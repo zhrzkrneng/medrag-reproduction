@@ -1,0 +1,20 @@
+[
+ {
+  "variant": "fp16_tp2_flashinfer",
+  "rc": 0,
+  "wall_sec_incl_load": 559,
+  "sec_per_q": 13.635
+ },
+ {
+  "variant": "fp16_pp2",
+  "rc": 0,
+  "wall_sec_incl_load": 443,
+  "sec_per_q": 15.188
+ },
+ {
+  "variant": "awq_tp1_one_gpu",
+  "rc": 0,
+  "wall_sec_incl_load": 662,
+  "sec_per_q": 23.852
+ }
+]

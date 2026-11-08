@@ -29,6 +29,8 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 # Llama-3 budget (8192 / 7168), the closest model MedRAG supports.
 MODELS = {
     "Qwen/Qwen2.5-7B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
+    # official 4-bit AWQ build of the same model: fits on one T4, used only if fp16 is too slow (documented)
+    "Qwen/Qwen2.5-7B-Instruct-AWQ": {"max_length": 8192, "context_length": 7168, "template": None},
     "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024,
                              "template": os.path.join(ROOT, "templates", "pmc_llama.jinja")},
 }
@@ -50,6 +52,7 @@ def main():
     p.add_argument("--max_new_tokens", type=int, default=1024)
     p.add_argument("--chunk", type=int, default=200, help="questions per vLLM call; results appended after each")
     p.add_argument("--tp", type=int, default=2, help="tensor parallel size (2 for Kaggle T4 x2)")
+    p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
     p.add_argument("--out", default="results")
     a = p.parse_args()
 
@@ -61,7 +64,7 @@ def main():
     if cfg["template"]:
         # MedRAG loads its jinja files with .replace('    ', '').replace('\n', '')
         template = open(cfg["template"]).read().replace("    ", "").replace("\n", "")
-    llm = LLM(a.model, dtype="half", tensor_parallel_size=a.tp, max_model_len=cfg["max_length"],
+    llm = LLM(a.model, dtype="half", tensor_parallel_size=a.tp, pipeline_parallel_size=a.pp, max_model_len=cfg["max_length"],
               gpu_memory_utilization=0.92, seed=0)
     tok = llm.get_tokenizer()
     if template:
