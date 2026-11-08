@@ -1,0 +1,1 @@
+{"id":"zohrehzkrn/medrag-repro-run-a","title":"medrag-repro-run-a","code_file":"run_a_kernel.py","language":"python","kernel_type":"script","is_private":true,"enable_gpu":true,"enable_internet":true,"machine_shape":"NvidiaTeslaT4","dataset_sources":["zohrehzkrn/medrag-repro-code"],"competition_sources":[],"kernel_sources":[]}
