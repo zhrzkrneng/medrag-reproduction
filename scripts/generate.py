@@ -114,8 +114,12 @@ def main():
                     capped += int(n_out >= budget)
                     f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
                                         "prompt_tokens": n_in, "output_tokens": n_out}) + "\n")
-            print(f"[{conf} | {ds}] {len(qids)} q in {dt:.0f}s ({dt/len(qids):.2f}s/q); "
-                  f"hit length cap: {capped}", flush=True)
+            msg = {"model": a.model, "config": conf, "dataset": ds, "n": len(qids), "seconds": round(dt, 1),
+                   "sec_per_q": round(dt / len(qids), 3), "hit_length_cap": capped}
+            print(json.dumps(msg), flush=True)
+            # also persisted, because vLLM's own logging can push this line out of a truncated console log
+            with open(os.path.join(a.out, "timing.jsonl"), "a") as tf:
+                tf.write(json.dumps(msg) + "\n")
 
 
 if __name__ == "__main__":
