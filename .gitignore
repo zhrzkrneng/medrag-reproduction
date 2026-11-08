@@ -1,0 +1,6 @@
+work/
+retrieved/
+corpus/
+__pycache__/
+*.npy
+.pytest_cache/
