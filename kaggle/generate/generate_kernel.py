@@ -1,7 +1,7 @@
 # Kaggle kernel: MedRAG generation with vLLM. Edit MODEL / CONFIGS / LIMIT below for each run.
 MODEL = "Qwen/Qwen2.5-7B-Instruct"
-CONFIGS = ["cot", "rrf2@32"]
-LIMIT = 20          # questions per dataset; None = all
+CONFIGS = ["cot", "rrf2@32", "bm25@32", "medcpt@32"]
+LIMIT = None        # questions per dataset; None = all
 import glob, gzip, json, os, subprocess, sys, time
 T0 = time.time()
 def sh(c):
@@ -28,6 +28,8 @@ cmd = [sys.executable, gen, "--model", MODEL, "--benchmark", bench, "--retrieved
        "--corpus", "/kaggle/tmp/textbooks.jsonl.gz", "--configs", *CONFIGS, "--out", "/kaggle/working/results"]
 if LIMIT:
     cmd += ["--limit", str(LIMIT)]
-t = time.time(); r = subprocess.run(cmd, capture_output=True, text=True)
-print("\n".join(l for l in (r.stdout + r.stderr).splitlines() if "it/s" not in l)[-6000:])
-print(f"RESULT generate rc={r.returncode} {time.time()-t:.0f}s; total kernel {time.time()-T0:.0f}s")
+# stream output live (so progress is visible while running); keep vLLM's own logging quiet
+env = dict(os.environ, VLLM_LOGGING_LEVEL="WARNING")  # no TQDM_DISABLE: it makes vLLM divide by zero
+t = time.time(); r = subprocess.run(cmd, env=env)
+print(f"RESULT generate rc={r.returncode} {time.time()-t:.0f}s; total kernel {time.time()-T0:.0f}s", flush=True)
+print(open("/kaggle/working/results/timing.jsonl").read() if os.path.exists("/kaggle/working/results/timing.jsonl") else "no timing file")

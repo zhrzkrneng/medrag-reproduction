@@ -105,7 +105,7 @@ def main():
                 params.append(SamplingParams(temperature=0.0, max_tokens=budget))
                 meta.append((qid, item["answer"], len(ids), budget))
             t = time.time()
-            outs = llm.generate(prompts, params)
+            outs = llm.generate(prompts, params, use_tqdm=False)
             dt = time.time() - t
             capped = 0
             with open(out_path, "w") as f:
