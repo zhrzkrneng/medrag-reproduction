@@ -2,6 +2,8 @@
 MODEL = "Qwen/Qwen2.5-7B-Instruct"
 CONFIGS = ["cot", "rrf2@32", "bm25@32", "medcpt@32"]
 LIMIT = None        # questions per dataset; None = all
+DATASETS = ["medqa", "mmlu"]
+CHUNK = 200         # questions per vLLM call; a progress line is printed after each
 import glob, gzip, json, os, subprocess, sys, time
 T0 = time.time()
 def sh(c):
@@ -25,7 +27,7 @@ with gzip.open("/kaggle/tmp/textbooks.jsonl.gz", "wt") as f:
     for s in load_corpus(os.path.join(corp, "chunk")):
         f.write(json.dumps(s) + "\n")
 cmd = [sys.executable, gen, "--model", MODEL, "--benchmark", bench, "--retrieved", retrieved,
-       "--corpus", "/kaggle/tmp/textbooks.jsonl.gz", "--configs", *CONFIGS, "--out", "/kaggle/working/results"]
+       "--corpus", "/kaggle/tmp/textbooks.jsonl.gz", "--configs", *CONFIGS, "--datasets", *DATASETS, "--chunk", str(CHUNK), "--out", "/kaggle/working/results"]
 if LIMIT:
     cmd += ["--limit", str(LIMIT)]
 # stream output live (so progress is visible while running); keep vLLM's own logging quiet

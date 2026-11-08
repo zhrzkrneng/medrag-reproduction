@@ -48,6 +48,7 @@ def main():
     p.add_argument("--configs", nargs="+", default=["cot"], help="'cot' or '<retriever>@<k>', e.g. rrf2@32")
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--max_new_tokens", type=int, default=1024)
+    p.add_argument("--chunk", type=int, default=200, help="questions per vLLM call; results appended after each")
     p.add_argument("--tp", type=int, default=2, help="tensor parallel size (2 for Kaggle T4 x2)")
     p.add_argument("--out", default="results")
     a = p.parse_args()
@@ -82,45 +83,60 @@ def main():
     for conf in a.configs:
         for ds in a.datasets:
             out_path = os.path.join(a.out, slug, ds, f"{conf.replace('@', '_k')}.jsonl")
-            if os.path.exists(out_path):
-                print("skip (exists)", out_path, flush=True)
-                continue
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             qids = sorted(bench[ds])[: a.limit]
-            prompts, params, meta = [], [], []
-            for qid in qids:
-                item = bench[ds][qid]
-                context = None
-                if conf != "cot":
-                    retr, k = conf.split("@")
-                    snips = [corpus[i] for i in retrieved[(ds, qid)][retr][: int(k)]]
-                    joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
-                    ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
-                    context = tok.decode(ctx_ids)
-                msgs = build_messages(item["question"], item["options"], context)
-                text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-                ids = tok.encode(text, add_special_tokens=False)
-                budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
-                prompts.append(TokensPrompt(prompt_token_ids=ids))
-                params.append(SamplingParams(temperature=0.0, max_tokens=budget))
-                meta.append((qid, item["answer"], len(ids), budget))
-            t = time.time()
-            outs = llm.generate(prompts, params, use_tqdm=False)
-            dt = time.time() - t
-            capped = 0
-            with open(out_path, "w") as f:
-                for (qid, gold, n_in, budget), o in zip(meta, outs):
-                    n_out = len(o.outputs[0].token_ids)
-                    capped += int(n_out >= budget)
-                    f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
-                                        "prompt_tokens": n_in, "output_tokens": n_out}) + "\n")
-            msg = {"model": a.model, "config": conf, "dataset": ds, "n": len(qids), "seconds": round(dt, 1),
-                   "sec_per_q": round(dt / len(qids), 3), "hit_length_cap": capped}
+            done = set()
+            if os.path.exists(out_path):  # resume: keep answers already written
+                with open(out_path) as f:
+                    done = {json.loads(line)["qid"] for line in f if line.strip()}
+            todo = [q for q in qids if q not in done]
+            if not todo:
+                print("skip (complete)", out_path, flush=True)
+                continue
+            t_all, capped = time.time(), 0
+            # answered in chunks and appended after each one, so progress (and real speed) is visible
+            for start in range(0, len(todo), a.chunk):
+                part = todo[start: start + a.chunk]
+                prompts, params, meta = [], [], []
+                for qid in part:
+                    item = bench[ds][qid]
+                    context = None
+                    if conf != "cot":
+                        retr, k = conf.split("@")
+                        snips = [corpus[i] for i in retrieved[(ds, qid)][retr][: int(k)]]
+                        joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
+                        ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
+                        context = tok.decode(ctx_ids)
+                    msgs = build_messages(item["question"], item["options"], context)
+                    text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+                    ids = tok.encode(text, add_special_tokens=False)
+                    budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
+                    prompts.append(TokensPrompt(prompt_token_ids=ids))
+                    params.append(SamplingParams(temperature=0.0, max_tokens=budget))
+                    meta.append((qid, item["answer"], len(ids), budget))
+                t = time.time()
+                outs = llm.generate(prompts, params, use_tqdm=False)
+                dt = max(time.time() - t, 1e-6)
+                n_in = n_out_all = 0
+                with open(out_path, "a") as f:
+                    for (qid, gold, n_prompt, budget), o in zip(meta, outs):
+                        n_out = len(o.outputs[0].token_ids)
+                        capped += int(n_out >= budget)
+                        n_in += n_prompt
+                        n_out_all += n_out
+                        f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
+                                            "prompt_tokens": n_prompt, "output_tokens": n_out}) + "\n")
+                print(json.dumps({"progress": f"{len(done) + start + len(part)}/{len(qids)}", "config": conf,
+                                  "dataset": ds, "chunk_sec": round(dt, 1), "sec_per_q": round(dt / len(part), 3),
+                                  "prompt_tok_per_sec": round(n_in / dt), "output_tok_per_sec": round(n_out_all / dt)}),
+                      flush=True)
+            dt = max(time.time() - t_all, 1e-6)
+            msg = {"model": a.model, "config": conf, "dataset": ds, "n": len(todo), "seconds": round(dt, 1),
+                   "sec_per_q": round(dt / len(todo), 3), "hit_length_cap": capped}
             print(json.dumps(msg), flush=True)
             # also persisted, because vLLM's own logging can push this line out of a truncated console log
             with open(os.path.join(a.out, "timing.jsonl"), "a") as tf:
                 tf.write(json.dumps(msg) + "\n")
-
 
 if __name__ == "__main__":
     main()
