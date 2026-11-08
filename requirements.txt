@@ -1,0 +1,10 @@
+# Retrieval / evaluation (CPU). Versions tested on 2026-11-08 with Python 3.13 and Java 21.
+pyserini==2.4.0
+faiss-cpu==1.15.1
+sentence-transformers
+transformers==5.22.2
+torch
+numpy
+huggingface_hub
+pytest
+# Generation (GPU only): vllm
