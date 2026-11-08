@@ -1,0 +1,12 @@
+{
+  "shape": [
+    125847,
+    768
+  ],
+  "dtype": "float32",
+  "seconds": 1804,
+  "ids_sha256": "1ac12e4eced1636b852a17b73931da7bb25c9d6375adae488bae110a11bd940e",
+  "first_id": "Anatomy_Gray_0",
+  "last_id": "Surgery_Schwartz_14348",
+  "model": "ncbi/MedCPT-Article-Encoder"
+}
