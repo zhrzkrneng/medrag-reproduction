@@ -13,7 +13,7 @@ Reproduction of “Benchmarking Retrieval-Augmented Generation for Medicine” (
 | Component | Paper | This repo, phase 1 |
 |---|---|---|
 | Benchmark | MIRAGE, 7,663 questions in 5 datasets | MedQA-US (1,273) + MMLU-Med (1,089) |
-| Corpus | PubMed, StatPearls, Textbooks, Wikipedia, MedCorp | **Textbooks** (18 books, 125,829 snippets; same as paper Table 3) |
+| Corpus | PubMed, StatPearls, Textbooks, Wikipedia, MedCorp | **Textbooks** (18 books, 125,847 snippets; paper Table 3: 125.8k) |
 | Retrievers | BM25, Contriever, SPECTER, MedCPT, RRF-2, RRF-4 | **BM25, MedCPT, RRF-2** |
 | LLMs | GPT-4, GPT-3.5, Mixtral, Llama2-70B, MEDITRON-70B, PMC-LLaMA-13B | **Qwen2.5-7B-Instruct** (main), **PMC-LLaMA-13B** (to compare with the paper) |
 | Settings | Zero-shot, multi-choice, RAG, question-only retrieval | same |
@@ -87,7 +87,7 @@ python scripts/evaluate.py --results results
 
 ### چه چیزی بازتولید می‌شود (مرحلهٔ ۱)
 - **بنچمارک:** MedQA-US (۱٬۲۷۳ سؤال) و MMLU-Med (۱٬۰۸۹ سؤال) از MIRAGE
-- **منبع دانش:** کتاب‌های درسی (Textbooks)، شامل ۱۸ کتاب و ۱۲۵٬۸۲۹ قطعه. این عددها دقیقاً با جدول ۳ مقاله یکی است.
+- **منبع دانش:** کتاب‌های درسی (Textbooks)، شامل ۱۸ کتاب و ۱۲۵٬۸۴۷ قطعه. جدول ۳ مقاله این عدد را به شکل گردشده ۱۲۵.۸ هزار آورده است.
 - **روش‌های بازیابی:** BM25، MedCPT، و ترکیب این دو با RRF-2
 - **مدل‌های زبانی:** Qwen2.5-7B-Instruct به عنوان مدل اصلی، و PMC-LLaMA-13B که در خود مقاله هم آمده و مقایسهٔ مستقیم را ممکن می‌کند.
 
