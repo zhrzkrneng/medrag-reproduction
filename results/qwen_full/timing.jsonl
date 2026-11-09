@@ -1,0 +1,4 @@
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "cot", "dataset": "medqa", "n": 1273, "seconds": 592.2, "sec_per_q": 0.465, "hit_length_cap": 1}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "cot", "dataset": "mmlu", "n": 1089, "seconds": 315.1, "sec_per_q": 0.289, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@32", "dataset": "medqa", "n": 1273, "seconds": 17053.8, "sec_per_q": 13.397, "hit_length_cap": 22}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@32", "dataset": "mmlu", "n": 1089, "seconds": 14777.2, "sec_per_q": 13.57, "hit_length_cap": 7}

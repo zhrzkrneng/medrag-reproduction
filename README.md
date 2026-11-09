@@ -63,7 +63,27 @@ python scripts/evaluate.py --results results
 
 ### Results
 
-*Pending. Filled in after the Kaggle runs.*
+**Qwen2.5-7B-Instruct, Textbooks corpus, 32 snippets** (full test sets; official MIRAGE parser; ± is the binomial standard deviation, as in the paper).
+
+| Dataset | CoT (no RAG) | MedRAG, RRF-2 (k=32) | Change | Paired test (exact McNemar) |
+|---|---|---|---|---|
+| MedQA-US (n=1,273) | 61.67 ± 1.36 | 61.12 ± 1.37 | −0.55 | p = 0.73 (148 fixed, 155 broken) |
+| MMLU-Med (n=1,089) | 78.42 ± 1.25 | 74.75 ± 1.32 | **−3.67** | **p = 0.006** (83 fixed, 123 broken) |
+
+Strict accuracy (unparsable answers counted wrong): MedQA 61.67 / 60.57, MMLU 78.42 / 74.66. Unparsable answers: MedQA 3 / 24, MMLU 0 / 10. With RAG, 22 (MedQA) and 7 (MMLU) answers hit the length limit; most of these hit MedRAG's 8,192-token total limit, because the context alone is about 7,200 tokens.
+
+**Reference numbers from the paper** ([arXiv:2402.13178](https://arxiv.org/abs/2402.13178), Tables 6 and 7):
+
+| Paper setting | MMLU-Med: CoT → MedRAG | MedQA-US: CoT → MedRAG |
+|---|---|---|
+| GPT-3.5, Textbooks, RRF-2 (Table 7) | 72.91 → 76.68 (+3.77) | 65.04 → 65.91 (+0.87) |
+| GPT-4, MedCorp, RRF-4 (Table 6) | 89.44 → 87.24 (−2.20) | 83.97 → 82.80 (−1.17) |
+| Mixtral 8×7B, MedCorp, RRF-4 (Table 6) | 74.01 → 75.85 (+1.84) | 64.10 → 60.02 (−4.08) |
+| PMC-LLaMA-13B, MedCorp, RRF-4 (Table 6) | 52.16 → 52.53 (+0.37) | 44.38 → 42.58 (−1.80) |
+
+**Reading.** We do **not** reproduce the gain the paper reports for GPT-3.5 with Textbooks + RRF-2. With Qwen2.5-7B, RAG gives no change on MedQA-US and a significant drop on MMLU-Med. The paper's own Table 6 shows that on these two exam-style datasets the effect of RAG depends on the model and is negative for several (GPT-4, Llama2-70B, and PMC-LLaMA and Mixtral on MedQA), so our result is consistent with that part of the paper. Possible reasons, **not yet tested**: Qwen2.5 is a newer and stronger model whose CoT accuracy is already high (possible exposure to these public benchmarks during pre-training), and a 7B model may be distracted by 7,000 tokens of context. Planned checks: the number-of-snippets sweep (k = 1…16) and PMC-LLaMA-13B (the paper's model).
+
+**Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
 
 ### Citation
 
@@ -105,6 +125,17 @@ python scripts/evaluate.py --results results
 ۵. **vLLM** به‌جای pipeline هاگینگ‌فیس، برای سرعت بیشتر. روش تولید متن در هر دو حالت greedy است.
 
 ### نتایج
-*بعد از اجرا روی کاگل اضافه می‌شود.*
+**مدل Qwen2.5-7B-Instruct، منبع دانش Textbooks، ۳۲ قطعه** (کل سؤال‌های آزمون، با روش رسمی MIRAGE برای استخراج جواب؛ ± انحراف معیار دوجمله‌ای است، مثل خود مقاله)
+
+| دیتاست | بدون RAG (CoT) | با RAG (RRF-2، ۳۲ قطعه) | تغییر | آزمون آماری زوجی (McNemar دقیق) |
+|---|---|---|---|---|
+| MedQA-US (۱٬۲۷۳ سؤال) | ۶۱.۶۷ ± ۱.۳۶ | ۶۱.۱۲ ± ۱.۳۷ | ۰.۵۵− | p = 0.73 (۱۴۸ درست‌شده، ۱۵۵ خراب‌شده) |
+| MMLU-Med (۱٬۰۸۹ سؤال) | ۷۸.۴۲ ± ۱.۲۵ | ۷۴.۷۵ ± ۱.۳۲ | **۳.۶۷−** | **p = 0.006** (۸۳ درست‌شده، ۱۲۳ خراب‌شده) |
+
+**مقایسه با مقاله:** مقاله برای GPT-3.5 با Textbooks و RRF-2 بهبود گزارش کرده است: در MMLU-Med از ۷۲.۹۱ به ۷۶.۶۸، و در MedQA از ۶۵.۰۴ به ۶۵.۹۱ (جدول ۷). ما این بهبود را با Qwen2.5-7B **بازتولید نکردیم**. ولی جدول ۶ خود مقاله نشان می‌دهد که روی این دو دیتاست امتحانی، اثر RAG به مدل بستگی دارد و برای چند مدل منفی است: برای GPT-4، Llama2-70B، و برای PMC-LLaMA و Mixtral روی MedQA. پس نتیجهٔ ما با این بخش از مقاله سازگار است.
+
+**دلایل احتمالی (هنوز آزمایش نشده):** Qwen2.5 مدل جدیدتر و قوی‌تری است و دقت CoT آن از قبل بالاست. ممکن است این بنچمارک‌های عمومی را در پیش‌آموزش دیده باشد. همچنین ممکن است یک مدل 7B با ۷ هزار توکن context حواسش پرت شود. آزمایش تعداد قطعه‌ها (k = 1 تا 16) و اجرای PMC-LLaMA-13B (مدل خود مقاله) برای بررسی همین برنامه‌ریزی شده‌اند.
+
+**هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست.
 
 </div>
