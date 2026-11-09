@@ -81,9 +81,24 @@ Strict accuracy (unparsable answers counted wrong): MedQA 61.67 / 60.57, MMLU 78
 | Mixtral 8×7B, MedCorp, RRF-4 (Table 6) | 74.01 → 75.85 (+1.84) | 64.10 → 60.02 (−4.08) |
 | PMC-LLaMA-13B, MedCorp, RRF-4 (Table 6) | 52.16 → 52.53 (+0.37) | 44.38 → 42.58 (−1.80) |
 
-**Reading.** We do **not** reproduce the gain the paper reports for GPT-3.5 with Textbooks + RRF-2. With Qwen2.5-7B, RAG gives no change on MedQA-US and a significant drop on MMLU-Med. The paper's own Table 6 shows that on these two exam-style datasets the effect of RAG depends on the model and is negative for several (GPT-4, Llama2-70B, and PMC-LLaMA and Mixtral on MedQA), so our result is consistent with that part of the paper. Possible reasons, **not yet tested**: Qwen2.5 is a newer and stronger model whose CoT accuracy is already high (possible exposure to these public benchmarks during pre-training), and a 7B model may be distracted by 7,000 tokens of context. Planned checks: the number-of-snippets sweep (k = 1…16) and PMC-LLaMA-13B (the paper's model).
+**Reading.** We do **not** reproduce the gain the paper reports for GPT-3.5 with Textbooks + RRF-2. With Qwen2.5-7B, RAG gives no change on MedQA-US and a significant drop on MMLU-Med. The paper's own Table 6 shows that on these two exam-style datasets the effect of RAG depends on the model and is negative for several (GPT-4, Llama2-70B, and PMC-LLaMA and Mixtral on MedQA), so our result is consistent with that part of the paper. Two explanations were considered: a 7B model being distracted by long contexts, and retrieved text that adds little beyond what the model already knows. The number-of-snippets sweep below tests the first.
 
-**Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
+#### Number of snippets (k)
+
+![Accuracy vs. number of snippets](docs/k_sweep.png)
+
+| k | 1 | 2 | 4 | 8 | 16 | 32 | CoT |
+|---|---|---|---|---|---|---|---|
+| MedQA-US | 58.92 | 57.89 | 57.50 | 58.68 | 61.12 | 61.12 | 61.67 |
+| MMLU-Med | 72.64 | 72.45 | 74.29 | 73.83 | 76.12 | 74.75 | 78.42 |
+
+Paired exact McNemar test against CoT (p-values; 6 tests per dataset, so the Bonferroni threshold is 0.0083): MedQA k=1…32: 0.037, 0.005, 0.002, 0.026, 0.72, 0.73; MMLU-Med: <0.0001, <0.0001, 0.002, 0.0004, 0.081, 0.006.
+
+- Accuracy **rises** with k, which matches the paper's Figure 3 (roughly log-linear growth for k ≤ 32, GPT-3.5, MedCorp, RRF-4).
+- But with this model, RAG **never beats CoT**. Few snippets hurt the most, and 16–32 snippets only bring accuracy back to about the CoT level.
+- So the "distracted by long context" explanation is **not supported**: more context helps, it does not hurt. A more likely reading is that the model leans on the few retrieved passages even when they are not the right evidence, and more snippets dilute that effect. This is a hypothesis from these numbers, not yet tested directly; a per-question check of whether the retrieved snippets contain the answer would test it.
+
+**Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets); the k = 1…16 sweep took 0.4–5.6 s per question (~6.2 GPU hours). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
 
 ### Citation
 
@@ -134,8 +149,21 @@ Strict accuracy (unparsable answers counted wrong): MedQA 61.67 / 60.57, MMLU 78
 
 **مقایسه با مقاله:** مقاله برای GPT-3.5 با Textbooks و RRF-2 بهبود گزارش کرده است: در MMLU-Med از ۷۲.۹۱ به ۷۶.۶۸، و در MedQA از ۶۵.۰۴ به ۶۵.۹۱ (جدول ۷). ما این بهبود را با Qwen2.5-7B **بازتولید نکردیم**. ولی جدول ۶ خود مقاله نشان می‌دهد که روی این دو دیتاست امتحانی، اثر RAG به مدل بستگی دارد و برای چند مدل منفی است: برای GPT-4، Llama2-70B، و برای PMC-LLaMA و Mixtral روی MedQA. پس نتیجهٔ ما با این بخش از مقاله سازگار است.
 
-**دلایل احتمالی (هنوز آزمایش نشده):** Qwen2.5 مدل جدیدتر و قوی‌تری است و دقت CoT آن از قبل بالاست. ممکن است این بنچمارک‌های عمومی را در پیش‌آموزش دیده باشد. همچنین ممکن است یک مدل 7B با ۷ هزار توکن context حواسش پرت شود. آزمایش تعداد قطعه‌ها (k = 1 تا 16) و اجرای PMC-LLaMA-13B (مدل خود مقاله) برای بررسی همین برنامه‌ریزی شده‌اند.
+**دو توضیح احتمالی بررسی شد:** یکی اینکه context طولانی حواس مدل 7B را پرت می‌کند، و دیگری اینکه متن بازیابی‌شده چیزی بیش از دانسته‌های خود مدل اضافه نمی‌کند. آزمایش تعداد قطعه‌ها در ادامه، توضیح اول را می‌سنجد.
 
-**هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست.
+#### تعداد قطعه‌ها (k)
+
+| k | 1 | 2 | 4 | 8 | 16 | 32 | بدون RAG |
+|---|---|---|---|---|---|---|---|
+| MedQA-US | ۵۸.۹۲ | ۵۷.۸۹ | ۵۷.۵۰ | ۵۸.۶۸ | ۶۱.۱۲ | ۶۱.۱۲ | ۶۱.۶۷ |
+| MMLU-Med | ۷۲.۶۴ | ۷۲.۴۵ | ۷۴.۲۹ | ۷۳.۸۳ | ۷۶.۱۲ | ۷۴.۷۵ | ۷۸.۴۲ |
+
+- دقت با **بیشتر شدن k بالا می‌رود.** این روند با شکل ۳ مقاله سازگار است: رشد تقریباً لگاریتمی تا k=32، که مقاله با GPT-3.5 و MedCorp و RRF-4 گزارش کرده است.
+- ولی با این مدل، RAG **در هیچ kای از حالت بدون RAG بهتر نشد.** کم بودن قطعه‌ها بیشترین ضرر را دارد. با ۱۶ تا ۳۲ قطعه، دقت فقط به حدود سطح بدون RAG برمی‌گردد.
+- پس فرضیهٔ «context طولانی حواس مدل را پرت می‌کند» **تأیید نشد**: context بیشتر کمک می‌کند، نه ضرر.
+- توضیح محتمل‌تر این است که مدل به چند قطعهٔ بازیابی‌شده تکیه می‌کند، حتی وقتی آن قطعه‌ها شاهد درستی نیستند. با قطعه‌های بیشتر، این اثر رقیق می‌شود. این هم فقط فرضیه‌ای است که از این اعداد برداشت شده و هنوز مستقیم آزمایش نشده.
+- نمودار و آزمون‌های آماری (McNemar با اصلاح Bonferroni) در بخش انگلیسی آمده‌اند.
+
+**هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست. آزمایش k = 1 تا 16 بین ۰.۴ تا ۵.۶ ثانیه برای هر سؤال طول کشید، جمعاً حدود ۶.۲ ساعت GPU.
 
 </div>

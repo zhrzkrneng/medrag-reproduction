@@ -2,3 +2,13 @@
 {"model": "Qwen/Qwen2.5-7B-Instruct", "config": "cot", "dataset": "mmlu", "n": 1089, "seconds": 315.1, "sec_per_q": 0.289, "hit_length_cap": 0}
 {"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@32", "dataset": "medqa", "n": 1273, "seconds": 17053.8, "sec_per_q": 13.397, "hit_length_cap": 22}
 {"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@32", "dataset": "mmlu", "n": 1089, "seconds": 14777.2, "sec_per_q": 13.57, "hit_length_cap": 7}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@1", "dataset": "medqa", "n": 1273, "seconds": 685.0, "sec_per_q": 0.538, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@2", "dataset": "medqa", "n": 1273, "seconds": 907.6, "sec_per_q": 0.713, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@4", "dataset": "medqa", "n": 1273, "seconds": 1550.9, "sec_per_q": 1.218, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@8", "dataset": "medqa", "n": 1273, "seconds": 2959.2, "sec_per_q": 2.325, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@16", "dataset": "medqa", "n": 1273, "seconds": 7077.6, "sec_per_q": 5.56, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@1", "dataset": "mmlu", "n": 1089, "seconds": 441.9, "sec_per_q": 0.406, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@2", "dataset": "mmlu", "n": 1089, "seconds": 630.3, "sec_per_q": 0.579, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@4", "dataset": "mmlu", "n": 1089, "seconds": 1075.9, "sec_per_q": 0.988, "hit_length_cap": 0}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@8", "dataset": "mmlu", "n": 1089, "seconds": 2124.4, "sec_per_q": 1.951, "hit_length_cap": 2}
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@16", "dataset": "mmlu", "n": 1089, "seconds": 5074.9, "sec_per_q": 4.66, "hit_length_cap": 1}
