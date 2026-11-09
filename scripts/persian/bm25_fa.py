@@ -63,8 +63,9 @@ def main():
         for qid in sorted(bench):
             ids, scores = bm25.search(bench[qid]["question"], k_pool)
             empty += not ids
-            out.write(json.dumps({"dataset": a.dataset, "qid": qid, "bm25": ids[: a.k],
-                                  "bm25_scores": [round(x, 4) for x in scores[: a.k]]}) + "\n")
+            # the full pool (max(2k, 100) hits) is kept so RRF can be computed exactly as in MedRAG
+            out.write(json.dumps({"dataset": a.dataset, "qid": qid, "bm25": ids,
+                                  "bm25_scores": [round(x, 4) for x in scores]}) + "\n")
     print(f"searched {len(bench)} questions in {time.time() - t1:.0f}s; questions with no hit: {empty}")
 
 

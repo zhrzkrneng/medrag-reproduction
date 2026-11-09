@@ -17,6 +17,7 @@ TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 os.makedirs(TMP, exist_ok=True)
 assert sh(f"{sys.executable} {P('prepare_fa_mmlu.py')} --benchmark {ROOT}/data/mirage_benchmark.json "
           f"--out {TMP}/fa_mmlu.json --report {OUT}/fa_mmlu_alignment.json | tail -4") == 0
+assert sh(f"{sys.executable} {P('prepare_kopp.py')} --out {TMP}/kopp.json") == 0
 assert sh(f"{sys.executable} {P('chunk_corpus.py')} --revision {CORPUS_REVISION} --out {TMP}/chunks.jsonl.gz "
           f"--stats {OUT}/chunk_stats.json | grep -E 'snippets\"|documents_kept'") == 0
 h, n = hashlib.sha256(), 0
@@ -37,6 +38,6 @@ print(f"embedding rc={rcs} at {time.time()-T0:.0f}s", flush=True)
 if glob.glob(f"{OUT}/emb/*stopped.json") or any(rcs):
     print("RESULT: embedding stopped or failed; no retrieval run", flush=True)
 else:
-    rc = subprocess.run([sys.executable, P("dense_search.py"), "--emb_dir", f"{OUT}/emb", "--fa_mmlu", f"{TMP}/fa_mmlu.json",
+    rc = subprocess.run([sys.executable, P("dense_search.py"), "--emb_dir", f"{OUT}/emb", "--benchmarks", f"{TMP}/fa_mmlu.json:fa_mmlu", f"{TMP}/kopp.json:kopp",
                          "--out", f"{OUT}/bge_m3_top100.jsonl.gz"]).returncode
     print(f"RESULT: search rc={rc}; total {time.time()-T0:.0f}s", flush=True)

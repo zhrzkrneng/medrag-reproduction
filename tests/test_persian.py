@@ -17,3 +17,10 @@ def test_planted_question_is_found_by_ngrams():
     doc = tokens("مقدمه متن. بيمار 45 ساله با درد قفسه سينه و تنگي نفس به اورژانس مراجعه کرده است. ادامه")
     qg = ngrams(q, 8)
     assert qg and qg <= ngrams(doc, 8)
+
+
+def test_clean_text_removes_bidi_marks_without_merging_words():
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+    from medrag_repro.persian import clean_text
+    raw = "‫در‬‫میاستنی‬ ‫گراویس‪،‬‬ ‫اختلال‬"
+    assert clean_text(raw) == "در میاستنی گراویس ، اختلال"

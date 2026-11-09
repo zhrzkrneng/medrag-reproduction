@@ -132,6 +132,18 @@ MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py
 
 Persian retrieval finds the correct option's text about half as often. Two confounds must be separated before this is a finding: the corpora differ (textbooks vs web articles), and exact phrase matching is harder in Persian (morphology, spelling variants, translated options), so part of the gap may be the measurement. Planned controls: the same proxy on Persian↔English translated pairs of snippets, and multilingual dense retrieval.
 
+**Dense and fused Persian retrieval.** BGE-M3 (`BAAI/bge-m3`, MIT; [CLS], L2-normalised) embeddings of all 541,926 snippets were computed on 2×T4 in 47 min (`kaggle/embed_fa/`; the kernel re-chunks the corpus from the Hub and checks it against the local fingerprint instead of uploading it). RRF-2 here fuses BM25 and BGE-M3 with MedRAG's formula, because MedCPT is English-only. Answer coverage (correct option's text in the top-32; same 1,089 MMLU-Med questions in both languages, same normalisation):
+
+| Retriever | English, Textbooks | Persian, web corpus | KOPP (Persian) |
+|---|---|---|---|
+| BM25 | 17.8% | 10.3% | 13.2% |
+| dense (MedCPT / BGE-M3) | 17.7% | 10.9% | 13.7% |
+| RRF-2 | 18.5% | 11.8% | 14.6% |
+
+The two Persian retrievers overlap in only 13% of their top-32 (English BM25/MedCPT: 12.5%), and fusion helps in both languages. A multilingual dense retriever does **not** close the gap, which points to the corpus rather than the retriever, though the measurement confound (exact matching is harder in Persian) remains. Planned control that removes it: Persian questions → English Textbooks with BGE-M3, scored on the aligned English options.
+
+**Data fix.** 184 of 1,878 KOPP questions (copied from PDFs) wrap every word in Unicode bidi control marks, which made BM25 return nothing for 115 of them. `medrag_repro.persian.clean_text` replaces the marks with spaces (some words are separated only by them); questions with no BM25 hit dropped from 115 to 3. The corpus has the marks in 1.7% of snippets; it is left unchanged for now so BM25 and the existing BGE-M3 embeddings index the same text, and will be cleaned at the next embedding run. Query embeddings were recomputed on CPU after the fix (same top-1 as the GPU run for 1,074 of 1,089 FA_MED_MMLU questions; 99% top-10 overlap).
+
 **Leakage check (RQ4).** `scripts/persian/leakage_check.py` looks for benchmark questions copied into the Persian corpus (which Gaokerena was trained on and our RAG retrieves from): word 8-gram and 13-gram overlap of each question stem with every corpus document after Persian normalisation (Arabic yeh/kaf, ZWNJ, digits); a question is flagged if ≥ 50% of its n-grams occur in one document.
 
 | Benchmark | checkable (≥ 8 words) | flagged (8-gram) | highest overlap with one document |
@@ -239,6 +251,13 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
 - **دو عامل مخدوش‌کننده** را باید قبل از نتیجه‌گیری جدا کرد:
   - منبع‌ها فرق دارند: کتاب درسی در برابر مقالهٔ وب.
   - تطابق عینی عبارت در فارسی سخت‌تر است: صرف کلمات، تنوع املایی، و ترجمه‌ای بودن گزینه‌ها. پس بخشی از این فاصله ممکن است از خود معیار باشد.
+- **بازیابی معنایی و ترکیبی فارسی:** embedding همهٔ ۵۴۱٬۹۲۶ قطعه با BGE-M3 روی دو T4 در ۴۷ دقیقه ساخته شد. چون MedCPT فقط انگلیسی است، RRF-2 در فارسی ترکیب BM25 و BGE-M3 است. پوشش جواب در ۳۲ قطعهٔ اول:
+  - انگلیسی (Textbooks): BM25 ۱۷.۸٪، MedCPT ۱۷.۷٪، RRF-2 ۱۸.۵٪
+  - فارسی (منبع وب): BM25 ۱۰.۳٪، BGE-M3 ۱۰.۹٪، RRF-2 ۱۱.۸٪
+  - KOPP: BM25 ۱۳.۲٪، BGE-M3 ۱۳.۷٪، RRF-2 ۱۴.۶٪
+
+  بازیابی معنایی چندزبانه **شکاف را نمی‌بندد**. این نشان می‌دهد عامل اصلی بیشتر منبع دانش است تا روش بازیابی. ولی عامل مخدوش‌کنندهٔ معیار هنوز باقی است.
+- **اصلاح داده:** در ۱۸۴ سؤال KOPP، که از PDF کپی شده‌اند، هر کلمه بین نویسه‌های نامرئی جهت متن قرار گرفته بود. به همین دلیل BM25 برای ۱۱۵ سؤال هیچ نتیجه‌ای برنمی‌گرداند. بعد از پاک‌سازی، این عدد به ۳ رسید.
 - **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
   - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.

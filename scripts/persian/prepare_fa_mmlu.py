@@ -5,6 +5,8 @@ The dataset card (gaokerena/FA_MED_MMLU) states no licence, so the data is not c
 repository: this script writes it to data_local/ (git-ignored). Cite Ghassabi et al. 2025,
 arXiv:2505.16000, when using it.
 
+Text is cleaned with medrag_repro.persian.clean_text (Unicode bidi marks; 1 question has them).
+
 Checks:
   * same subjects and item counts as MIRAGE MMLU-Med;
   * answer key: option<i> -> letter, compared item by item (random alignment would agree ~25%);
@@ -19,9 +21,12 @@ import collections
 import glob
 import json
 import os
+import sys
 import re
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
+sys.path.insert(0, os.path.join(ROOT, "src"))
+from medrag_repro.persian import clean_text  # noqa: E402
 DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩٫", "01234567890123456789.")
 NUM = re.compile(r"\d+(?:\.\d+)?")
 
@@ -58,8 +63,8 @@ def main():
         for qid, r in zip(ids, rows):
             letter = "ABCD"[int(str(r["answer"]).strip()) - 1]
             sub_agree += letter == mmlu[qid]["answer"]
-            options = {L: r[f"option{i}"] for i, L in enumerate("ABCD", 1)}
-            out[qid] = {"question": r["question"], "options": options, "answer": letter}
+            options = {L: clean_text(r[f"option{i}"]) for i, L in enumerate("ABCD", 1)}
+            out[qid] = {"question": clean_text(r["question"]), "options": options, "answer": letter}
             en = numbers(mmlu[qid]["question"] + " " + " ".join(mmlu[qid]["options"].values()))
             fa = numbers(r["question"] + " " + " ".join(options.values()))
             if en:
