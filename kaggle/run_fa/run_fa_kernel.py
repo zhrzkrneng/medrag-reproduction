@@ -18,6 +18,7 @@ stamp = open(os.path.join(ROOT, "scripts", "persian", "CODE_STAMP")).read().stri
 print("code root:", ROOT, "stamp:", stamp, flush=True)
 assert stamp == CODE_STAMP, f"stale code dataset (stamp {stamp!r}, expected {CODE_STAMP!r})"
 P = lambda *x: os.path.join(ROOT, "scripts", *x)
+assert glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), recursive=True), "retrieval file missing"
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 os.makedirs(TMP, exist_ok=True)
 sh("pip install -q langchain-text-splitters 2>&1 | tail -2")
@@ -34,7 +35,9 @@ for line in gzip.open(f"{TMP}/chunks.jsonl.gz", "rt", encoding="utf-8"):
     s = json.loads(line); h.update(s["id"].encode()); h.update(hashlib.md5(s["content"].encode()).digest()); n += 1
 print("snippets", n, "fingerprint", h.hexdigest()[:16], flush=True)
 assert n == EXPECTED["snippets"] and h.hexdigest()[:16] == EXPECTED["fingerprint"], "chunks differ from the local ones"
-retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl.gz"), recursive=True)[0]
+# Kaggle decompresses .gz files in datasets, so the file may arrive as .jsonl
+retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), recursive=True)[0]
+print("retrieved:", retrieved, flush=True)
 t = time.time(); rc = sh("pip install -q vllm 2>&1 | tail -3"); print(f"vllm install rc={rc} {time.time()-t:.0f}s", flush=True)
 print(f"setup done at {time.time()-T0:.0f}s", flush=True)
 cmd = [sys.executable, P("generate.py"), "--model", MODEL, "--benchmark", f"{TMP}/fa_benchmarks.json",
