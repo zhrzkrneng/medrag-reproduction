@@ -51,7 +51,7 @@ def main():
     p.add_argument("--en_chunk_dir", required=True)
     p.add_argument("--en_retrieved", default=os.path.join(ROOT, "results", "retrieval", "textbooks_top32.jsonl.gz"))
     p.add_argument("--fa_chunks", required=True)
-    p.add_argument("--fa_retrieved", default=os.path.join(ROOT, "results", "persian", "fa_mmlu_bm25_top32.jsonl.gz"))
+    p.add_argument("--fa_retrieved", default=os.path.join(ROOT, "results", "persian", "fa_mmlu_bm25_top100.jsonl.gz"))
     p.add_argument("--fa_benchmark", default=os.path.join(ROOT, "data_local", "fa_mmlu_benchmark.json"))
     p.add_argument("--retriever", default="bm25")
     p.add_argument("--out", required=True)

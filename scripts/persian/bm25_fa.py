@@ -11,7 +11,7 @@ Output: one JSON line per question with the top-k snippet ids and scores (ids on
 Usage:
   python scripts/persian/bm25_fa.py --chunks data_local/fa_corpus_chunks.jsonl.gz \
       --work_dir work_fa --benchmark data_local/fa_mmlu_benchmark.json --dataset fa_mmlu \
-      --out results/persian/fa_mmlu_bm25_top32.jsonl.gz
+      --out results/persian/fa_mmlu_bm25_top100.jsonl.gz
 """
 import argparse
 import gzip
