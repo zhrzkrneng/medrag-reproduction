@@ -36,18 +36,25 @@ def load_corpus(chunk_dir: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------- BM25
-def build_bm25_index(chunk_dir: str, index_dir: str, threads: int = 4) -> None:
+def build_bm25_index(chunk_dir: str, index_dir: str, threads: int = 4, language: str | None = None) -> None:
+    """language=None: Pyserini's default English analyzer (as in MedRAG); "fa": Lucene's PersianAnalyzer."""
     if os.path.exists(index_dir):
         return
-    subprocess.run([sys.executable, "-m", "pyserini.index.lucene", "--collection", "JsonCollection",
-                    "--input", chunk_dir, "--index", index_dir,
-                    "--generator", "DefaultLuceneDocumentGenerator", "--threads", str(threads)], check=True)
+    cmd = [sys.executable, "-m", "pyserini.index.lucene", "--collection", "JsonCollection",
+           "--input", chunk_dir, "--index", index_dir,
+           "--generator", "DefaultLuceneDocumentGenerator", "--threads", str(threads)]
+    if language:
+        cmd += ["--language", language]
+    subprocess.run(cmd, check=True)
 
 
 class BM25:
-    def __init__(self, index_dir: str):
+    def __init__(self, index_dir: str, language: str | None = None):
         from pyserini.search.lucene import LuceneSearcher
         self.searcher = LuceneSearcher(index_dir)  # Pyserini defaults (k1=0.9, b=0.4), as in MedRAG
+        if language:
+            # must match the index analyzer: a Persian index searched without this returns no hits
+            self.searcher.set_language(language)
 
     def search(self, query: str, k: int) -> tuple[list[str], list[float]]:
         hits = self.searcher.search(query, k=k)

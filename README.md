@@ -118,6 +118,21 @@ MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py
 
 `scripts/persian/prepare_fa_mmlu.py` downloads [FA_MED_MMLU](https://huggingface.co/datasets/gaokerena/FA_MED_MMLU) (Persian MMLU-Med, Ghassabi et al. 2025), checks it against MIRAGE and writes it in MIRAGE's format to `data_local/` (not committed: the dataset card states no licence). Check result: same 6 subjects and 1,089 items, and the answer key agrees for **all 1,089** items in order (a misaligned file would agree about 25%), so Persian and English results can be compared question by question. Numbers survive translation in 343 of 453 questions that contain them; the sampled misses are formatting (“2,300” → “2300”, “2 months” → “دو ماه”). Report: `results/persian/fa_mmlu_alignment.json`.
 
+**Persian corpus.** `scripts/persian/chunk_corpus.py` chunks [gaokerena/medical_corpus](https://huggingface.co/datasets/gaokerena/medical_corpus) with MedRAG's Textbooks settings (LangChain `RecursiveCharacterTextSplitter`, 1,000 characters, 200 overlap; checked in MedRAG `src/data/textbooks.py`): 101,954 documents → 2,173 exact duplicates removed → **541,926 snippets** (4.3× the English Textbooks). Unlike Textbooks, it is a **web health corpus**: 64% of snippets come from hidoctor.ir and 17% from niniban.com (pregnancy and parenting). Stats: `results/persian/fa_corpus_chunk_stats.json`.
+
+**Persian BM25.** `scripts/persian/bm25_fa.py` indexes it with Lucene's PersianAnalyzer (`--language fa`; the searcher also needs `set_language("fa")`, otherwise a Persian index returns no hits) and retrieves for FA_MED_MMLU with question-only queries (indexing 31 s, 1,089 queries 9 s on CPU).
+
+**First RQ1 measurement (answer coverage, BM25, same 1,089 questions; `scripts/persian/answer_coverage.py`):**
+
+| k | English, Textbooks: correct option present | Persian, web corpus: correct option present |
+|---|---|---|
+| 1 | 5.2% | 2.4% |
+| 8 | 13.3% | 6.3% |
+| 32 | 17.8% | 10.3% |
+
+Persian retrieval finds the correct option's text about half as often. Two confounds must be separated before this is a finding: the corpora differ (textbooks vs web articles), and exact phrase matching is harder in Persian (morphology, spelling variants, translated options), so part of the gap may be the measurement. Planned controls: the same proxy on Persian↔English translated pairs of snippets, and multilingual dense retrieval.
+
+
 ### Citation
 
 ```bibtex
@@ -208,5 +223,11 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - کلید جواب برای **هر ۱٬۰۸۹ سؤال** به همان ترتیب یکسان است. اگر فایل‌ها هم‌تراز نبودند، حدود ۲۵٪ تطابق انتظار می‌رفت.
   - پس نتایج فارسی و انگلیسی را می‌شود سؤال‌به‌سؤال مقایسه کرد.
 - اعداد در ۳۴۳ از ۴۵۳ سؤالِ عددی عیناً حفظ شده‌اند. نمونه‌هایی که بررسی شد فقط تفاوت قالب‌بندی داشتند، مثل «2,300» که «2300» شده، یا «2 months» که «دو ماه» ترجمه شده.
+- **منبع دانش فارسی:** با همان تنظیمات قطعه‌بندی MedRAG (۱٬۰۰۰ نویسه با ۲۰۰ نویسه هم‌پوشانی)، ۱۰۱٬۹۵۴ سند پس از حذف ۲٬۱۷۳ سند تکراری به **۵۴۱٬۹۲۶ قطعه** تبدیل شد. این ۴.۳ برابر Textbooks انگلیسی است. برخلاف Textbooks، این منبع **مقاله‌های سلامتِ وب** است: ۶۴٪ قطعه‌ها از hidoctor.ir و ۱۷٪ از niniban.com (بارداری و کودک).
+- **BM25 فارسی:** با تحلیلگر فارسی Lucene ساخته شد. نکتهٔ مهم: موقع جست‌وجو هم باید `set_language("fa")` تنظیم شود، وگرنه هیچ نتیجه‌ای برنمی‌گردد.
+- **اولین اندازه‌گیری برای RQ1:** روی همان ۱٬۰۸۹ سؤال و با BM25، متن گزینهٔ درست در ۳۲ قطعهٔ اول در **۱۷.۸٪** سؤال‌های انگلیسی (Textbooks) و **۱۰.۳٪** سؤال‌های فارسی (منبع وب) پیدا شد؛ یعنی حدود نصف.
+- **دو عامل مخدوش‌کننده** را باید قبل از نتیجه‌گیری جدا کرد:
+  - منبع‌ها فرق دارند: کتاب درسی در برابر مقالهٔ وب.
+  - تطابق عینی عبارت در فارسی سخت‌تر است: صرف کلمات، تنوع املایی، و ترجمه‌ای بودن گزینه‌ها. پس بخشی از این فاصله ممکن است از خود معیار باشد.
 
 </div>
