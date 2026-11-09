@@ -1,0 +1,2 @@
+{"model": "axiong/PMC_LLaMA_13B", "config": "cot", "dataset": "medqa", "n": 30, "seconds": 410.8, "sec_per_q": 13.694, "hit_length_cap": 7}
+{"model": "axiong/PMC_LLaMA_13B", "config": "rrf2@32", "dataset": "medqa", "n": 30, "seconds": 828.9, "sec_per_q": 27.629, "hit_length_cap": 16}
