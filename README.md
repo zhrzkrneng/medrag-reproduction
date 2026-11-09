@@ -178,6 +178,19 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - **It depends on what is retrieved.** Split by whether the correct option's text is in the 4 snippets (lexical proxy above): on KOPP, RAG **helps** when it is (147 questions: 58.5% → 71.4%, p = 0.003) and hurts when it is not (1,696: 50.7% → 45.2%, p < 0.001). On FA_MED_MMLU only 61 questions have it (82.0% → 80.3%, n.s.). The proxy misses paraphrased evidence, so "absent" means "not found verbatim", not "no useful content".
 - Reading: with this corpus, retrieval mostly adds distraction because the answer is rarely retrieved; this is consistent with the 2×2 control pointing at the knowledge source.
 
+**2×2 RAG accuracy (question language × corpus; BGE-M3, k = 4, Qwen2.5-7B-Instruct).** The direct test proposed above: the same 1,089 items, each language against each corpus, in the full pipeline (`kaggle/xling_rag/`, `scripts/persian/analyze_xling_rag.py` → `results/persian/xling_rag/summary.json`; 2.3 GPU-hours).
+
+| Accuracy | English Textbooks | Persian web corpus | paired test (corpus) | CoT, no retrieval |
+|---|---|---|---|---|
+| English question | **73.92%** | 70.43% (cross-lingual) | p = 0.015 | 78.42% |
+| Persian question | 47.75% (cross-lingual) | **52.98%** | p = 0.004 | 59.14% |
+| paired test (question language) | p < 0.0001 | p < 0.0001 | | |
+
+- **Interaction, not a single best corpus.** English questions do better with Textbooks (+3.5), Persian questions do better with the Persian corpus (+5.2). The worst cell is a Persian question with English Textbooks, although its retrieval finds the correct option's text more often than the Persian corpus does (102 vs 65 questions at k = 4). A context in a different language from the question costs more than the better corpus gains.
+- This **revises the reading of the 2×2 coverage control**: the corpus is the main lever for *retrieval* coverage, but for *accuracy* the language match between question and context matters as much. Translating the question or the snippets is the natural next test.
+- **RAG below CoT in every cell** at k = 4 (paired test against CoT p < 0.001 in every cell). Where the correct option's text is in the 4 snippets, accuracy is close to or above CoT (e.g. Persian/Persian: 78.5% → 84.6%, 65 questions); where it is not, RAG loses 5–12 points. With these corpora and k = 4 the answer is rarely retrieved (5–11% of questions), so distraction dominates.
+- Consistency check: cell 1 (BGE-M3, 73.92%) is close to the English RRF-2 result at k = 4 (74.29%).
+
 ### Citation
 
 ```bibtex
@@ -298,5 +311,13 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - **وابستگی به محتوای بازیابی‌شده:** در KOPP، وقتی متن گزینهٔ درست در ۴ قطعه هست (۱۴۷ سؤال)، RAG دقت را از ۵۸.۵٪ به **۷۱.۴٪** می‌رساند (p = 0.003). وقتی نیست (۱٬۶۹۶ سؤال)، دقت از ۵۰.۷٪ به ۴۵.۲٪ می‌افتد. در FA_MED_MMLU فقط ۶۱ سؤال چنین قطعه‌ای دارند و تفاوت معنادار نیست.
   - **محدودیت:** این معیار فقط تطابق عینی را می‌بیند. «نبودن» یعنی متن عیناً پیدا نشد، نه اینکه هیچ اطلاعات مفیدی نبود.
   - **برداشت:** با این منبع، جواب به‌ندرت بازیابی می‌شود و بازیابی بیشتر حواس مدل را پرت می‌کند. این با نتیجهٔ آزمایش ۲×۲ هم‌خوان است که منبع دانش را عامل اصلی نشان داد.
+
+- **آزمایش ۲×۲ دقت (زبان سؤال × منبع؛ BGE-M3، k = 4):** همان آزمونِ مستقیمی که بالاتر پیشنهاد شده بود، این بار در کل خط RAG. کد در `kaggle/xling_rag/` و `scripts/persian/analyze_xling_rag.py`، نتیجه در `results/persian/xling_rag/summary.json`. هزینه ۲.۳ ساعت GPU بود.
+  - سؤال انگلیسی: با Textbooks **۷۳.۹۲٪**، با منبع فارسی ۷۰.۴۳٪ (p = 0.015). بدون بازیابی: ۷۸.۴۲٪.
+  - سؤال فارسی: با Textbooks ۴۷.۷۵٪، با منبع فارسی **۵۲.۹۸٪** (p = 0.004). بدون بازیابی: ۵۹.۱۴٪.
+  - **اثر متقابل:** هیچ منبعی برای هر دو زبان بهترین نیست. سؤال انگلیسی با کتاب انگلیسی بهتر است و سؤال فارسی با منبع فارسی. بدترین حالت، سؤال فارسی با کتاب انگلیسی است، با اینکه بازیابی در این حالت جواب را بیشتر پیدا می‌کند (۱۰۲ سؤال در برابر ۶۵). یعنی هم‌زبان نبودن سؤال و متن بازیابی‌شده بیشتر از کیفیت بهتر منبع هزینه دارد.
+  - **اصلاح برداشت قبلی:** آزمایش ۲×۲ پوشش نشان داد منبع عامل اصلی *پوشش بازیابی* است. اما برای *دقت*، هم‌زبان بودن سؤال و متن به همان اندازه مهم است. آزمایش طبیعی بعدی ترجمهٔ سؤال یا ترجمهٔ قطعه‌هاست.
+  - **در هر چهار حالت، RAG با k = 4 از حالت بدون بازیابی بدتر است.** وقتی متن گزینهٔ درست در ۴ قطعه هست، دقت نزدیک یا بالاتر از حالت بدون بازیابی است (مثلاً فارسی با فارسی: ۷۸.۵٪ به ۸۴.۶٪ در ۶۵ سؤال). وقتی نیست، ۵ تا ۱۲ واحد افت دارد. چون جواب فقط در ۵ تا ۱۱٪ سؤال‌ها بازیابی می‌شود، اثر منفی غالب است.
+  - **بررسی سازگاری:** حالت ۱ (۷۳.۹۲٪) به نتیجهٔ انگلیسی RRF-2 با k = 4 (۷۴.۲۹٪) نزدیک است.
 
 </div>
