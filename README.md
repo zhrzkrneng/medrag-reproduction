@@ -44,7 +44,7 @@ The official code is public domain (NCBI). Pinned reference commits:
 
 ```
 src/medrag_repro/   templates.py · retrieval.py · evaluate.py
-scripts/            retrieve.py · embed_corpus.py · generate.py · evaluate.py
+scripts/            retrieve.py · embed_corpus.py · generate.py · evaluate.py · retrieval_quality.py
 templates/          pmc_llama.jinja (from MedRAG)
 data/               mirage_benchmark.json
 tests/              unit tests for parsing, RRF and prompts
@@ -97,6 +97,20 @@ Paired exact McNemar test against CoT (p-values; 6 tests per dataset, so the Bon
 - Accuracy **rises** with k, which matches the paper's Figure 3 (roughly log-linear growth for k ≤ 32, GPT-3.5, MedCorp, RRF-4).
 - But with this model, RAG **never beats CoT**. Few snippets hurt the most, and 16–32 snippets only bring accuracy back to about the CoT level.
 - So the "distracted by long context" explanation is **not supported**: more context helps, it does not hurt. A more likely reading is that the model leans on the few retrieved passages even when they are not the right evidence, and more snippets dilute that effect. This is a hypothesis from these numbers, not yet tested directly; a per-question check of whether the retrieved snippets contain the answer would test it.
+
+#### Does the context contain the answer? (retrieval-quality proxy)
+
+MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py` uses a lexical proxy: an option counts as present when its text occurs in one of the top-k snippets. Questions are grouped by what the context contains, and CoT and RAG answers are compared inside each group (full table: `results/retrieval_quality/retrieval_quality.md`).
+
+| Group (MedQA-US, k=32) | share | CoT | RAG | fixed / broken | p (McNemar) |
+|---|---|---|---|---|---|
+| only the correct option appears | 5.7% | 71.2 | 75.3 | 6 / 3 | 0.51 |
+| only wrong options appear | 14.8% | 58.7 | 50.8 | 16 / 31 | **0.04** |
+| no option appears | 71.0% | 60.2 | 59.7 | 111 / 115 | 0.84 |
+
+- **The model follows the context.** When only wrong options appear, RAG is significantly worse than CoT on both datasets and at both k = 2 and k = 32 (p between 0.001 and 0.04). It picks a wrong option that is in the context more often than CoT does (MedQA k=32: 31.7% vs 24.9%; MMLU-Med: 21.4% vs 13.0%). When only the correct option appears, RAG tends to help, but these groups are too small to be significant.
+- **Retrieval rarely finds the answer.** With 32 snippets the correct option appears in only 14% (MedQA) and 19% (MMLU-Med) of contexts. For most questions no option appears at all. In that group RAG is significantly worse at k = 2 (MedQA p = 0.012, MMLU-Med p < 0.001) and the harm shrinks with more snippets, which explains the rising k-curve.
+- **Conclusion.** For this model the bottleneck is retrieval relevance (Textbooks with question-only retrieval), not context length. This agrees with the paper's finding that the choice of corpus matters most (StatPearls was best for MedQA-US in its Table 7). Caveats: lexical presence is not evidence (a snippet may mention a drug to rule it out), long sentence-like options (MMLU-Med) are rarely matched, and several groups and tests are compared.
 
 **Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets); the k = 1…16 sweep took 0.4–5.6 s per question (~6.2 GPU hours). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
 
@@ -163,6 +177,18 @@ Paired exact McNemar test against CoT (p-values; 6 tests per dataset, so the Bon
 - پس فرضیهٔ «context طولانی حواس مدل را پرت می‌کند» **تأیید نشد**: context بیشتر کمک می‌کند، نه ضرر.
 - توضیح محتمل‌تر این است که مدل به چند قطعهٔ بازیابی‌شده تکیه می‌کند، حتی وقتی آن قطعه‌ها شاهد درستی نیستند. با قطعه‌های بیشتر، این اثر رقیق می‌شود. این هم فقط فرضیه‌ای است که از این اعداد برداشت شده و هنوز مستقیم آزمایش نشده.
 - نمودار و آزمون‌های آماری (McNemar با اصلاح Bonferroni) در بخش انگلیسی آمده‌اند.
+
+#### آیا context جواب را دارد؟ (معیار تقریبی کیفیت بازیابی)
+MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ندارد. برای همین `scripts/retrieval_quality.py` از یک معیار تقریبی واژگانی استفاده می‌کند: یک گزینه «حاضر» است اگر متنش در یکی از k قطعهٔ بازیابی‌شده آمده باشد.
+
+- **مدل از context پیروی می‌کند:**
+  - وقتی فقط گزینه‌های غلط در context هستند، RAG در هر دو دیتاست و هر دو k (یعنی 2 و 32) به شکل معنادار بدتر از حالت بدون RAG است (p بین ۰.۰۰۱ و ۰.۰۴).
+  - در این حالت، مدل بیشتر گزینهٔ غلطی را انتخاب می‌کند که در متن آمده است. مثلاً در MedQA با k=32، این نرخ ۳۱.۷٪ با RAG است، در برابر ۲۴.۹٪ بدون RAG.
+- **بازیابی به‌ندرت جواب را پیدا می‌کند:**
+  - با ۳۲ قطعه، گزینهٔ درست فقط در ۱۴٪ (MedQA) و ۱۹٪ (MMLU-Med) از contextها هست.
+  - در بیشتر سؤال‌ها هیچ گزینه‌ای در متن نیست. در این گروه، RAG با k=2 به شکل معنادار ضرر می‌زند و با قطعه‌های بیشتر این ضرر کم می‌شود. همین روند صعودی منحنی k را توضیح می‌دهد.
+- **نتیجه:** برای این مدل، گلوگاه مرتبط بودن بازیابی است، نه طول context. این با یافتهٔ مقاله سازگار است که «انتخاب منبع دانش مهم‌ترین عامل است».
+- **محدودیت‌ها:** حضور واژگانی یک گزینه به معنای شاهد بودن آن نیست؛ گزینه‌های جمله‌ای MMLU کمتر پیدا می‌شوند؛ و چندین گروه و آزمون با هم مقایسه شده‌اند. جدول و آزمون‌ها در بخش انگلیسی آمده‌اند.
 
 **هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست. آزمایش k = 1 تا 16 بین ۰.۴ تا ۵.۶ ثانیه برای هر سؤال طول کشید، جمعاً حدود ۶.۲ ساعت GPU.
 
