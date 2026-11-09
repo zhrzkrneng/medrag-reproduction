@@ -52,12 +52,15 @@ def main():
     p.add_argument("--max_new_tokens", type=int, default=1024)
     p.add_argument("--chunk", type=int, default=200, help="questions per vLLM call; results appended after each")
     p.add_argument("--tp", type=int, default=2, help="tensor parallel size (2 for Kaggle T4 x2)")
+    p.add_argument("--time_budget_s", type=float, default=None,
+                   help="stop before starting a new chunk once this many seconds have passed (answers so far are kept)")
     p.add_argument("--gpu_mem", type=float, default=0.92, help="vLLM gpu_memory_utilization")
     p.add_argument("--enforce_eager", action="store_true", help="no CUDA graphs (saves GPU memory)")
     p.add_argument("--quantization", default=None, help="e.g. bitsandbytes (documented deviation)")
     p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
     p.add_argument("--out", default="results")
     a = p.parse_args()
+    T_START = time.time()
 
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
@@ -106,6 +109,10 @@ def main():
             t_all, capped = time.time(), 0
             # answered in chunks and appended after each one, so progress (and real speed) is visible
             for start in range(0, len(todo), a.chunk):
+                if a.time_budget_s and time.time() - T_START > a.time_budget_s:
+                    print(json.dumps({"stopped": "time budget", "config": conf, "dataset": ds,
+                                      "answered": len(done) + start, "of": len(qids)}), flush=True)
+                    return
                 part = todo[start: start + a.chunk]
                 prompts, params, meta = [], [], []
                 for qid in part:
