@@ -142,6 +142,16 @@ Persian retrieval finds the correct option's text about half as often. Two confo
 
 The two Persian retrievers overlap in only 13% of their top-32 (English BM25/MedCPT: 12.5%), and fusion helps in both languages. A multilingual dense retriever does **not** close the gap, which points to the corpus rather than the retriever, though the measurement confound (exact matching is harder in Persian) remains. Planned control that removes it: Persian questions → English Textbooks with BGE-M3, scored on the aligned English options.
 
+**Cross-lingual control (2×2).** To separate question language from corpus, the same 1,089 questions were run in both languages against both corpora with BGE-M3 (`kaggle/xling/`, `scripts/persian/xling_coverage.py`). Coverage is always scored in the corpus language with the aligned options, so within a column the measurement is identical and only the question language changes:
+
+| Correct option present in top-32 | English Textbooks | Persian web corpus |
+|---|---|---|
+| English question | 20.1% | 10.3% (cross-lingual) |
+| Persian question | 18.1% (cross-lingual) | 10.9% |
+| paired test, English vs Persian question | p = 0.005 | p = 0.30 |
+
+Asking in Persian instead of English costs about 2 points on Textbooks and nothing measurable on the Persian corpus: a multilingual retriever handles the question language well. The large gap is between the columns (about 8–10 points), i.e. the corpus, together with the remaining measurement difference (English vs Persian matching), which this design cannot separate further. For RQ1 this points to the knowledge source as the main lever; a direct test would be Persian questions with an English or translated textbook corpus in the full RAG pipeline.
+
 **Data fix.** 184 of 1,878 KOPP questions (copied from PDFs) wrap every word in Unicode bidi control marks, which made BM25 return nothing for 115 of them. `medrag_repro.persian.clean_text` replaces the marks with spaces (some words are separated only by them); questions with no BM25 hit dropped from 115 to 3. The corpus has the marks in 1.7% of snippets; it is left unchanged for now so BM25 and the existing BGE-M3 embeddings index the same text, and will be cleaned at the next embedding run. Query embeddings were recomputed on CPU after the fix (same top-1 as the GPU run for 1,074 of 1,089 FA_MED_MMLU questions; 99% top-10 overlap).
 
 **Leakage check (RQ4).** `scripts/persian/leakage_check.py` looks for benchmark questions copied into the Persian corpus (which Gaokerena was trained on and our RAG retrieves from): word 8-gram and 13-gram overlap of each question stem with every corpus document after Persian normalisation (Arabic yeh/kaf, ZWNJ, digits); a question is flagged if ≥ 50% of its n-grams occur in one document.
@@ -257,6 +267,12 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - KOPP: BM25 ۱۳.۲٪، BGE-M3 ۱۳.۷٪، RRF-2 ۱۴.۶٪
 
   بازیابی معنایی چندزبانه **شکاف را نمی‌بندد**. این نشان می‌دهد عامل اصلی بیشتر منبع دانش است تا روش بازیابی. ولی عامل مخدوش‌کنندهٔ معیار هنوز باقی است.
+- **آزمایش کنترلی ۲×۲:** همان ۱٬۰۸۹ سؤال، به هر دو زبان، روی هر دو منبع با BGE-M3 جست‌وجو شد. پوشش همیشه به زبان خودِ منبع سنجیده شد. نتیجه، یعنی سهم سؤال‌هایی که متن گزینهٔ درست در ۳۲ قطعهٔ اول آمده:
+  - Textbooks انگلیسی: با سؤال انگلیسی ۲۰.۱٪، با سؤال فارسی ۱۸.۱٪
+  - منبع وب فارسی: با سؤال انگلیسی ۱۰.۳٪، با سؤال فارسی ۱۰.۹٪
+  - **زبان سؤال** فقط حدود ۲ واحد اثر دارد (روی منبع فارسی هم اثر معناداری ندارد).
+  - **منبع دانش** (همراه با تفاوت زبانِ معیار) حدود ۸ تا ۱۰ واحد اثر دارد.
+  - پس در RQ1، اهرم اصلی **منبع دانش** است.
 - **اصلاح داده:** در ۱۸۴ سؤال KOPP، که از PDF کپی شده‌اند، هر کلمه بین نویسه‌های نامرئی جهت متن قرار گرفته بود. به همین دلیل BM25 برای ۱۱۵ سؤال هیچ نتیجه‌ای برنمی‌گرداند. بعد از پاک‌سازی، این عدد به ۳ رسید.
 - **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
