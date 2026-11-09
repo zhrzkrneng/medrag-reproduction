@@ -5,7 +5,7 @@ N = 30
 MODEL = "axiong/PMC_LLaMA_13B"
 VARIANTS = [
     ("fp16_tp2_eager", ["--tp", "2", "--gpu_mem", "0.97", "--enforce_eager"]),
-    ("bnb8_tp2", ["--tp", "2", "--quantization", "bitsandbytes"]),   # documented deviation if used
+    # bitsandbytes was tried in v1: vLLM 0.33 no longer supports it
 ]
 import os
 os.environ["HF_HOME"] = "/kaggle/tmp/hf"   # not /kaggle/working (20 GB limit)
@@ -25,7 +25,7 @@ retrieved = glob.glob(os.path.join(ROOT, "**", "textbooks_top32.jsonl*"), recurs
 bench = glob.glob(os.path.join(ROOT, "**", "mirage_benchmark.json"), recursive=True)[0]
 gen = glob.glob(os.path.join(ROOT, "**", "scripts", "generate.py"), recursive=True)[0]
 sh("df -h / /kaggle/working /kaggle/tmp /tmp 2>&1; free -g")
-t = time.time(); rc = sh("pip install -q vllm bitsandbytes 2>&1 | tail -3"); print(f"vllm install rc={rc} {time.time()-t:.0f}s", flush=True)
+t = time.time(); rc = sh("pip install -q vllm 2>&1 | tail -3"); print(f"vllm install rc={rc} {time.time()-t:.0f}s", flush=True)
 from huggingface_hub import snapshot_download
 from medrag_repro.retrieval import load_corpus
 corp = snapshot_download("MedRAG/textbooks", repo_type="dataset", local_dir="/kaggle/tmp/textbooks")

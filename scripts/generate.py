@@ -71,6 +71,10 @@ def main():
               gpu_memory_utilization=a.gpu_mem, enforce_eager=a.enforce_eager, quantization=a.quantization, seed=0)
     tok = llm.get_tokenizer()
     if template:
+        # vLLM wraps its tokenizer, and setting chat_template on the wrapper does not reach
+        # apply_chat_template; build prompts with the plain Hugging Face tokenizer instead
+        from transformers import AutoTokenizer
+        tok = AutoTokenizer.from_pretrained(a.model)
         tok.chat_template = template
 
     bench = json.load(open(a.benchmark))
