@@ -132,6 +132,16 @@ MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py
 
 Persian retrieval finds the correct option's text about half as often. Two confounds must be separated before this is a finding: the corpora differ (textbooks vs web articles), and exact phrase matching is harder in Persian (morphology, spelling variants, translated options), so part of the gap may be the measurement. Planned controls: the same proxy on Persian↔English translated pairs of snippets, and multilingual dense retrieval.
 
+**Leakage check (RQ4).** `scripts/persian/leakage_check.py` looks for benchmark questions copied into the Persian corpus (which Gaokerena was trained on and our RAG retrieves from): word 8-gram and 13-gram overlap of each question stem with every corpus document after Persian normalisation (Arabic yeh/kaf, ZWNJ, digits); a question is flagged if ≥ 50% of its n-grams occur in one document.
+
+| Benchmark | checkable (≥ 8 words) | flagged (8-gram) | highest overlap with one document |
+|---|---|---|---|
+| KOPP (Iranian licensing exam, 1,878) | 1,743 | **0** | 20% |
+| FA_MED_MMLU (1,089) | 983 | **0** | 25% |
+
+Positive control: 20 benchmark questions planted into a copy of corpus documents (some with Arabic-yeh spelling) were all found when checkable (17 of 17 with ≥ 8 words; the 3 misses had 4–7 words), with no false positives. So there is **no verbatim leakage** from these benchmarks into the corpus. Not covered: paraphrased or translated copies, and questions shorter than 8 words (7% of KOPP, 10% of FA_MED_MMLU). Report: `results/persian/leakage.json`.
+
+
 
 ### Citation
 
@@ -229,5 +239,8 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
 - **دو عامل مخدوش‌کننده** را باید قبل از نتیجه‌گیری جدا کرد:
   - منبع‌ها فرق دارند: کتاب درسی در برابر مقالهٔ وب.
   - تطابق عینی عبارت در فارسی سخت‌تر است: صرف کلمات، تنوع املایی، و ترجمه‌ای بودن گزینه‌ها. پس بخشی از این فاصله ممکن است از خود معیار باشد.
+- **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
+  - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
+  - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.
 
 </div>
