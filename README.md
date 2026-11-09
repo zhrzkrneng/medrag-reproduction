@@ -110,7 +110,7 @@ MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py
 
 - **The model follows the context.** When only wrong options appear, RAG is significantly worse than CoT on both datasets and at both k = 2 and k = 32 (p between 0.001 and 0.04). It picks a wrong option that is in the context more often than CoT does (MedQA k=32: 31.7% vs 24.9%; MMLU-Med: 21.4% vs 13.0%). When only the correct option appears, RAG tends to help, but these groups are too small to be significant.
 - **Retrieval rarely finds the answer.** With 32 snippets the correct option appears in only 14% (MedQA) and 19% (MMLU-Med) of contexts. For most questions no option appears at all. In that group RAG is significantly worse at k = 2 (MedQA p = 0.012, MMLU-Med p < 0.001) and the harm shrinks with more snippets, which explains the rising k-curve.
-- **Conclusion.** For this model the bottleneck is retrieval relevance (Textbooks with question-only retrieval), not context length. This agrees with the paper's finding that the choice of corpus matters most (StatPearls was best for MedQA-US in its Table 7). Caveats: lexical presence is not evidence (a snippet may mention a drug to rule it out), long sentence-like options (MMLU-Med) are rarely matched, and several groups and tests are compared.
+- **Conclusion.** For this model the bottleneck is retrieval relevance (Textbooks with question-only retrieval), not context length. This agrees with the paper's finding that the choice of corpus matters most (StatPearls was best for MedQA-US in its Table 7). A manual reading of the 25 MedQA cases where RAG switched from a correct CoT answer to a wrong option present in the context (`results/retrieval_quality/manual_review_medqa_k32.md`) found that 80% of the snippets are on the question's topic but describe a neighbouring diagnosis or treatment ("near-miss" retrieval), 16% are incidental mentions, and 1 case is a proxy error. Caveats: lexical presence is not evidence (a snippet may mention a drug to rule it out), long sentence-like options (MMLU-Med) are rarely matched, and several groups and tests are compared.
 
 **Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets); the k = 1…16 sweep took 0.4–5.6 s per question (~6.2 GPU hours). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
 
@@ -188,6 +188,10 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - با ۳۲ قطعه، گزینهٔ درست فقط در ۱۴٪ (MedQA) و ۱۹٪ (MMLU-Med) از contextها هست.
   - در بیشتر سؤال‌ها هیچ گزینه‌ای در متن نیست. در این گروه، RAG با k=2 به شکل معنادار ضرر می‌زند و با قطعه‌های بیشتر این ضرر کم می‌شود. همین روند صعودی منحنی k را توضیح می‌دهد.
 - **نتیجه:** برای این مدل، گلوگاه مرتبط بودن بازیابی است، نه طول context. این با یافتهٔ مقاله سازگار است که «انتخاب منبع دانش مهم‌ترین عامل است».
+- **بررسی دستی:** ۲۵ سؤال MedQA را خواندم که در آن‌ها RAG جواب درستِ بدون RAG را به گزینهٔ غلطِ داخل متن تغییر داد. نتیجه:
+  - در ۸۰٪ موارد، قطعه دربارهٔ همان موضوع سؤال است، ولی تشخیص یا درمانِ مشابهِ دیگری را توضیح می‌دهد (بازیابیِ «نزدیک ولی اشتباه»).
+  - در ۱۶٪ موارد، گزینه فقط گذرا نام برده شده.
+  - یک مورد خطای خود معیار بود.
 - **محدودیت‌ها:** حضور واژگانی یک گزینه به معنای شاهد بودن آن نیست؛ گزینه‌های جمله‌ای MMLU کمتر پیدا می‌شوند؛ و چندین گروه و آزمون با هم مقایسه شده‌اند. جدول و آزمون‌ها در بخش انگلیسی آمده‌اند.
 
 **هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست. آزمایش k = 1 تا 16 بین ۰.۴ تا ۵.۶ ثانیه برای هر سؤال طول کشید، جمعاً حدود ۶.۲ ساعت GPU.
