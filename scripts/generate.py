@@ -31,7 +31,7 @@ MODELS = {
     "Qwen/Qwen2.5-7B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
     # official 4-bit AWQ build of the same model: fits on one T4, used only if fp16 is too slow (documented)
     "Qwen/Qwen2.5-7B-Instruct-AWQ": {"max_length": 8192, "context_length": 7168, "template": None},
-    "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024,
+    "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024, "add_bos": True,
                              "template": os.path.join(ROOT, "templates", "pmc_llama.jinja")},
 }
 
@@ -52,6 +52,9 @@ def main():
     p.add_argument("--max_new_tokens", type=int, default=1024)
     p.add_argument("--chunk", type=int, default=200, help="questions per vLLM call; results appended after each")
     p.add_argument("--tp", type=int, default=2, help="tensor parallel size (2 for Kaggle T4 x2)")
+    p.add_argument("--gpu_mem", type=float, default=0.92, help="vLLM gpu_memory_utilization")
+    p.add_argument("--enforce_eager", action="store_true", help="no CUDA graphs (saves GPU memory)")
+    p.add_argument("--quantization", default=None, help="e.g. bitsandbytes (documented deviation)")
     p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
     p.add_argument("--out", default="results")
     a = p.parse_args()
@@ -65,7 +68,7 @@ def main():
         # MedRAG loads its jinja files with .replace('    ', '').replace('\n', '')
         template = open(cfg["template"]).read().replace("    ", "").replace("\n", "")
     llm = LLM(a.model, dtype="half", tensor_parallel_size=a.tp, pipeline_parallel_size=a.pp, max_model_len=cfg["max_length"],
-              gpu_memory_utilization=0.92, seed=0)
+              gpu_memory_utilization=a.gpu_mem, enforce_eager=a.enforce_eager, quantization=a.quantization, seed=0)
     tok = llm.get_tokenizer()
     if template:
         tok.chat_template = template
@@ -113,6 +116,9 @@ def main():
                     msgs = build_messages(item["question"], item["options"], context)
                     text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
                     ids = tok.encode(text, add_special_tokens=False)
+                    if cfg.get("add_bos") and tok.bos_token_id is not None:
+                        # MedRAG runs LLaMA models through a HF pipeline, whose tokenizer adds <s>
+                        ids = [tok.bos_token_id] + ids
                     budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
                     prompts.append(TokensPrompt(prompt_token_ids=ids))
                     params.append(SamplingParams(temperature=0.0, max_tokens=budget))
