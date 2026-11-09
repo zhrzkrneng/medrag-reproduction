@@ -114,6 +114,10 @@ MIRAGE has no gold evidence for these datasets, so `scripts/retrieval_quality.py
 
 **Cost.** On 2×T4 (Kaggle free tier), CoT takes about 0.3–0.5 s per question, and RAG with 32 snippets about 13.4 s per question (~8.8 GPU hours for both datasets); the k = 1…16 sweep took 0.4–5.6 s per question (~6.2 GPU hours). T4 GPUs support only the Triton/Flex attention backends in vLLM 0.33; a diagnosis of other settings is in `results/speed_diagnosis/`.
 
+### Persian extension (work in progress)
+
+`scripts/persian/prepare_fa_mmlu.py` downloads [FA_MED_MMLU](https://huggingface.co/datasets/gaokerena/FA_MED_MMLU) (Persian MMLU-Med, Ghassabi et al. 2025), checks it against MIRAGE and writes it in MIRAGE's format to `data_local/` (not committed: the dataset card states no licence). Check result: same 6 subjects and 1,089 items, and the answer key agrees for **all 1,089** items in order (a misaligned file would agree about 25%), so Persian and English results can be compared question by question. Numbers survive translation in 343 of 453 questions that contain them; the sampled misses are formatting (“2,300” → “2300”, “2 months” → “دو ماه”). Report: `results/persian/fa_mmlu_alignment.json`.
+
 ### Citation
 
 ```bibtex
@@ -195,5 +199,14 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
 - **محدودیت‌ها:** حضور واژگانی یک گزینه به معنای شاهد بودن آن نیست؛ گزینه‌های جمله‌ای MMLU کمتر پیدا می‌شوند؛ و چندین گروه و آزمون با هم مقایسه شده‌اند. جدول و آزمون‌ها در بخش انگلیسی آمده‌اند.
 
 **هزینه:** روی دو T4 رایگان کاگل، CoT حدود ۰.۳ تا ۰.۵ ثانیه برای هر سؤال طول می‌کشد و RAG با ۳۲ قطعه حدود ۱۳.۴ ثانیه، یعنی حدود ۸.۸ ساعت GPU برای هر دو دیتاست. آزمایش k = 1 تا 16 بین ۰.۴ تا ۵.۶ ثانیه برای هر سؤال طول کشید، جمعاً حدود ۶.۲ ساعت GPU.
+
+### توسعهٔ فارسی (در حال انجام)
+- اسکریپت `scripts/persian/prepare_fa_mmlu.py` دیتاست FA_MED_MMLU (ترجمهٔ فارسی MMLU-Med) را دانلود می‌کند، با MIRAGE مقایسه می‌کند و در قالب MIRAGE ذخیره می‌کند.
+- داده در مخزن قرار نمی‌گیرد، چون صفحهٔ دیتاست مجوزی اعلام نکرده است.
+- **نتیجهٔ بررسی:**
+  - همان ۶ موضوع و ۱٬۰۸۹ سؤال.
+  - کلید جواب برای **هر ۱٬۰۸۹ سؤال** به همان ترتیب یکسان است. اگر فایل‌ها هم‌تراز نبودند، حدود ۲۵٪ تطابق انتظار می‌رفت.
+  - پس نتایج فارسی و انگلیسی را می‌شود سؤال‌به‌سؤال مقایسه کرد.
+- اعداد در ۳۴۳ از ۴۵۳ سؤالِ عددی عیناً حفظ شده‌اند. نمونه‌هایی که بررسی شد فقط تفاوت قالب‌بندی داشتند، مثل «2,300» که «2300» شده، یا «2 months» که «دو ماه» ترجمه شده.
 
 </div>
