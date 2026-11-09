@@ -165,6 +165,19 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 
 
 
+**Persian RAG accuracy (Qwen2.5-7B-Instruct, k = 4).** `kaggle/run_fa/`, analysis `scripts/persian/analyze_fa_runs.py` → `results/persian/run_fa/summary.json` (per-question predictions are committed as ids and letters only). Prompts are MedRAG's English instructions with Persian question, options and snippets; RRF-2 = BM25 + BGE-M3 over the Persian web corpus. k = 4 rather than 32 because Persian snippets take about twice as many tokens (k = 4 ≈ 2,300 prompt tokens, k = 32 ≈ 7,500) and k = 32 did not fit this week's GPU quota.
+
+| | CoT (no retrieval) | RRF-2, k = 4 | RAG fixes / breaks | paired test |
+|---|---|---|---|---|
+| FA_MED_MMLU (1,089) | 59.14% | 53.35% | 143 / 206 | p < 0.001 |
+| KOPP (1,878) | 51.65% | 47.55% | 286 / 363 | p = 0.003 |
+| English MMLU-Med, same items (Textbooks) | 78.42% | 74.29% | | |
+
+- **Language gap:** the same 1,089 items lose 19.3 points in Persian without retrieval (278 questions correct only in English, 68 only in Persian; p < 0.0001), and 20.9 points with RAG at k = 4.
+- **RAG hurts in Persian** on both benchmarks (−5.8 and −4.1 points); in English at k = 4 it also hurts, by −4.1 points.
+- **It depends on what is retrieved.** Split by whether the correct option's text is in the 4 snippets (lexical proxy above): on KOPP, RAG **helps** when it is (147 questions: 58.5% → 71.4%, p = 0.003) and hurts when it is not (1,696: 50.7% → 45.2%, p < 0.001). On FA_MED_MMLU only 61 questions have it (82.0% → 80.3%, n.s.). The proxy misses paraphrased evidence, so "absent" means "not found verbatim", not "no useful content".
+- Reading: with this corpus, retrieval mostly adds distraction because the answer is rarely retrieved; this is consistent with the 2×2 control pointing at the knowledge source.
+
 ### Citation
 
 ```bibtex
@@ -277,5 +290,13 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
 - **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
   - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.
+
+- **دقت RAG فارسی (Qwen2.5-7B-Instruct، k = 4):** پوشهٔ `kaggle/run_fa/`، تحلیل با `scripts/persian/analyze_fa_runs.py` و نتیجه در `results/persian/run_fa/summary.json`. از پیش‌بینی‌ها فقط شناسه و حرف گزینه در مخزن است. k = 4 به جای ۳۲ انتخاب شد، چون قطعه‌های فارسی حدود دو برابر توکن می‌گیرند و k = 32 در سهمیهٔ GPU این هفته جا نمی‌شد.
+  - FA_MED_MMLU (۱٬۰۸۹ سؤال): بدون بازیابی **۵۹.۱۴٪**، با RRF-2 **۵۳.۳۵٪**. RAG در ۱۴۳ سؤال جواب را درست کرد و در ۲۰۶ سؤال خراب کرد (p < 0.001).
+  - KOPP (۱٬۸۷۸ سؤال): بدون بازیابی **۵۱.۶۵٪**، با RRF-2 **۴۷.۵۵٪**. ۲۸۶ اصلاح در برابر ۳۶۳ خرابی (p = 0.003).
+  - **شکاف زبانی:** همان ۱٬۰۸۹ سؤال به انگلیسی ۷۸.۴۲٪ و به فارسی ۵۹.۱۴٪، یعنی **۱۹.۳ واحد** افت. ۲۷۸ سؤال فقط به انگلیسی درست جواب داده شد و ۶۸ سؤال فقط به فارسی (p < 0.0001). با RAG در k = 4 این افت ۲۰.۹ واحد است.
+  - **وابستگی به محتوای بازیابی‌شده:** در KOPP، وقتی متن گزینهٔ درست در ۴ قطعه هست (۱۴۷ سؤال)، RAG دقت را از ۵۸.۵٪ به **۷۱.۴٪** می‌رساند (p = 0.003). وقتی نیست (۱٬۶۹۶ سؤال)، دقت از ۵۰.۷٪ به ۴۵.۲٪ می‌افتد. در FA_MED_MMLU فقط ۶۱ سؤال چنین قطعه‌ای دارند و تفاوت معنادار نیست.
+  - **محدودیت:** این معیار فقط تطابق عینی را می‌بیند. «نبودن» یعنی متن عیناً پیدا نشد، نه اینکه هیچ اطلاعات مفیدی نبود.
+  - **برداشت:** با این منبع، جواب به‌ندرت بازیابی می‌شود و بازیابی بیشتر حواس مدل را پرت می‌کند. این با نتیجهٔ آزمایش ۲×۲ هم‌خوان است که منبع دانش را عامل اصلی نشان داد.
 
 </div>
