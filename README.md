@@ -197,6 +197,19 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - *Reasoning language:* given a Persian question, Qwen2.5-7B-Instruct almost never reasons in Persian (≤ 7 of 1,089–1,878 answers per run). It reasons in English or **in Chinese**: 24% of FA_MED_MMLU answers without retrieval, 61% with the Persian corpus, 75% with English Textbooks; 45% and 59% on KOPP. With English questions it never switches. The answer letter is still parsed correctly (the JSON key is Latin). Accuracy is similar either way (e.g. FA_MED_MMLU CoT: English reasoning 57.5%, Chinese 64.3%; with Textbooks 45.1% vs 48.6%), and the language is the model's choice, so this is a description, not a causal effect. It does show that the long cross-lingual prompt pushes the model further from the question language. A prompt that fixes the reasoning language (e.g. "think in English") is a cheap next test.
 - *Manual check of 12 random questions answered correctly only in English* (seed 0): the translation is faithful in 10; in 2 it loses something ("Marked microsatellite instability" loses "marked"; "Li-Fraumeni syndrome" is rendered with a word meaning "membership"). In the sampled items, then, the gap comes mostly from the model's Persian, not from translation errors (small sample).
 
+**Translate first (Persian question → English with Qwen itself, then the English pipeline).** `kaggle/translate/`, `scripts/persian/translate_questions.py`, analysis `scripts/persian/analyze_translate.py` → `results/persian/translate/summary.json` (0.75 GPU-hours). Qwen translates question and options (greedy, 0.26 s/question; 13 of 1,089 outputs could not be parsed and stay in Persian, counted as they are). BGE-M3 retrieves from Textbooks with the translated question; CoT and k = 4 as in the 2×2.
+
+| Same 1,089 items | CoT | Textbooks, k = 4 |
+|---|---|---|
+| English original | 78.42% | 73.92% |
+| **Persian, machine-translated to English** | **66.85%** | **63.54%** |
+| Persian as is | 59.14% | 47.75% (Persian corpus: 52.98%) |
+
+- Translating first is the best Persian pipeline: +7.7 points without retrieval and +15.8 with Textbooks over asking in Persian, and +10.6 over the Persian corpus (all p < 0.0001). It recovers about 40% of the language gap without retrieval.
+- **Retrieval is fully recovered**: the correct option's text is in the top 4 for 123 questions with the translated question vs 124 with the English original. What remains is in reading and answering.
+- **Translation quality matters but does not explain the whole gap.** Round-trip chrF against the original English (FA_MED_MMLU is itself a translation of it) is 67.0 for questions and 68.3 for options. By question-chrF tercile the gap to English is 14.9, 10.5 and 9.3 points. Part of the loss is in the Persian dataset's own translation, which the round trip cannot undo, and low chrF also goes with longer, harder questions, so this is a correlation.
+- RAG still costs 3.3 points against CoT here (p = 0.015). When the correct option's text is retrieved (123 questions), RAG is on par (81.3% → 82.1%).
+
 ### Citation
 
 ```bibtex
@@ -334,5 +347,13 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
     - چون زبان را خود مدل انتخاب می‌کند، این فقط یک توصیف است و اثر علّی نیست.
     - آزمایش ارزان بعدی: دستوری که زبان استدلال را ثابت کند، مثلاً «به انگلیسی فکر کن».
   - **بررسی دستی ۱۲ سؤال تصادفی که فقط به انگلیسی درست جواب گرفتند:** ترجمه در ۱۰ سؤال درست بود. در ۲ سؤال چیزی از دست رفته بود، مثلاً «Li-Fraumeni» با کلمه‌ای به معنی «عضویت» ترجمه شده بود. پس در این نمونهٔ کوچک، شکاف بیشتر از ضعف فارسیِ مدل است تا خطای ترجمه.
+
+- **اول ترجمه، بعد جواب:** Qwen خودش سؤال فارسی و گزینه‌ها را به انگلیسی ترجمه می‌کند و بعد خط انگلیسی اجرا می‌شود. کد در `kaggle/translate/`، `scripts/persian/translate_questions.py` و `scripts/persian/analyze_translate.py`، نتیجه در `results/persian/translate/summary.json`. هزینه ۰.۷۵ ساعت GPU بود. ترجمه ۰.۲۶ ثانیه برای هر سؤال طول کشید. ۱۳ ترجمه از ۱٬۰۸۹ قابل خواندن نبود و همان متن فارسی نگه داشته شد، یعنی هیچ سؤالی حذف نشد.
+  - بدون بازیابی: انگلیسی اصلی ۷۸.۴۲٪، **ترجمه‌شده ۶۶.۸۵٪**، فارسی ۵۹.۱۴٪.
+  - با Textbooks و k = 4: انگلیسی اصلی ۷۳.۹۲٪، **ترجمه‌شده ۶۳.۵۴٪**، فارسی ۴۷.۷۵٪. با منبع فارسی: ۵۲.۹۸٪.
+  - **بهترین روش برای سؤال فارسی، اول ترجمه کردن است.** نسبت به پرسیدن به فارسی، بدون بازیابی ۷.۷ واحد و با Textbooks ۱۵.۸ واحد بهتر است. نسبت به منبع فارسی هم ۱۰.۶ واحد بهتر است. همهٔ این تفاوت‌ها معنادارند (p < 0.0001). بدون بازیابی، حدود ۴۰٪ شکاف زبانی جبران می‌شود.
+  - **بازیابی کامل جبران شد.** متن گزینهٔ درست با سؤال ترجمه‌شده در ۱۲۳ سؤال بازیابی شد و با سؤال انگلیسی اصلی در ۱۲۴ سؤال. پس افت باقی‌مانده در مرحلهٔ فهم و جواب دادن است، نه در بازیابی.
+  - **کیفیت ترجمه مهم است، ولی همهٔ شکاف را توضیح نمی‌دهد.** شباهت ترجمهٔ برگشتی با متن اصلی انگلیسی (chrF) برای سؤال ۶۷.۰ و برای گزینه‌ها ۶۸.۳ است. در سه گروه سؤال، از کیفیت پایین تا بالا، فاصله با انگلیسی ۱۴.۹، ۱۰.۵ و ۹.۳ واحد است. بخشی از افت از ترجمهٔ خود دیتاست فارسی است و ترجمهٔ برگشتی آن را جبران نمی‌کند. سؤال‌های طولانی‌تر و سخت‌تر هم chrF پایین‌تری دارند، پس این فقط یک همبستگی است.
+  - RAG در این حالت هم ۳.۳ واحد از حالت بدون بازیابی بدتر است (p = 0.015). وقتی جواب بازیابی شده (۱۲۳ سؤال)، دو حالت برابرند (۸۱.۳٪ و ۸۲.۱٪).
 
 </div>

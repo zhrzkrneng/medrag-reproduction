@@ -1,0 +1,60 @@
+{
+ "n": 1089,
+ "translation": {
+  "parse_failures_kept_in_persian": 13,
+  "sec_per_q": 0.262,
+  "corpus_chrF_question": 67.0,
+  "mean_sentence_chrF_options": 68.3
+ },
+ "accuracy_%": {
+  "mt_cot": 66.85,
+  "mt_textbooks_k4": 63.54,
+  "en_cot": 78.42,
+  "fa_cot": 59.14,
+  "1_en_q__textbooks": 73.92,
+  "2_fa_q__textbooks": 47.75,
+  "3_fa_q__fa_web": 52.98
+ },
+ "paired_tests": {
+  "fa_cot vs mt_cot": 0.0,
+  "mt_cot vs en_cot": 0.0,
+  "2_fa_q__textbooks vs mt_textbooks_k4": 0.0,
+  "3_fa_q__fa_web vs mt_textbooks_k4": 0.0,
+  "mt_textbooks_k4 vs 1_en_q__textbooks": 0.0,
+  "mt_cot vs mt_textbooks_k4": 0.015
+ },
+ "gold_in_top4": {
+  "mt_question": 123
+ },
+ "cot_by_question_chrF_tercile": {
+  "low": {
+   "chrF_range": [
+    0.0,
+    61.5
+   ],
+   "mt_cot_%": 59.5,
+   "en_cot_%": 74.4
+  },
+  "mid": {
+   "chrF_range": [
+    61.5,
+    71.7
+   ],
+   "mt_cot_%": 68.6,
+   "en_cot_%": 79.1
+  },
+  "high": {
+   "chrF_range": [
+    71.8,
+    100.0
+   ],
+   "mt_cot_%": 72.5,
+   "en_cot_%": 81.8
+  }
+ },
+ "mt_textbooks_k4_when_gold_in_top4": {
+  "n": 123,
+  "mt_cot_%": 81.3,
+  "mt_textbooks_k4_%": 82.1
+ }
+}
