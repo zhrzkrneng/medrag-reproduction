@@ -1,0 +1,136 @@
+{
+ "cot_gap_by_subject": {
+  "anatomy": {
+   "n": 135,
+   "en_%": 71.9,
+   "fa_%": 45.2,
+   "gap": 26.7
+  },
+  "clinical_knowledge": {
+   "n": 265,
+   "en_%": 79.6,
+   "fa_%": 64.5,
+   "gap": 15.1
+  },
+  "college_biology": {
+   "n": 144,
+   "en_%": 81.9,
+   "fa_%": 56.2,
+   "gap": 25.7
+  },
+  "college_medicine": {
+   "n": 173,
+   "en_%": 72.8,
+   "fa_%": 60.7,
+   "gap": 12.1
+  },
+  "medical_genetics": {
+   "n": 100,
+   "en_%": 87.0,
+   "fa_%": 61.0,
+   "gap": 26.0
+  },
+  "professional_medicine": {
+   "n": 272,
+   "en_%": 79.0,
+   "fa_%": 60.7,
+   "gap": 18.4
+  }
+ },
+ "reasoning_language": {
+  "fa_mmlu cot": {
+   "en": {
+    "n": 826,
+    "acc_%": 57.5
+   },
+   "zh": {
+    "n": 263,
+    "acc_%": 64.3
+   }
+  },
+  "fa_mmlu rrf2_k4 (Persian corpus)": {
+   "en": {
+    "n": 423,
+    "acc_%": 53.0
+   },
+   "zh": {
+    "n": 666,
+    "acc_%": 53.6
+   }
+  },
+  "kopp cot": {
+   "en": {
+    "n": 1026,
+    "acc_%": 52.6
+   },
+   "fa": {
+    "n": 7,
+    "acc_%": 42.9
+   },
+   "zh": {
+    "n": 845,
+    "acc_%": 50.5
+   }
+  },
+  "kopp rrf2_k4 (Persian corpus)": {
+   "en": {
+    "n": 776,
+    "acc_%": 50.0
+   },
+   "fa": {
+    "n": 1,
+    "acc_%": 100.0
+   },
+   "zh": {
+    "n": 1101,
+    "acc_%": 45.8
+   }
+  },
+  "fa_mmlu bge_k4 Textbooks": {
+   "en": {
+    "n": 275,
+    "acc_%": 45.1
+   },
+   "zh": {
+    "n": 814,
+    "acc_%": 48.6
+   }
+  },
+  "fa_mmlu bge_k4 Persian corpus": {
+   "en": {
+    "n": 447,
+    "acc_%": 53.5
+   },
+   "fa": {
+    "n": 1,
+    "acc_%": 0.0
+   },
+   "zh": {
+    "n": 641,
+    "acc_%": 52.7
+   }
+  },
+  "mmlu cot": {
+   "en": {
+    "n": 1089,
+    "acc_%": 78.4
+   }
+  },
+  "mmlu bge_k4 Textbooks": {
+   "en": {
+    "n": 1089,
+    "acc_%": 73.9
+   }
+  },
+  "mmlu bge_k4 Persian corpus": {
+   "en": {
+    "n": 1088,
+    "acc_%": 70.5
+   },
+   "fa": {
+    "n": 1,
+    "acc_%": 0.0
+   }
+  }
+ }
+}

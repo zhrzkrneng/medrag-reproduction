@@ -191,6 +191,12 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - **RAG below CoT in every cell** at k = 4 (paired test against CoT p < 0.001 in every cell). Where the correct option's text is in the 4 snippets, accuracy is close to or above CoT (e.g. Persian/Persian: 78.5% → 84.6%, 65 questions); where it is not, RAG loses 5–12 points. With these corpora and k = 4 the answer is rarely retrieved (5–11% of questions), so distraction dominates.
 - Consistency check: cell 1 (BGE-M3, 73.92%) is close to the English RRF-2 result at k = 4 (74.29%).
 
+**Error analysis (no GPU; `scripts/persian/error_analysis.py` → `results/persian/error_analysis.json`).**
+
+- *Gap by subject (CoT, English vs Persian, same items):* anatomy −26.7, medical genetics −26.0, college biology −25.7, professional medicine −18.4, clinical knowledge −15.1, college medicine −12.1 points. The gap is largest where answers hinge on technical terms (anatomy, genetics, biology).
+- *Reasoning language:* given a Persian question, Qwen2.5-7B-Instruct almost never reasons in Persian (≤ 7 of 1,089–1,878 answers per run). It reasons in English or **in Chinese**: 24% of FA_MED_MMLU answers without retrieval, 61% with the Persian corpus, 75% with English Textbooks; 45% and 59% on KOPP. With English questions it never switches. The answer letter is still parsed correctly (the JSON key is Latin). Accuracy is similar either way (e.g. FA_MED_MMLU CoT: English reasoning 57.5%, Chinese 64.3%; with Textbooks 45.1% vs 48.6%), and the language is the model's choice, so this is a description, not a causal effect. It does show that the long cross-lingual prompt pushes the model further from the question language. A prompt that fixes the reasoning language (e.g. "think in English") is a cheap next test.
+- *Manual check of 12 random questions answered correctly only in English* (seed 0): the translation is faithful in 10; in 2 it loses something ("Marked microsatellite instability" loses "marked"; "Li-Fraumeni syndrome" is rendered with a word meaning "membership"). In the sampled items, then, the gap comes mostly from the model's Persian, not from translation errors (small sample).
+
 ### Citation
 
 ```bibtex
@@ -319,5 +325,14 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - **اصلاح برداشت قبلی:** آزمایش ۲×۲ پوشش نشان داد منبع عامل اصلی *پوشش بازیابی* است. اما برای *دقت*، هم‌زبان بودن سؤال و متن به همان اندازه مهم است. آزمایش طبیعی بعدی ترجمهٔ سؤال یا ترجمهٔ قطعه‌هاست.
   - **در هر چهار حالت، RAG با k = 4 از حالت بدون بازیابی بدتر است.** وقتی متن گزینهٔ درست در ۴ قطعه هست، دقت نزدیک یا بالاتر از حالت بدون بازیابی است (مثلاً فارسی با فارسی: ۷۸.۵٪ به ۸۴.۶٪ در ۶۵ سؤال). وقتی نیست، ۵ تا ۱۲ واحد افت دارد. چون جواب فقط در ۵ تا ۱۱٪ سؤال‌ها بازیابی می‌شود، اثر منفی غالب است.
   - **بررسی سازگاری:** حالت ۱ (۷۳.۹۲٪) به نتیجهٔ انگلیسی RRF-2 با k = 4 (۷۴.۲۹٪) نزدیک است.
+
+- **تحلیل خطا (بدون GPU):** کد `scripts/persian/error_analysis.py`، نتیجه در `results/persian/error_analysis.json`.
+  - **شکاف زبانی به تفکیک موضوع** (بدون بازیابی، همان سؤال‌ها): آناتومی −۲۶.۷، ژنتیک پزشکی −۲۶.۰، زیست‌شناسی −۲۵.۷، پزشکی حرفه‌ای −۱۸.۴، دانش بالینی −۱۵.۱، پزشکی عمومی −۱۲.۱ واحد. شکاف جایی بیشتر است که جواب به اصطلاح تخصصی وابسته است.
+  - **زبان استدلال مدل:** Qwen با سؤال فارسی تقریباً هیچ‌وقت به فارسی استدلال نمی‌کند (حداکثر ۷ پاسخ در هر اجرا). یا به انگلیسی استدلال می‌کند یا **به چینی**. سهم چینی در FA_MED_MMLU: ۲۴٪ بدون بازیابی، ۶۱٪ با منبع فارسی، ۷۵٪ با Textbooks. در KOPP: ۴۵٪ و ۵۹٪. با سؤال انگلیسی هرگز به چینی نمی‌رود.
+    - حرف جواب همچنان درست خوانده می‌شود.
+    - دقت در دو حالت نزدیک است. مثلاً بدون بازیابی: استدلال انگلیسی ۵۷.۵٪، چینی ۶۴.۳٪.
+    - چون زبان را خود مدل انتخاب می‌کند، این فقط یک توصیف است و اثر علّی نیست.
+    - آزمایش ارزان بعدی: دستوری که زبان استدلال را ثابت کند، مثلاً «به انگلیسی فکر کن».
+  - **بررسی دستی ۱۲ سؤال تصادفی که فقط به انگلیسی درست جواب گرفتند:** ترجمه در ۱۰ سؤال درست بود. در ۲ سؤال چیزی از دست رفته بود، مثلاً «Li-Fraumeni» با کلمه‌ای به معنی «عضویت» ترجمه شده بود. پس در این نمونهٔ کوچک، شکاف بیشتر از ضعف فارسیِ مدل است تا خطای ترجمه.
 
 </div>
