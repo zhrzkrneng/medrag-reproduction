@@ -210,6 +210,19 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - **Translation quality matters but does not explain the whole gap.** Round-trip chrF against the original English (FA_MED_MMLU is itself a translation of it) is 67.0 for questions and 68.3 for options. By question-chrF tercile the gap to English is 14.9, 10.5 and 9.3 points. Part of the loss is in the Persian dataset's own translation, which the round trip cannot undo, and low chrF also goes with longer, harder questions, so this is a correlation.
 - RAG still costs 3.3 points against CoT here (p = 0.015). When the correct option's text is retrieved (123 questions), RAG is on par (81.3% → 82.1%).
 
+**"Think in English" (same Persian questions, one sentence added to the system prompt).** `kaggle/en_think/`, `generate.py --system_suffix`, analysis `scripts/persian/analyze_en_think.py` → `results/persian/en_think/summary.json` (0.64 GPU-hours). The added sentence: *"Write your step-by-step thinking in English, even if the question is in another language."* Everything else is as in the runs without it (CoT; BGE-M3 Textbooks, k = 4, same retrieved snippets).
+
+| Same 1,089 Persian questions | without the sentence | with the sentence | paired test |
+|---|---|---|---|
+| CoT | 59.14% | 59.78% | p = 0.72 |
+| Textbooks, k = 4 | 47.75% | 51.06% | p = 0.025 |
+| answers reasoned in Chinese (CoT / Textbooks) | 263 / 814 | 92 / 135 | |
+
+- **The instruction works, the accuracy barely moves.** The share of answers reasoned in Chinese falls from 24% to 8% (CoT) and from 75% to 12% (Textbooks). CoT accuracy does not change. With Textbooks it rises by 3.3 points; p = 0.025 is one of several tests in this study, so read it as a small, likely effect rather than a firm one.
+- **So the reasoning language is not the main cause of the language gap.** Translating the question first is still far better (66.85% CoT, 63.54% with Textbooks; both p < 0.0001 against the new runs). The loss is in reading the Persian question, not in the language the model writes its reasoning in.
+- With the sentence, RAG is still below CoT (51.06% vs 59.78%, p < 0.0001). The small gain with Textbooks comes from questions whose answer is not in the snippets (45.7% → 49.2%, 987 questions); one possible reading is that the long English context distracts a little less when the model also reasons in English (not tested directly).
+- No answer is lost to parsing (official parser: 0 unparsed in both runs).
+
 ### Citation
 
 ```bibtex
@@ -355,5 +368,13 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - **بازیابی کامل جبران شد.** متن گزینهٔ درست با سؤال ترجمه‌شده در ۱۲۳ سؤال بازیابی شد و با سؤال انگلیسی اصلی در ۱۲۴ سؤال. پس افت باقی‌مانده در مرحلهٔ فهم و جواب دادن است، نه در بازیابی.
   - **کیفیت ترجمه مهم است، ولی همهٔ شکاف را توضیح نمی‌دهد.** شباهت ترجمهٔ برگشتی با متن اصلی انگلیسی (chrF) برای سؤال ۶۷.۰ و برای گزینه‌ها ۶۸.۳ است. در سه گروه سؤال، از کیفیت پایین تا بالا، فاصله با انگلیسی ۱۴.۹، ۱۰.۵ و ۹.۳ واحد است. بخشی از افت از ترجمهٔ خود دیتاست فارسی است و ترجمهٔ برگشتی آن را جبران نمی‌کند. سؤال‌های طولانی‌تر و سخت‌تر هم chrF پایین‌تری دارند، پس این فقط یک همبستگی است.
   - RAG در این حالت هم ۳.۳ واحد از حالت بدون بازیابی بدتر است (p = 0.015). وقتی جواب بازیابی شده (۱۲۳ سؤال)، دو حالت برابرند (۸۱.۳٪ و ۸۲.۱٪).
+
+- **«به انگلیسی فکر کن»:** همان سؤال‌های فارسی را دوباره اجرا کردم و فقط یک جمله به دستور سیستم اضافه شد: *«مراحل استدلالت را به انگلیسی بنویس، حتی اگر سؤال به زبان دیگری است.»* بقیهٔ تنظیمات مثل اجرای قبلی بود، با همان قطعه‌های بازیابی‌شده. کد در `kaggle/en_think/` و `scripts/persian/analyze_en_think.py`، نتیجه در `results/persian/en_think/summary.json`. هزینه ۰.۶۴ ساعت GPU بود.
+  - بدون بازیابی: بدون جمله ۵۹.۱۴٪، با جمله ۵۹.۷۸٪ (p = 0.72، یعنی تفاوتی نیست).
+  - با Textbooks و k = 4: بدون جمله ۴۷.۷۵٪، با جمله ۵۱.۰۶٪ (p = 0.025).
+  - **دستور کار کرد، اما دقت تقریباً تغییری نکرد.** سهم پاسخ‌هایی که مدل در آن‌ها به چینی استدلال کرده بدون بازیابی از ۲۴٪ به ۸٪ رسید و با Textbooks از ۷۵٪ به ۱۲٪. دقت بدون بازیابی ثابت ماند. با Textbooks ۳.۳ واحد بالا رفت. اما این یکی از چندین آزمون این پژوهش است، پس آن را اثری کوچک و محتمل بدانید، نه قطعی.
+  - **پس زبان استدلال علت اصلی شکاف زبانی نیست.** ترجمهٔ سؤال هنوز خیلی بهتر است (۶۶.۸۵٪ بدون بازیابی و ۶۳.۵۴٪ با Textbooks، هر دو p < 0.0001). افت در مرحلهٔ فهم سؤال فارسی است، نه در زبانی که مدل با آن استدلال می‌نویسد.
+  - با این جمله هم RAG از حالت بدون بازیابی بدتر است (۵۱.۰۶٪ در برابر ۵۹.۷۸٪). بهبود کوچک با Textbooks از سؤال‌هایی می‌آید که جوابشان در قطعه‌ها نیست (۴۵.۷٪ به ۴۹.۲٪، ۹۸۷ سؤال). یک توضیح ممکن این است که وقتی مدل به انگلیسی استدلال می‌کند، متن انگلیسی طولانی کمی کمتر حواسش را پرت می‌کند. این را مستقیم آزمایش نکرده‌ام.
+  - هیچ جوابی به خاطر خطای خواندن خروجی از دست نرفت.
 
 </div>

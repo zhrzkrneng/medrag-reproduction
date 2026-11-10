@@ -1,0 +1,66 @@
+{
+ "n": 1089,
+ "system_suffix": " Write your step-by-step thinking in English, even if the question is in another language.",
+ "accuracy_%": {
+  "fa_cot": 59.14,
+  "fa_cot_en_think": 59.78,
+  "fa_textbooks_k4": 47.75,
+  "fa_textbooks_k4_en_think": 51.06,
+  "mt_cot": 66.85,
+  "mt_textbooks_k4": 63.54,
+  "en_cot": 78.42,
+  "en_textbooks_k4": 73.92
+ },
+ "unparsed_official": {
+  "cot": 0,
+  "bge_tb_k4": 0
+ },
+ "unparsed_strict": {
+  "cot": 2,
+  "bge_tb_k4": 25
+ },
+ "paired_tests": {
+  "fa_cot vs fa_cot_en_think": 0.7166,
+  "fa_textbooks_k4 vs fa_textbooks_k4_en_think": 0.0248,
+  "fa_cot_en_think vs mt_cot": 0.0,
+  "fa_textbooks_k4_en_think vs mt_textbooks_k4": 0.0,
+  "fa_cot_en_think vs fa_textbooks_k4_en_think": 0.0,
+  "fa_cot_en_think vs en_cot": 0.0
+ },
+ "reasoning_language": {
+  "fa_cot_en_think": {
+   "en": {
+    "n": 997,
+    "acc_%": 60.9
+   },
+   "zh": {
+    "n": 92,
+    "acc_%": 47.8
+   }
+  },
+  "fa_textbooks_k4_en_think": {
+   "en": {
+    "n": 954,
+    "acc_%": 51.2
+   },
+   "zh": {
+    "n": 135,
+    "acc_%": 50.4
+   }
+  }
+ },
+ "textbooks_k4_gold_present": {
+  "n": 102,
+  "fa_cot": 70.6,
+  "fa_cot_en_think": 75.5,
+  "fa_textbooks_k4": 67.6,
+  "fa_textbooks_k4_en_think": 68.6
+ },
+ "textbooks_k4_gold_absent": {
+  "n": 987,
+  "fa_cot": 58.0,
+  "fa_cot_en_think": 58.2,
+  "fa_textbooks_k4": 45.7,
+  "fa_textbooks_k4_en_think": 49.2
+ }
+}
