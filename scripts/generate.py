@@ -58,6 +58,8 @@ def main():
     p.add_argument("--enforce_eager", action="store_true", help="no CUDA graphs (saves GPU memory)")
     p.add_argument("--quantization", default=None, help="e.g. bitsandbytes (documented deviation)")
     p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
+    p.add_argument("--system_suffix", default="", help="extra system-prompt text (ablation; empty = MedRAG's prompt)")
+    p.add_argument("--tag", default="", help="suffix for output file names, e.g. 'en_think'")
     p.add_argument("--out", default="results")
     a = p.parse_args()
     T_START = time.time()
@@ -95,7 +97,7 @@ def main():
     slug = a.model.replace("/", "__")
     for conf in a.configs:
         for ds in a.datasets:
-            out_path = os.path.join(a.out, slug, ds, f"{conf.replace('@', '_k')}.jsonl")
+            out_path = os.path.join(a.out, slug, ds, f"{conf.replace('@', '_k')}{'_' + a.tag if a.tag else ''}.jsonl")
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             qids = sorted(bench[ds])[: a.limit]
             done = set()
@@ -124,7 +126,7 @@ def main():
                         joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
                         ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
                         context = tok.decode(ctx_ids)
-                    msgs = build_messages(item["question"], item["options"], context)
+                    msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
                     text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
                     ids = tok.encode(text, add_special_tokens=False)
                     if cfg.get("add_bos") and tok.bos_token_id is not None:

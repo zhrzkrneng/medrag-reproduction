@@ -44,14 +44,15 @@ def format_snippet(idx: int, snippet: dict) -> str:
     return "Document [{:d}] (Title: {:s}) {:s}".format(idx, snippet["title"], snippet["content"])
 
 
-def build_messages(question: str, options: dict, context: str | None) -> list[dict]:
+def build_messages(question: str, options: dict, context: str | None, system_suffix: str = "") -> list[dict]:
+    """system_suffix: optional extra instruction appended to the system prompt (an ablation; empty = MedRAG)."""
     opts = format_options(options)
     if context is None:
         return [
-            {"role": "system", "content": COT_SYSTEM},
+            {"role": "system", "content": COT_SYSTEM + system_suffix},
             {"role": "user", "content": COT_PROMPT.format(question=question, options=opts)},
         ]
     return [
-        {"role": "system", "content": MEDRAG_SYSTEM},
+        {"role": "system", "content": MEDRAG_SYSTEM + system_suffix},
         {"role": "user", "content": MEDRAG_PROMPT.format(context=context, question=question, options=opts)},
     ]
