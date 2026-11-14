@@ -14,9 +14,16 @@ Method (n-gram overlap, the approach used for contamination checks in GPT-3 / la
 
 Only counts, question ids and document indices are written (no corpus text).
 
+Other "corpora" can be checked with --corpus_files / --text_fields, e.g. the MF3QA question-answer
+pairs Gaokerena was instruction-tuned on (each row = Question + Answer). --plant N adds a positive
+control: N random checkable benchmark questions are inserted into copies of N random documents
+(extra documents, kept out of the main counts), and the report says how many are found.
+
 Usage: python scripts/persian/leakage_check.py --corpus_dir <medical_corpus snapshot> \
            --kopp_dir <KOPP snapshot> --fa_mmlu data_local/fa_mmlu_benchmark.json \
            --out results/persian/leakage.json
+       python scripts/persian/leakage_check.py --corpus_files '<MF3QA snapshot>/data/*.parquet' \
+           --text_fields Question,Answer --plant 20 --kopp_dir ... --fa_mmlu ... --out results/persian/leakage_mf3qa.json
 """
 import argparse
 import collections
@@ -52,7 +59,10 @@ def load_benchmarks(a):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--corpus_dir", required=True)
+    p.add_argument("--corpus_dir", default=None)
+    p.add_argument("--corpus_files", default=None, help="glob of parquet files (default <corpus_dir>/data/*.parquet)")
+    p.add_argument("--text_fields", default="content", help="comma-separated columns joined into one document")
+    p.add_argument("--plant", type=int, default=0, help="positive control: number of planted questions")
     p.add_argument("--kopp_dir", required=True)
     p.add_argument("--fa_mmlu", required=True)
     p.add_argument("--threshold", type=float, default=0.5)
@@ -60,8 +70,21 @@ def main():
     a = p.parse_args()
     import pyarrow.parquet as pq
 
+    import random
     qs = load_benchmarks(a)
-    report = {"threshold": a.threshold, "benchmarks": {}}
+    files = sorted(glob.glob(a.corpus_files or os.path.join(a.corpus_dir, "data", "*.parquet")))
+    assert files, "no corpus files"
+    fields = a.text_fields.split(",")
+    doc_text = lambda row: "\n".join(row[k] or "" for k in fields)  # noqa: E731
+    report = {"threshold": a.threshold, "corpus_files": [os.path.basename(f) for f in files],
+              "text_fields": fields, "benchmarks": {}}
+    rng = random.Random(0)
+    planted = []  # (qid, document index to copy)
+    if a.plant:
+        n_docs = sum(pq.ParquetFile(f).metadata.num_rows for f in files)
+        pool = sorted(q for q in qs if len(tokens(qs[q]["question"])) >= 8)
+        planted = list(zip(rng.sample(pool, a.plant), rng.sample(range(n_docs), a.plant)))
+    report["documents"] = 0
     for n in (8, 13):
         qgrams = {q: ngrams(tokens(v["question"]), n) for q, v in qs.items()}
         index = collections.defaultdict(list)
@@ -72,9 +95,14 @@ def main():
         hits = collections.defaultdict(collections.Counter)
         docs_text = {}
         doc_i = 0
-        for f in sorted(glob.glob(os.path.join(a.corpus_dir, "data", "*.parquet"))):
-            for row in pq.read_table(f).to_pylist():
-                toks = tokens(row["content"])
+        copies = {}
+        for f in files:
+            for row in pq.read_table(f, columns=fields).to_pylist():
+                text = doc_text(row)
+                for q, d in planted:
+                    if d == doc_i:
+                        copies[q] = text
+                toks = tokens(text)
                 found = set()
                 for g in ngrams(toks, n):
                     if g in index:
@@ -85,6 +113,19 @@ def main():
                 if found:
                     docs_text[doc_i] = " " + " ".join(toks) + " "
                 doc_i += 1
+        report["documents"] = doc_i
+        if planted:  # each copy gets its question in the middle; scored like a real document, apart
+            found = []
+            for j, (q, _) in enumerate(planted):
+                t, pq_text = copies[q], qs[q]["question"]
+                if j % 2:  # every second one in Arabic spelling (yeh, kaf), as web text often is
+                    pq_text = pq_text.replace("ی", "ي").replace("ک", "ك")
+                t = t[: len(t) // 2] + " " + pq_text + " " + t[len(t) // 2:]
+                gs = ngrams(tokens(t), n)
+                if qgrams[q]:
+                    found.append(len(qgrams[q] & gs) / len(qgrams[q]) >= a.threshold)
+            report.setdefault("positive_control", {})[f"{n}-gram"] = {
+                "planted": len(planted), "checkable": len(found), "found": sum(found)}
         for bench in ("kopp", "fa_mmlu"):
             ids = [q for q in qs if q.startswith(bench + "/")]
             checkable = [q for q in ids if qgrams[q]]

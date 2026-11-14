@@ -163,6 +163,8 @@ Asking in Persian instead of English costs about 2 points on Textbooks and nothi
 
 Positive control: 20 benchmark questions planted into a copy of corpus documents (some with Arabic-yeh spelling) were all found when checkable (17 of 17 with ≥ 8 words; the 3 misses had 4–7 words), with no false positives. So there is **no verbatim leakage** from these benchmarks into the corpus. Not covered: paraphrased or translated copies, and questions shorter than 8 words (7% of KOPP, 10% of FA_MED_MMLU). Report: `results/persian/leakage.json`.
 
+*Instruction-tuning data of Gaokerena.* The same check on [MF3QA](https://huggingface.co/datasets/gaokerena/MF3QA) (20,000 train question-answer pairs Gaokerena was instruction-tuned on, plus 4,000 dev/test; each row = question + answer; revision `82e6d9c`) also finds **no** KOPP or FA_MED_MMLU question (0 flagged at 8 and 13 words; the highest overlap of any question with one row is 3%). Positive control: 20 planted questions, half in Arabic spelling, all found (20 of 20 at 8 words, 9 of 9 checkable at 13 words). So a Gaokerena result on these benchmarks is not explained by verbatim copies in its training data (same limits as above). CPU-only Kaggle kernel `kaggle/leak_mf3qa/`; report `results/persian/leakage_mf3qa/`.
+
 
 
 **Persian RAG accuracy (Qwen2.5-7B-Instruct, k = 4).** `kaggle/run_fa/`, analysis `scripts/persian/analyze_fa_runs.py` → `results/persian/run_fa/summary.json` (per-question predictions are committed as ids and letters only). Prompts are MedRAG's English instructions with Persian question, options and snippets; RRF-2 = BM25 + BGE-M3 over the Persian web corpus. k = 4 rather than 32 because Persian snippets take about twice as many tokens (k = 4 ≈ 2,300 prompt tokens, k = 32 ≈ 7,500) and k = 32 did not fit this week's GPU quota.
@@ -333,6 +335,7 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - پس در RQ1، اهرم اصلی **منبع دانش** است.
 - **اصلاح داده:** در ۱۸۴ سؤال KOPP، که از PDF کپی شده‌اند، هر کلمه بین نویسه‌های نامرئی جهت متن قرار گرفته بود. به همین دلیل BM25 برای ۱۱۵ سؤال هیچ نتیجه‌ای برنمی‌گرداند. بعد از پاک‌سازی، این عدد به ۳ رسید.
 - **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
+  - **دادهٔ آموزشی Gaokerena:** همین بررسی روی MF3QA انجام شد. MF3QA همان ۲۰٬۰۰۰ پرسش‌وپاسخی است که Gaokerena روی آن آموزش دیده، به‌اضافهٔ ۴٬۰۰۰ پرسش‌وپاسخ dev و test. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU در آن نیست، و بیشترین هم‌پوشانی یک سؤال با یک ردیف ۳٪ است. کنترل مثبت هم کار کرد: هر ۲۰ سؤال کاشته‌شده پیدا شدند، حتی نیمی که با املای عربی نوشته شده بودند. پس اگر Gaokerena روی این دو آزمون خوب عمل کند، دلیلش رونویسی سؤال‌ها در دادهٔ آموزشی‌اش نیست. اجرا روی CPU در Kaggle (`kaggle/leak_mf3qa/`)، نتیجه در `results/persian/leakage_mf3qa/`.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
   - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.
 
