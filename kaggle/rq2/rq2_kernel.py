@@ -4,7 +4,7 @@
 #   Configs: CoT, and RRF-2 (BM25 + BGE-M3) over the Persian corpus at k = 4, same lists and prompts as run_fa.
 #   The adapter is merged into the base on CPU (peft merge_and_unload) and the merged model is served by vLLM.
 #   fp16 on T4 (no bf16): the pilot checks that the answers parse before the full run is paid for.
-# Needs a Kaggle secret HF_TOKEN (read token of an account that accepted Aya-Expanse-8B's terms).
+# Needs a Kaggle secret HF_kaggle-medrag (or HF_TOKEN) (read token of an account that accepted Aya-Expanse-8B's terms).
 CODE_STAMP = "code-2026-11-15c"
 LIMIT = 50               # pilot: first 50 questions of each dataset; None for the full run
 DATASETS = ["fa_mmlu", "kopp"]
@@ -23,7 +23,12 @@ stamp = open(sf).read().strip() if os.path.exists(sf) else None
 print("code root:", ROOT, "stamp:", stamp, flush=True)
 assert stamp == CODE_STAMP, f"stale code dataset (stamp {stamp!r}, expected {CODE_STAMP!r})"
 from kaggle_secrets import UserSecretsClient
-os.environ["HF_TOKEN"] = UserSecretsClient().get_secret("HF_TOKEN")
+for _label in ["HF_kaggle-medrag", "HF_TOKEN"]:   # the secret's label in the user's Kaggle account
+    try:
+        os.environ["HF_TOKEN"] = UserSecretsClient().get_secret(_label); print("HF secret:", _label, flush=True); break
+    except Exception as e:
+        print("secret", _label, "not available:", type(e).__name__, flush=True)
+assert os.environ.get("HF_TOKEN"), "attach the Hugging Face secret to this notebook (Add-ons > Secrets)"
 P = lambda *x: os.path.join(ROOT, "scripts", *x)
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 os.makedirs(TMP, exist_ok=True)
