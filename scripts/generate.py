@@ -31,6 +31,10 @@ MODELS = {
     "Qwen/Qwen2.5-7B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
     # official 4-bit AWQ build of the same model: fits on one T4, used only if fp16 is too slow (documented)
     "Qwen/Qwen2.5-7B-Instruct-AWQ": {"max_length": 8192, "context_length": 7168, "template": None},
+    # RQ2: Gaokerena-V (LoRA on Aya-Expanse-8B, merged before generation; see kaggle/rq2) and its base model.
+    # Aya-Expanse-8B has an 8K context, so it gets the same budget; its own chat template is used.
+    "gaokerena/gaokerena-v1.0": {"max_length": 8192, "context_length": 7168, "template": None},
+    "CohereLabs/aya-expanse-8b": {"max_length": 8192, "context_length": 7168, "template": None},
     "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024, "add_bos": True,
                              "template": os.path.join(ROOT, "templates", "pmc_llama.jinja")},
 }
@@ -60,6 +64,7 @@ def main():
     p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
     p.add_argument("--system_suffix", default="", help="extra system-prompt text (ablation; empty = MedRAG's prompt)")
     p.add_argument("--tag", default="", help="suffix for output file names, e.g. 'en_think'")
+    p.add_argument("--model_path", default=None, help="local weights for --model (e.g. a merged LoRA); default: --model")
     p.add_argument("--out", default="results")
     a = p.parse_args()
     T_START = time.time()
@@ -72,14 +77,15 @@ def main():
     if cfg["template"]:
         # MedRAG loads its jinja files with .replace('    ', '').replace('\n', '')
         template = open(cfg["template"]).read().replace("    ", "").replace("\n", "")
-    llm = LLM(a.model, dtype="half", tensor_parallel_size=a.tp, pipeline_parallel_size=a.pp, max_model_len=cfg["max_length"],
+    weights = a.model_path or a.model
+    llm = LLM(weights, dtype="half", tensor_parallel_size=a.tp, pipeline_parallel_size=a.pp, max_model_len=cfg["max_length"],
               gpu_memory_utilization=a.gpu_mem, enforce_eager=a.enforce_eager, quantization=a.quantization, seed=0)
     tok = llm.get_tokenizer()
     if template:
         # vLLM wraps its tokenizer, and setting chat_template on the wrapper does not reach
         # apply_chat_template; build prompts with the plain Hugging Face tokenizer instead
         from transformers import AutoTokenizer
-        tok = AutoTokenizer.from_pretrained(a.model)
+        tok = AutoTokenizer.from_pretrained(weights)
         tok.chat_template = template
 
     bench = json.load(open(a.benchmark))
