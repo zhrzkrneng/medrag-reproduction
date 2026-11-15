@@ -6,10 +6,10 @@
 #   fp16 on T4 (no bf16): the pilot checks that the answers parse before the full run is paid for.
 # Needs no secret: the base comes from Kaggle Models (verified against Hugging Face), the adapter repo is public.
 CODE_STAMP = "code-2026-11-15c"
-LIMIT = 50               # pilot: first 50 questions of each dataset; None for the full run
+LIMIT = None             # full run (pilot of 50 + 50 questions on 2026-11-15: all answers parsed, fp16 output coherent)
 DATASETS = ["fa_mmlu", "kopp"]
 CONFIGS = ["cot", "rrf2@4"]
-GEN_BUDGET_S = 3 * 3600  # per model; generate.py stops before a new chunk after this
+GEN_BUDGET_S = int(3.6 * 3600)  # per model; pilot speed implies ~2.9 h (Gaokerena) and ~1.9 h (Aya) for all 2,967 questions x 2 configs
 EXPECTED = {"snippets": 541926, "fingerprint": "399761caa137ba97"}
 CORPUS_REVISION = "1765dbdc64f75742d019e5e80010c62db27c63a1"
 BASE, ADAPTER = "CohereLabs/aya-expanse-8b", "gaokerena/gaokerena-v1.0"
