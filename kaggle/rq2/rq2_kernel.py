@@ -27,9 +27,13 @@ assert stamp == CODE_STAMP, f"stale code dataset (stamp {stamp!r}, expected {COD
 # reach. Each file is checked against the Hugging Face repo's sizes and LFS sha256 (public metadata) before use.
 def find_base():
     cs = [os.path.dirname(c) for c in glob.glob("/kaggle/input/**/config.json", recursive=True)
-          if glob.glob(os.path.join(os.path.dirname(c), "model-0000*-of-00004.safetensors"))]
-    assert cs, "Aya-Expanse-8B (Kaggle model cohereforai/aya-expanse/transformers/8b) is not attached"
-    return cs[0]
+          if glob.glob(os.path.join(os.path.dirname(c), "*.safetensors")) and "aya" in c.lower()]
+    if cs:
+        return cs[0]
+    import kagglehub  # not mounted: download it (needs the licence accepted on the model page)
+    return kagglehub.model_download("cohereforai/aya-expanse/transformers/8b/5")
+base_dir = find_base()   # checked first, so a missing licence costs seconds, not the 4-minute setup
+print("base dir:", base_dir, sorted(os.listdir(base_dir)), flush=True)
 P = lambda *x: os.path.join(ROOT, "scripts", *x)
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 os.makedirs(TMP, exist_ok=True)
@@ -51,8 +55,6 @@ retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), rec
 from huggingface_hub import HfApi, snapshot_download
 rev = {r: HfApi().model_info(r).sha for r in [BASE, ADAPTER]}
 print("revisions", rev, flush=True)
-base_dir = find_base()
-print("base dir:", base_dir, sorted(os.listdir(base_dir)), flush=True)
 # verify the Kaggle copy file by file against the Hugging Face repo
 info = HfApi().model_info(BASE, revision=rev[BASE], files_metadata=True)
 check = {}
