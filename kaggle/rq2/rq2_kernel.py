@@ -5,7 +5,7 @@
 #   The adapter is merged into the base on CPU (peft merge_and_unload) and the merged model is served by vLLM.
 #   fp16 on T4 (no bf16): the pilot checks that the answers parse before the full run is paid for.
 # Needs a Kaggle secret HF_TOKEN (read token of an account that accepted Aya-Expanse-8B's terms).
-CODE_STAMP = "rq2-v1"
+CODE_STAMP = "code-2026-11-15c"
 LIMIT = 50               # pilot: first 50 questions of each dataset; None for the full run
 DATASETS = ["fa_mmlu", "kopp"]
 CONFIGS = ["cot", "rrf2@4"]
