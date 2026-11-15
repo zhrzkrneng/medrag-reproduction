@@ -4,7 +4,7 @@
 #   Configs: CoT, and RRF-2 (BM25 + BGE-M3) over the Persian corpus at k = 4, same lists and prompts as run_fa.
 #   The adapter is merged into the base on CPU (peft merge_and_unload) and the merged model is served by vLLM.
 #   fp16 on T4 (no bf16): the pilot checks that the answers parse before the full run is paid for.
-# Needs a Kaggle secret HF_kaggle-medrag (or HF_TOKEN) (read token of an account that accepted Aya-Expanse-8B's terms).
+# Needs no secret: the base comes from Kaggle Models (verified against Hugging Face), the adapter repo is public.
 CODE_STAMP = "code-2026-11-15c"
 LIMIT = 50               # pilot: first 50 questions of each dataset; None for the full run
 DATASETS = ["fa_mmlu", "kopp"]
@@ -22,13 +22,14 @@ sf = os.path.join(ROOT, "scripts", "persian", "CODE_STAMP")
 stamp = open(sf).read().strip() if os.path.exists(sf) else None
 print("code root:", ROOT, "stamp:", stamp, flush=True)
 assert stamp == CODE_STAMP, f"stale code dataset (stamp {stamp!r}, expected {CODE_STAMP!r})"
-from kaggle_secrets import UserSecretsClient
-for _label in ["HF_kaggle-medrag", "HF_TOKEN"]:   # the secret's label in the user's Kaggle account
-    try:
-        os.environ["HF_TOKEN"] = UserSecretsClient().get_secret(_label); print("HF secret:", _label, flush=True); break
-    except Exception as e:
-        print("secret", _label, "not available:", type(e).__name__, flush=True)
-assert os.environ.get("HF_TOKEN"), "attach the Hugging Face secret to this notebook (Add-ons > Secrets)"
+# Aya-Expanse-8B comes from Cohere's own Kaggle Models copy (cohereforai/aya-expanse/transformers/8b/5, attached
+# below), because Kaggle does not hand user secrets to API-pushed kernels, so the gated Hugging Face repo is out of
+# reach. Each file is checked against the Hugging Face repo's sizes and LFS sha256 (public metadata) before use.
+def find_base():
+    cs = [os.path.dirname(c) for c in glob.glob("/kaggle/input/**/config.json", recursive=True)
+          if glob.glob(os.path.join(os.path.dirname(c), "model-0000*-of-00004.safetensors"))]
+    assert cs, "Aya-Expanse-8B (Kaggle model cohereforai/aya-expanse/transformers/8b) is not attached"
+    return cs[0]
 P = lambda *x: os.path.join(ROOT, "scripts", *x)
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 os.makedirs(TMP, exist_ok=True)
@@ -50,9 +51,36 @@ retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), rec
 from huggingface_hub import HfApi, snapshot_download
 rev = {r: HfApi().model_info(r).sha for r in [BASE, ADAPTER]}
 print("revisions", rev, flush=True)
+base_dir = find_base()
+print("base dir:", base_dir, sorted(os.listdir(base_dir)), flush=True)
+# verify the Kaggle copy file by file against the Hugging Face repo
+info = HfApi().model_info(BASE, revision=rev[BASE], files_metadata=True)
+check = {}
+for f in info.siblings:
+    if not (f.rfilename.endswith(".safetensors") or f.rfilename in ("tokenizer.json", "config.json", "tokenizer_config.json")):
+        continue
+    lp = os.path.join(base_dir, f.rfilename)
+    assert os.path.exists(lp), f"missing in the Kaggle copy: {f.rfilename}"
+    size_ok = os.path.getsize(lp) == f.size
+    want = f.lfs.sha256 if f.lfs else None
+    got = None
+    if want:
+        hh = hashlib.sha256()
+        with open(lp, "rb") as fh:
+            for b in iter(lambda: fh.read(1 << 24), b""):
+                hh.update(b)
+        got = hh.hexdigest()
+    else:  # small git file: compare the git blob sha1
+        data = open(lp, "rb").read()
+        got = hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+        want = f.blob_id
+    check[f.rfilename] = {"size_ok": size_ok, "hash_ok": got == want}
+print("base verification", json.dumps(check), flush=True)
+assert all(v["size_ok"] and v["hash_ok"] for k, v in check.items() if k.endswith(".safetensors")), "Kaggle weights differ from Hugging Face"
 os.makedirs(f"{OUT}/results", exist_ok=True)
-json.dump(rev, open(f"{OUT}/results/model_revisions.json", "w"), indent=1)
-base_dir = snapshot_download(BASE, revision=rev[BASE], local_dir=f"{TMP}/aya", allow_patterns=["*.json", "*.safetensors"])
+json.dump({**rev, "base_source": "kaggle:cohereforai/aya-expanse/transformers/8b/5", "base_verification": check},
+          open(f"{OUT}/results/model_revisions.json", "w"), indent=1)
+print(f"verification done at {time.time()-T0:.0f}s", flush=True)
 ad_dir = snapshot_download(ADAPTER, revision=rev[ADAPTER], local_dir=f"{TMP}/gaokerena")
 print(f"downloads done at {time.time()-T0:.0f}s", flush=True)
 # merge on CPU in fp16 (the dtype vLLM runs on T4); tokenizer from the base, as in the model card
