@@ -1,0 +1,205 @@
+{
+ "model_revisions": {
+  "CohereLabs/aya-expanse-8b": "5062468bf9bc0c6035fd64e06274333ec127d980",
+  "gaokerena/gaokerena-v1.0": "dcb0a40aebff3dffabaefe06d09b646a459e8910",
+  "base_source": "kaggle:cohereforai/aya-expanse/transformers/8b/5",
+  "base_verification": {
+   "config.json": {
+    "size_ok": false,
+    "hash_ok": false
+   },
+   "model-00001-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00002-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00003-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00004-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "tokenizer.json": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "tokenizer_config.json": {
+    "size_ok": false,
+    "hash_ok": false
+   }
+  }
+ },
+ "fa_mmlu": {
+  "n": 1089,
+  "of": 1089,
+  "accuracy_%": {
+   "gaokerena_cot": 47.2,
+   "gaokerena_rrf2_k4": 42.52,
+   "aya_cot": 52.71,
+   "aya_rrf2_k4": 48.21,
+   "qwen_cot": 59.14,
+   "qwen_rrf2_k4": 53.35
+  },
+  "unparsed_official": {
+   "gaokerena_cot": 0,
+   "gaokerena_rrf2_k4": 0,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0
+  },
+  "unparsed_strict": {
+   "gaokerena_cot": 52,
+   "gaokerena_rrf2_k4": 138,
+   "aya_cot": 5,
+   "aya_rrf2_k4": 23
+  },
+  "answer_hit_length_cap": {
+   "gaokerena_cot": 20,
+   "gaokerena_rrf2_k4": 50,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0
+  },
+  "paired_tests": {
+   "aya_cot vs gaokerena_cot": {
+    "diff_points": -5.51,
+    "p": 0.0007
+   },
+   "aya_cot vs aya_rrf2_k4": {
+    "diff_points": -4.5,
+    "p": 0.0094
+   },
+   "gaokerena_cot vs gaokerena_rrf2_k4": {
+    "diff_points": -4.68,
+    "p": 0.009
+   },
+   "gaokerena_cot vs aya_rrf2_k4": {
+    "diff_points": 1.01,
+    "p": 0.6027
+   },
+   "aya_cot vs gaokerena_rrf2_k4": {
+    "diff_points": -10.19,
+    "p": 0.0
+   },
+   "qwen_cot vs gaokerena_cot": {
+    "diff_points": -11.94,
+    "p": 0.0
+   },
+   "qwen_rrf2_k4 vs gaokerena_rrf2_k4": {
+    "diff_points": -10.83,
+    "p": 0.0
+   },
+   "qwen_cot vs aya_cot": {
+    "diff_points": -6.43,
+    "p": 0.0004
+   }
+  },
+  "by_gold_in_top4": {
+   "present": {
+    "n": 61,
+    "gaokerena_cot": 73.8,
+    "gaokerena_rrf2_k4": 80.3,
+    "aya_cot": 80.3,
+    "aya_rrf2_k4": 82.0,
+    "qwen_cot": 82.0,
+    "qwen_rrf2_k4": 80.3
+   },
+   "absent": {
+    "n": 1013,
+    "gaokerena_cot": 45.6,
+    "gaokerena_rrf2_k4": 40.3,
+    "aya_cot": 51.2,
+    "aya_rrf2_k4": 46.2,
+    "qwen_cot": 57.8,
+    "qwen_rrf2_k4": 51.6
+   }
+  }
+ },
+ "kopp": {
+  "n": 1878,
+  "of": 1878,
+  "accuracy_%": {
+   "gaokerena_cot": 41.96,
+   "gaokerena_rrf2_k4": 40.68,
+   "aya_cot": 46.33,
+   "aya_rrf2_k4": 43.66,
+   "qwen_cot": 51.65,
+   "qwen_rrf2_k4": 47.55
+  },
+  "unparsed_official": {
+   "gaokerena_cot": 0,
+   "gaokerena_rrf2_k4": 0,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0
+  },
+  "unparsed_strict": {
+   "gaokerena_cot": 125,
+   "gaokerena_rrf2_k4": 288,
+   "aya_cot": 10,
+   "aya_rrf2_k4": 56
+  },
+  "answer_hit_length_cap": {
+   "gaokerena_cot": 54,
+   "gaokerena_rrf2_k4": 109,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0
+  },
+  "paired_tests": {
+   "aya_cot vs gaokerena_cot": {
+    "diff_points": -4.37,
+    "p": 0.0005
+   },
+   "aya_cot vs aya_rrf2_k4": {
+    "diff_points": -2.67,
+    "p": 0.04
+   },
+   "gaokerena_cot vs gaokerena_rrf2_k4": {
+    "diff_points": -1.28,
+    "p": 0.3663
+   },
+   "gaokerena_cot vs aya_rrf2_k4": {
+    "diff_points": 1.7,
+    "p": 0.2146
+   },
+   "aya_cot vs gaokerena_rrf2_k4": {
+    "diff_points": -5.65,
+    "p": 0.0001
+   },
+   "qwen_cot vs gaokerena_cot": {
+    "diff_points": -9.69,
+    "p": 0.0
+   },
+   "qwen_rrf2_k4 vs gaokerena_rrf2_k4": {
+    "diff_points": -6.87,
+    "p": 0.0
+   },
+   "qwen_cot vs aya_cot": {
+    "diff_points": -5.32,
+    "p": 0.0001
+   }
+  },
+  "by_gold_in_top4": {
+   "present": {
+    "n": 147,
+    "gaokerena_cot": 58.5,
+    "gaokerena_rrf2_k4": 64.6,
+    "aya_cot": 58.5,
+    "aya_rrf2_k4": 67.3,
+    "qwen_cot": 58.5,
+    "qwen_rrf2_k4": 71.4
+   },
+   "absent": {
+    "n": 1696,
+    "gaokerena_cot": 40.3,
+    "gaokerena_rrf2_k4": 38.3,
+    "aya_cot": 45.3,
+    "aya_rrf2_k4": 41.2,
+    "qwen_cot": 50.7,
+    "qwen_rrf2_k4": 45.2
+   }
+  }
+ }
+}

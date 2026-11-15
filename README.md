@@ -180,6 +180,24 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - Even when the correct option's text is in the 32 snippets (129 questions), k = 32 is not better than CoT (74.4% vs 72.1%, p = 0.74).
 - A preliminary look at the first 500 questions (56.6% vs 57.6%) was not representative: the questions are sorted by subject, and the long professional-medicine questions come last.
 
+**RQ2: retrieval vs. Persian fine-tuning (Gaokerena-v1.0 vs. its base Aya-Expanse-8B; Qwen2.5-7B-Instruct as reference).** `kaggle/rq2/`, analysis `scripts/persian/analyze_rq2.py` → `results/persian/rq2/summary.json` (ids, letters and statistics only). Gaokerena-v1.0 is a LoRA adapter on Aya-Expanse-8B; it was merged in fp16 and both models were run with vLLM on 2×T4 using the same MedRAG prompts, the same Persian RRF-2 lists (k = 4) and the same length budget as Qwen. Revisions: Aya `5062468`, Gaokerena `dcb0a40`; the base weights came from the Kaggle Models copy of Aya, and all four safetensors files match the Hugging Face sha256 (`config.json` differs only in `_name_or_path`, `tokenizer_config.json` only by two extra chat templates; recorded in `model_revisions.json`). One Kaggle run, 4.1 h on 2×T4 (generation 3.7 h).
+
+| Accuracy (%) | FA_MED_MMLU (1,089) | KOPP (1,878) |
+|---|---|---|
+| Aya-Expanse-8B, CoT | 52.71 | 46.33 |
+| Aya-Expanse-8B, RRF-2 k = 4 | 48.21 | 43.66 |
+| Gaokerena-v1.0, CoT | 47.20 | 41.96 |
+| Gaokerena-v1.0, RRF-2 k = 4 | 42.52 | 40.68 |
+| Qwen2.5-7B-Instruct, CoT (reference) | 59.14 | 51.65 |
+| Qwen2.5-7B-Instruct, RRF-2 k = 4 | 53.35 | 47.55 |
+
+- **Fine-tuning effect (Gaokerena CoT − Aya CoT):** −5.5 points on FA_MED_MMLU (exact McNemar p = 0.0007) and −4.4 on KOPP (p = 0.0005). In our setup the Persian medical fine-tune is **worse** than its base model.
+- **Retrieval effect:** RAG lowers both models as it lowers Qwen: Aya −4.5 (p = 0.009) / −2.7 (p = 0.04); Gaokerena −4.7 (p = 0.009) / −1.3 (p = 0.37).
+- **RQ2 head-to-head (Aya + RAG vs. Gaokerena without RAG):** +1.0 (p = 0.60) and +1.7 (p = 0.21) points, no significant difference. Both are below the base model without either.
+- **When the correct option's text is in the 4 snippets** (61 / 147 questions) RAG helps every model (e.g. KOPP: Aya 58.5% → 67.3%, Gaokerena 58.5% → 64.6%); when it is absent (most questions) RAG hurts. Same pattern as Qwen.
+- **Answer format.** The official MedRAG parser reads every answer (0 unparsed), but Gaokerena more often leaves the JSON answer incomplete: strictly unparsable 52 / 138 (FA_MED_MMLU CoT / RAG) and 125 / 288 (KOPP) vs. Aya 5 / 23 and 10 / 56; Gaokerena also hit the 1,024-token answer cap 20–109 times per run (Aya never), in the pilot often through repetition loops. **Robustness:** restricted to questions where both models' answers parse strictly, the CoT gap remains (FA_MED_MMLU 52.5% vs 48.5%, p = 0.017; KOPP 46.1% vs 42.9%, p = 0.012), while with RAG it shrinks to −2.9 (p = 0.08) and −0.4 (p = 0.80). So the loss without retrieval is not only a formatting artefact.
+- **Caveat.** This measures Gaokerena under MedRAG's English JSON chain-of-thought prompt, which is not the format it was instruction-tuned on (MF3QA question-answer pairs). Its own paper uses its own evaluation protocol; our result does not contradict a better score in that protocol, and a fairer comparison would also run both models with Gaokerena's prompt. Single run, greedy decoding.
+
 
 
 **Persian RAG accuracy (Qwen2.5-7B-Instruct, k = 4).** `kaggle/run_fa/`, analysis `scripts/persian/analyze_fa_runs.py` → `results/persian/run_fa/summary.json` (per-question predictions are committed as ids and letters only). Prompts are MedRAG's English instructions with Persian question, options and snippets; RRF-2 = BM25 + BGE-M3 over the Persian web corpus. k = 4 rather than 32 because Persian snippets take about twice as many tokens (k = 4 ≈ 2,300 prompt tokens, k = 32 ≈ 7,500) and k = 32 did not fit this week's GPU quota.
@@ -365,6 +383,23 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
   - **نتیجهٔ مقدماتی ۵۰۰ سؤال اول نماینده نبود.** آن نتیجه ۵۶٫۶٪ در برابر ۵۷٫۶٪ بود. سؤال‌ها به ترتیب موضوع مرتب شده‌اند و سؤال‌های بلند professional medicine در آخر آمده‌اند.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
   - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.
+
+- **RQ2: بازیابی در برابر fine-tuning فارسی (Gaokerena-v1.0 در برابر مدل پایه‌اش Aya-Expanse-8B، با Qwen2.5-7B-Instruct به‌عنوان مرجع):** پوشهٔ `kaggle/rq2/`، تحلیل با `scripts/persian/analyze_rq2.py` و نتیجه در `results/persian/rq2/summary.json` (فقط شناسه، حرف گزینه و آمار). Gaokerena-v1.0 یک LoRA روی Aya-Expanse-8B است. آن را با fp16 ادغام کردم و هر دو مدل را با vLLM روی ۲×T4 اجرا کردم، با همان پرامپت‌های MedRAG، همان فهرست‌های RRF-2 فارسی (k = 4) و همان سقف طولی که برای Qwen استفاده شد. نسخه‌ها: Aya `5062468`، Gaokerena `dcb0a40`. وزن‌های پایه از نسخهٔ Kaggle Models آمد و sha256 هر چهار فایل safetensors با Hugging Face یکی است. هزینه: یک اجرای ۴٫۱ ساعته روی ۲×T4.
+  - **دقت (FA_MED_MMLU / KOPP):**
+    - Aya بدون بازیابی: ۵۲٫۷۱٪ / ۴۶٫۳۳٪
+    - Aya با بازیابی: ۴۸٫۲۱٪ / ۴۳٫۶۶٪
+    - Gaokerena بدون بازیابی: ۴۷٫۲۰٪ / ۴۱٫۹۶٪
+    - Gaokerena با بازیابی: ۴۲٫۵۲٪ / ۴۰٫۶۸٪
+    - Qwen، برای مرجع: ۵۹٫۱۴٪ / ۵۱٫۶۵٪ بدون بازیابی، و ۵۳٫۳۵٪ / ۴۷٫۵۵٪ با بازیابی
+  - **اثر fine-tuning:** در این تنظیمات Gaokerena از مدل پایه‌اش **ضعیف‌تر** است: ۵٫۵ امتیاز کمتر در FA_MED_MMLU (McNemar دقیق، p = 0.0007) و ۴٫۴ امتیاز کمتر در KOPP (p = 0.0005).
+  - **اثر بازیابی:** بازیابی هر دو مدل را پایین می‌آورد، همان‌طور که Qwen را پایین آورد. Aya: ۴٫۵− (p = 0.009) و ۲٫۷− (p = 0.04). Gaokerena: ۴٫۷− (p = 0.009) و ۱٫۳− (p = 0.37).
+  - **مقایسهٔ اصلی RQ2 (Aya با بازیابی در برابر Gaokerena بدون بازیابی):** ۱٫۰+ (p = 0.60) و ۱٫۷+ (p = 0.21) امتیاز. تفاوت معنادار نیست، و هر دو از مدل پایهٔ بدون هیچ‌کدام پایین‌ترند.
+  - **وقتی متن گزینهٔ درست در ۴ قطعه هست** (۶۱ سؤال در FA_MED_MMLU و ۱۴۷ سؤال در KOPP)، بازیابی به همهٔ مدل‌ها کمک می‌کند. مثلاً در KOPP، Aya از ۵۸٫۵٪ به ۶۷٫۳٪ و Gaokerena از ۵۸٫۵٪ به ۶۴٫۶٪ می‌رسد. وقتی نیست، که بیشتر سؤال‌ها همین‌طورند، بازیابی ضرر می‌زند.
+  - **قالب جواب:** parser رسمی MedRAG همهٔ جواب‌ها را می‌خواند. ولی Gaokerena بیشتر JSON را ناقص رها می‌کند:
+    - جواب‌هایی که parser سخت‌گیرانه نمی‌خواند: Gaokerena ۵۲ / ۱۳۸ در FA_MED_MMLU و ۱۲۵ / ۲۸۸ در KOPP، در برابر Aya ۵ / ۲۳ و ۱۰ / ۵۶.
+    - جواب‌های Gaokerena در هر اجرا ۲۰ تا ۱۰۹ بار به سقف ۱٬۰۲۴ توکن رسید. جواب‌های Aya هیچ بار نرسید.
+  - **آزمون پایداری:** اگر فقط سؤال‌هایی را نگه داریم که جواب هر دو مدل کاملاً خوانا است، فاصله در حالت بدون بازیابی می‌ماند: ۵۲٫۵٪ در برابر ۴۸٫۵٪ (p = 0.017) و ۴۶٫۱٪ در برابر ۴۲٫۹٪ (p = 0.012). در حالت با بازیابی کوچک می‌شود: ۲٫۹− (p = 0.08) و ۰٫۴− (p = 0.80). پس افت بدون بازیابی فقط از مشکل قالب نیست.
+  - **محدودیت:** این آزمایش Gaokerena را با پرامپت انگلیسی JSON chain-of-thought در MedRAG می‌سنجد، که با قالب آموزشی خودش (پرسش‌وپاسخ MF3QA) فرق دارد. مقالهٔ Gaokerena روش ارزیابی خودش را دارد، پس این نتیجه با امتیاز بهتر در آن روش تناقض ندارد. مقایسهٔ منصفانه‌تر این است که هر دو مدل با پرامپت خود Gaokerena هم اجرا شوند. یک اجرا، با decoding حریصانه.
 
 - **دقت RAG فارسی (Qwen2.5-7B-Instruct، k = 4):** پوشهٔ `kaggle/run_fa/`، تحلیل با `scripts/persian/analyze_fa_runs.py` و نتیجه در `results/persian/run_fa/summary.json`. از پیش‌بینی‌ها فقط شناسه و حرف گزینه در مخزن است. k = 4 به جای ۳۲ انتخاب شد، چون قطعه‌های فارسی حدود دو برابر توکن می‌گیرند و k = 32 در سهمیهٔ GPU این هفته جا نمی‌شد.
   - FA_MED_MMLU (۱٬۰۸۹ سؤال): بدون بازیابی **۵۹.۱۴٪**، با RRF-2 **۵۳.۳۵٪**. RAG در ۱۴۳ سؤال جواب را درست کرد و در ۲۰۶ سؤال خراب کرد (p < 0.001).
