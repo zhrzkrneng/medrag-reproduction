@@ -81,9 +81,25 @@ def main():
             rep["by_gold_in_top32"][lab] = {"n": len(sel), **{k: round(100 * sum(runs[k][i] for i in sel) / len(sel), 1)
                                                               for k in ["fa_cot", "fa_rrf2_k4", "fa_rrf2_k32"]},
                                             "cot_vs_k32_p": mcnemar([runs["fa_cot"][i] for i in sel], [runs["fa_rrf2_k32"][i] for i in sel])}
+    # MedRAG's length budget: context cut at 7,168 tokens and prompt + answer <= 8,192, so a long question leaves
+    # little room for the answer; Persian needs more tokens than English, so more answers hit that cap.
+    def capped(r):
+        return r["output_tokens"] >= min(1024, 8192 - r["prompt_tokens"])
+    en_rows = {r["qid"]: r for r in map(json.loads, open(f"{ROOT}/results/qwen_full/{M}/mmlu/rrf2_k32.jsonl"))}
+    cap = [capped(rows[q]) for q in done]
+    rep["answer_hit_length_cap"] = {"fa_rrf2_k32": sum(cap), "en_rrf2_k32": sum(capped(en_rows[q]) for q in done),
+                                    "fa_context_trimmed_further": sum(bool(rows[q].get("context_trimmed_tokens")) for q in done)}
+    rep["by_answer_capped"] = {}
+    for lab, v in [("capped", True), ("not_capped", False)]:
+        sel = [i for i in range(len(done)) if cap[i] is v]
+        rep["by_answer_capped"][lab] = {"n": len(sel), **{k: round(100 * sum(runs[k][i] for i in sel) / len(sel), 1)
+                                                         for k in ["fa_cot", "fa_rrf2_k4", "fa_rrf2_k32"]},
+                                        "unparsed_strict_k32": sum(strict_prediction(rows[done[i]]["response"]) is None for i in sel),
+                                        "cot_vs_k32_p": mcnemar([runs["fa_cot"][i] for i in sel], [runs["fa_rrf2_k32"][i] for i in sel])}
     with gzip.open(f"{a.out_dir}/fa_mmlu_predictions.jsonl.gz", "wt") as f:
         for q, c in zip(done, cov):
-            f.write(json.dumps({"qid": q, "gold": gold[q], "rrf2_k32": pred[q], "gold_in_top32": c}) + "\n")
+            f.write(json.dumps({"qid": q, "gold": gold[q], "rrf2_k32": pred[q], "gold_in_top32": c,
+                                "answer_capped": capped(rows[q])}) + "\n")
     json.dump(rep, open(f"{a.out_dir}/summary.json", "w"), indent=1)
     print(json.dumps(rep, indent=1))
 

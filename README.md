@@ -165,7 +165,20 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 
 *Instruction-tuning data of Gaokerena.* The same check on [MF3QA](https://huggingface.co/datasets/gaokerena/MF3QA) (20,000 train question-answer pairs Gaokerena was instruction-tuned on, plus 4,000 dev/test; each row = question + answer; revision `82e6d9c`) also finds **no** KOPP or FA_MED_MMLU question (0 flagged at 8 and 13 words; the highest overlap of any question with one row is 3%). Positive control: 20 planted questions, half in Arabic spelling, all found (20 of 20 at 8 words, 9 of 9 checkable at 13 words). So a Gaokerena result on these benchmarks is not explained by verbatim copies in its training data (same limits as above). CPU-only Kaggle kernel `kaggle/leak_mf3qa/`; report `results/persian/leakage_mf3qa/`.
 
-**Persian retrieval coverage by k (no GPU; `scripts/persian/fa_coverage_by_k.py` → `results/persian/fa_coverage_by_k.json`).** RRF-2 over the Persian corpus; the correct option's text is in the top k for FA_MED_MMLU 5.7% (k = 4), 7.3% (8), 9.3% (16), 12.0% (32) of measurable questions, and for KOPP 8.0%, 10.4%, 12.8%, 14.9% (English Textbooks, k = 32: 18.5%). More snippets roughly double the chance that the answer is retrieved, so k = 32 is worth testing. The kernel is ready (`kaggle/run_fa32/`, FA_MED_MMLU only, about 4.3 GPU-hours by the English k = 32 timing of 13.5 s/question; KOPP would add about 7 hours) but not run yet.
+**Persian retrieval coverage by k (no GPU; `scripts/persian/fa_coverage_by_k.py` → `results/persian/fa_coverage_by_k.json`).** RRF-2 over the Persian corpus; the correct option's text is in the top k for FA_MED_MMLU 5.7% (k = 4), 7.3% (8), 9.3% (16), 12.0% (32) of measurable questions, and for KOPP 8.0%, 10.4%, 12.8%, 14.9% (English Textbooks, k = 32: 18.5%). More snippets roughly double the chance that the answer is retrieved, so k = 32 is worth testing. The run is below.
+
+**Persian RAG at k = 32 (Qwen2.5-7B-Instruct, FA_MED_MMLU, 1,089 questions).** `kaggle/run_fa32/`, analysis `scripts/persian/analyze_fa32.py` → `results/persian/run_fa32/summary.json` (ids, letters and booleans only). Same RRF-2 lists and prompts as k = 4; MedRAG's length budget (context cut at 7,168 tokens, prompt + answer ≤ 8,192). It ran in two parts (2 h + 2.3 h GPU): the first stopped after 500 questions because one long question with its 32 snippets came to 10,006 tokens, which vLLM refuses; `generate.py` now cuts the context of such a question just enough to leave 256 answer tokens (42 questions; documented deviation, recorded as `context_trimmed_tokens`), and the second part resumed from question 501.
+
+| | Persian | English (same items) | gap |
+|---|---|---|---|
+| CoT | 59.14 | 78.42 | 19.3 |
+| RRF-2, k = 4 | 53.35 | 74.29 | 20.9 |
+| RRF-2, k = 32 | 54.45 | 74.75 | 20.3 |
+
+- Persian k = 32 is significantly worse than Persian CoT (−4.7 points, exact McNemar p = 0.008) and not different from k = 4 (p = 0.55). The language gap stays about 20 points at every k (k = 32: p < 0.001).
+- **Most of that loss is the length budget, not retrieval.** Persian snippets need about twice the tokens, so 95 Persian answers hit the answer-length cap (English k = 32: 7), mostly long professional-medicine questions; 94 of them are cut before the JSON answer is complete, and accuracy on them is 23.2% (CoT on the same questions: 56.8%). On the other 994 questions k = 32 and CoT do not differ (57.4% vs 59.4%, p = 0.30).
+- Even when the correct option's text is in the 32 snippets (129 questions), k = 32 is not better than CoT (74.4% vs 72.1%, p = 0.74).
+- A preliminary look at the first 500 questions (56.6% vs 57.6%) was not representative: the questions are sorted by subject, and the long professional-medicine questions come last.
 
 
 
@@ -338,7 +351,18 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
 - **اصلاح داده:** در ۱۸۴ سؤال KOPP، که از PDF کپی شده‌اند، هر کلمه بین نویسه‌های نامرئی جهت متن قرار گرفته بود. به همین دلیل BM25 برای ۱۱۵ سؤال هیچ نتیجه‌ای برنمی‌گرداند. بعد از پاک‌سازی، این عدد به ۳ رسید.
 - **بررسی نشت داده (RQ4):** هم‌پوشانی ۸ و ۱۳ کلمه‌ای متن هر سؤال با تک‌تک سندهای منبع فارسی سنجیده شد. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU عیناً در منبع نیامده است. بیشترین هم‌پوشانی با یک سند ۲۰ تا ۲۵٪ بود، در حالی که آستانهٔ علامت‌گذاری ۵۰٪ است.
   - **دادهٔ آموزشی Gaokerena:** همین بررسی روی MF3QA انجام شد. MF3QA همان ۲۰٬۰۰۰ پرسش‌وپاسخی است که Gaokerena روی آن آموزش دیده، به‌اضافهٔ ۴٬۰۰۰ پرسش‌وپاسخ dev و test. نتیجه: **هیچ سؤالی** از KOPP یا FA_MED_MMLU در آن نیست، و بیشترین هم‌پوشانی یک سؤال با یک ردیف ۳٪ است. کنترل مثبت هم کار کرد: هر ۲۰ سؤال کاشته‌شده پیدا شدند، حتی نیمی که با املای عربی نوشته شده بودند. پس اگر Gaokerena روی این دو آزمون خوب عمل کند، دلیلش رونویسی سؤال‌ها در دادهٔ آموزشی‌اش نیست. اجرا روی CPU در Kaggle (`kaggle/leak_mf3qa/`)، نتیجه در `results/persian/leakage_mf3qa/`.
-- **پوشش بازیابی فارسی بر حسب k (بدون GPU):** کد در `scripts/persian/fa_coverage_by_k.py`، نتیجه در `results/persian/fa_coverage_by_k.json`. درصد سؤال‌هایی که متن گزینهٔ درست در k قطعهٔ اول هست، با k = 4، 8، 16 و 32: در FA_MED_MMLU ۵.۷، ۷.۳، ۹.۳ و ۱۲.۰٪، و در KOPP ۸.۰، ۱۰.۴، ۱۲.۸ و ۱۴.۹٪. برای مقایسه، کتاب‌های انگلیسی با k = 32 به ۱۸.۵٪ می‌رسند. پس با قطعه‌های بیشتر، شانس پیدا شدن جواب تقریباً دو برابر می‌شود و آزمودن k = 32 ارزش دارد. کرنل آن آماده است (`kaggle/run_fa32/`، فقط FA_MED_MMLU) ولی هنوز اجرا نشده. هزینه‌اش، با معیار زمان اجرای انگلیسی با k = 32 (۱۳.۵ ثانیه برای هر سؤال)، حدود ۴.۳ ساعت GPU است. KOPP حدود ۷ ساعت دیگر لازم دارد.
+- **پوشش بازیابی فارسی بر حسب k (بدون GPU):** کد در `scripts/persian/fa_coverage_by_k.py`، نتیجه در `results/persian/fa_coverage_by_k.json`. درصد سؤال‌هایی که متن گزینهٔ درست در k قطعهٔ اول هست، با k = 4، 8، 16 و 32: در FA_MED_MMLU ۵.۷، ۷.۳، ۹.۳ و ۱۲.۰٪، و در KOPP ۸.۰، ۱۰.۴، ۱۲.۸ و ۱۴.۹٪. برای مقایسه، کتاب‌های انگلیسی با k = 32 به ۱۸.۵٪ می‌رسند. پس با قطعه‌های بیشتر، شانس پیدا شدن جواب تقریباً دو برابر می‌شود و آزمودن k = 32 ارزش دارد. نتیجهٔ اجرا در بند بعد آمده است.
+- **RAG فارسی با k = 32 (Qwen2.5-7B-Instruct، FA_MED_MMLU، ۱,۰۸۹ سؤال):** پوشهٔ `kaggle/run_fa32/`، تحلیل با `scripts/persian/analyze_fa32.py` و نتیجه در `results/persian/run_fa32/summary.json` (فقط شناسه، حرف گزینه و مقدار درست/نادرست). فهرست‌های بازیابی و پرامپت‌ها همان k = 4 است. سقف طول MedRAG هم رعایت شده: متن بازیابی‌شده حداکثر ۷,۱۶۸ توکن و پرامپت به‌اضافهٔ جواب حداکثر ۸,۱۹۲ توکن.
+  - **اجرا در دو بخش:** بخش اول ۲ ساعت و بخش دوم ۲٫۳ ساعت GPU طول کشید. بخش اول بعد از ۵۰۰ سؤال متوقف شد، چون یک سؤال بلند با ۳۲ قطعه به ۱۰,۰۰۶ توکن رسید و vLLM آن را نمی‌پذیرد. حالا `generate.py` متن بازیابی‌شدهٔ چنین سؤالی را فقط به اندازهٔ لازم کوتاه می‌کند تا ۲۵۶ توکن برای جواب بماند. این برای ۴۲ سؤال پیش آمد، به‌عنوان انحراف از MedRAG مستند شده و در فیلد `context_trimmed_tokens` ثبت می‌شود. بخش دوم از سؤال ۵۰۱ ادامه داد.
+  - **دقت:**
+    - بدون بازیابی: فارسی ۵۹٫۱۴٪، انگلیسی ۷۸٫۴۲٪.
+    - با k = 4: فارسی ۵۳٫۳۵٪، انگلیسی ۷۴٫۲۹٪.
+    - با k = 32: فارسی ۵۴٫۴۵٪، انگلیسی ۷۴٫۷۵٪.
+    - فاصلهٔ زبان در هر سه حالت حدود ۲۰ امتیاز است.
+  - **k = 32 در برابر بقیه:** k = 32 فارسی به‌طور معنادار از حالت بدون بازیابی بدتر است (۴٫۷ امتیاز، McNemar دقیق p = 0.008). با k = 4 تفاوت معناداری ندارد (p = 0.55).
+  - **بیشتر این افت از سقف طول است، نه از بازیابی.** قطعه‌های فارسی حدود دو برابر توکن می‌گیرند. برای همین ۹۵ جواب فارسی به سقف طول جواب رسیدند، در برابر ۷ جواب در انگلیسی، و بیشترشان سؤال‌های بلند professional medicine بودند. ۹۴ تا از این ۹۵ جواب پیش از کامل شدن JSON جواب قطع شدند. دقت روی این ۹۵ سؤال ۲۳٫۲٪ است، در حالی که بدون بازیابی روی همین سؤال‌ها ۵۶٫۸٪ است. روی ۹۹۴ سؤال دیگر، k = 32 با حالت بدون بازیابی تفاوتی ندارد (۵۷٫۴٪ در برابر ۵۹٫۴٪، p = 0.30).
+  - **حتی وقتی جواب در متن بازیابی‌شده هست،** یعنی وقتی متن گزینهٔ درست در ۳۲ قطعه پیدا می‌شود (۱۲۹ سؤال)، k = 32 بهتر از حالت بدون بازیابی نیست (۷۴٫۴٪ در برابر ۷۲٫۱٪، p = 0.74).
+  - **نتیجهٔ مقدماتی ۵۰۰ سؤال اول نماینده نبود.** آن نتیجه ۵۶٫۶٪ در برابر ۵۷٫۶٪ بود. سؤال‌ها به ترتیب موضوع مرتب شده‌اند و سؤال‌های بلند professional medicine در آخر آمده‌اند.
   - **کنترل مثبت:** ۲۰ سؤال را عمداً در سندهای ساختگی کاشتم، بعضی با املای عربیِ «ي». همهٔ سؤال‌های قابل بررسی (۱۷ از ۱۷) پیدا شدند و هیچ هشدار اشتباهی هم نبود.
   - **محدودیت:** نسخه‌های بازنویسی‌شده یا ترجمه‌شده، و سؤال‌های کوتاه‌تر از ۸ کلمه، با این روش بررسی نمی‌شوند.
 
