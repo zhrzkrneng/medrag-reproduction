@@ -55,7 +55,9 @@ retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), rec
 from huggingface_hub import HfApi, snapshot_download
 rev = {r: HfApi().model_info(r).sha for r in [BASE, ADAPTER]}
 print("revisions", rev, flush=True)
-# verify the Kaggle copy file by file against the Hugging Face repo
+# verify the Kaggle copy file by file against the Hugging Face repo. Checked by hand on 2026-11-15 (CPU probe):
+# config.json differs only in "_name_or_path"; tokenizer_config.json carries two extra named chat templates
+# ("tool_use", "rag") besides "default", which is identical to the Hugging Face one and the only one used here.
 info = HfApi().model_info(BASE, revision=rev[BASE], files_metadata=True)
 check = {}
 for f in info.siblings:
@@ -86,6 +88,8 @@ print(f"verification done at {time.time()-T0:.0f}s", flush=True)
 ad_dir = snapshot_download(ADAPTER, revision=rev[ADAPTER], local_dir=f"{TMP}/gaokerena")
 print(f"downloads done at {time.time()-T0:.0f}s", flush=True)
 # merge on CPU in fp16 (the dtype vLLM runs on T4); tokenizer from the base, as in the model card
+# Kaggle's preinstalled torchao (0.10) is too old for peft's LoRA dispatcher, which then refuses to load; not needed here
+sh("pip uninstall -y -q torchao 2>&1 | tail -1")
 import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
