@@ -65,6 +65,9 @@ def main():
     p.add_argument("--system_suffix", default="", help="extra system-prompt text (ablation; empty = MedRAG's prompt)")
     p.add_argument("--tag", default="", help="suffix for output file names, e.g. 'en_think'")
     p.add_argument("--model_path", default=None, help="local weights for --model (e.g. a merged LoRA); default: --model")
+    p.add_argument("--min_answer_tokens", type=int, default=256,
+                   help="if prompt + this would exceed max_length, the retrieved context is cut further from its end "
+                        "(documented deviation; MedRAG has no such guard and the prompt would not fit at all)")
     p.add_argument("--out", default="results")
     a = p.parse_args()
     T_START = time.time()
@@ -131,29 +134,43 @@ def main():
                         snips = [corpus[i] for i in retrieved[(ds, qid)][retr][: int(k)]]
                         joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
                         ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
-                        context = tok.decode(ctx_ids)
-                    msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
-                    text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-                    ids = tok.encode(text, add_special_tokens=False)
-                    if cfg.get("add_bos") and tok.bos_token_id is not None:
-                        # MedRAG runs LLaMA models through a HF pipeline, whose tokenizer adds <s>
-                        ids = [tok.bos_token_id] + ids
+                    trimmed = 0
+                    for _ in range(4):
+                        if conf != "cot":
+                            context = tok.decode(ctx_ids)
+                        msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
+                        text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+                        ids = tok.encode(text, add_special_tokens=False)
+                        if cfg.get("add_bos") and tok.bos_token_id is not None:
+                            # MedRAG runs LLaMA models through a HF pipeline, whose tokenizer adds <s>
+                            ids = [tok.bos_token_id] + ids
+                        over = len(ids) + a.min_answer_tokens - cfg["max_length"]
+                        if conf == "cot" or over <= 0 or not ctx_ids:
+                            break
+                        # a long question: cut the context just enough (vLLM rejects a prompt over max_length
+                        # and would stop the whole run)
+                        cut = min(len(ctx_ids), over + 8)
+                        ctx_ids, trimmed = ctx_ids[: len(ctx_ids) - cut], trimmed + cut
+                    if len(ids) >= cfg["max_length"]:
+                        ids = ids[-(cfg["max_length"] - 1):]  # last resort (cot only); logged via context_trimmed=-1
+                        trimmed = -1
                     budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
                     prompts.append(TokensPrompt(prompt_token_ids=ids))
                     params.append(SamplingParams(temperature=0.0, max_tokens=budget))
-                    meta.append((qid, item["answer"], len(ids), budget))
+                    meta.append((qid, item["answer"], len(ids), budget, trimmed))
                 t = time.time()
                 outs = llm.generate(prompts, params, use_tqdm=False)
                 dt = max(time.time() - t, 1e-6)
                 n_in = n_out_all = 0
                 with open(out_path, "a") as f:
-                    for (qid, gold, n_prompt, budget), o in zip(meta, outs):
+                    for (qid, gold, n_prompt, budget, trimmed), o in zip(meta, outs):
                         n_out = len(o.outputs[0].token_ids)
                         capped += int(n_out >= budget)
                         n_in += n_prompt
                         n_out_all += n_out
                         f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
-                                            "prompt_tokens": n_prompt, "output_tokens": n_out}) + "\n")
+                                            "prompt_tokens": n_prompt, "output_tokens": n_out,
+                                            **({"context_trimmed_tokens": trimmed} if trimmed else {})}) + "\n")
                 print(json.dumps({"progress": f"{len(done) + start + len(part)}/{len(qids)}", "config": conf,
                                   "dataset": ds, "chunk_sec": round(dt, 1), "sec_per_q": round(dt / len(part), 3),
                                   "prompt_tok_per_sec": round(n_in / dt), "output_tok_per_sec": round(n_out_all / dt)}),

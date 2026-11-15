@@ -3,8 +3,12 @@
 # English RRF-2@32 run on the same items (results/qwen_full, 74.75%).
 # Cost: Persian prompts at k = 32 are ~7,000 tokens (context truncated at 7,168 as for English); the English
 # k = 32 run took 13.5 s/question, so ~4.3 GPU-hours. KOPP at k = 32 (~7 more hours) is left out.
+# v2 (resume): v1 stopped after 500 questions because one long question with its 32 snippets came to 10,006
+# tokens (> 8,192) and vLLM refused it, ending the run. generate.py now cuts that question's context just enough
+# (--min_answer_tokens 256; none of the first 500 prompts would have been cut) and records context_trimmed_tokens.
+# The 500 answers of v1 ride along in the (private) code dataset under resume/ and are not regenerated.
 # Free check before running: the correct option's text is in the top 32 for 12.0% of questions (k = 4: 5.7%).
-CODE_STAMP = "run_fa32-v1"   # must match scripts/persian/CODE_STAMP in the attached code dataset
+CODE_STAMP = "code-2026-11-15c"   # must match scripts/persian/CODE_STAMP in the attached code dataset
 EXPECTED = {"snippets": 541926, "fingerprint": "399761caa137ba97"}
 CORPUS_REVISION = "1765dbdc64f75742d019e5e80010c62db27c63a1"
 MODEL = "Qwen/Qwen2.5-7B-Instruct"
@@ -42,6 +46,11 @@ retrieved = glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), rec
 print("retrieved:", retrieved, flush=True)
 t = time.time(); rc = sh("pip install -q vllm 2>&1 | tail -3"); print(f"vllm install rc={rc} {time.time()-t:.0f}s", flush=True)
 print(f"setup done at {time.time()-T0:.0f}s", flush=True)
+prev = glob.glob(os.path.join(ROOT, "**", "resume", "run_fa32", "rrf2_k32.jsonl"), recursive=True)
+dst = f"{OUT}/results/{MODEL.replace('/', '__')}/fa_mmlu/rrf2_k32.jsonl"
+os.makedirs(os.path.dirname(dst), exist_ok=True)
+if prev:
+    sh(f"cp {prev[0]} {dst} && wc -l {dst}")
 cmd = [sys.executable, P("generate.py"), "--model", MODEL, "--benchmark", f"{TMP}/fa_benchmarks.json",
        "--retrieved", retrieved, "--corpus", f"{TMP}/chunks.jsonl.gz", "--configs", *CONFIGS,
        "--datasets", *DATASETS, "--chunk", "100", "--time_budget_s", str(GEN_BUDGET_S), "--out", f"{OUT}/results"]
