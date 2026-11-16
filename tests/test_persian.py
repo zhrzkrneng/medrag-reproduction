@@ -24,3 +24,21 @@ def test_clean_text_removes_bidi_marks_without_merging_words():
     from medrag_repro.persian import clean_text
     raw = "‫در‬‫میاستنی‬ ‫گراویس‪،‬‬ ‫اختلال‬"
     assert clean_text(raw) == "در میاستنی گراویس ، اختلال"
+
+
+def test_gaokerena_prompt_and_parser():
+    import os, sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts", "persian"))
+    from medrag_repro.templates import build_messages_gk
+    from gk_parse import parse
+    opts = {"A": "الف", "B": "ب", "C": "ج", "D": "د"}
+    m = build_messages_gk("سؤال؟", opts, None)
+    assert len(m) == 1 and m[0]["role"] == "user"
+    assert m[0]["content"] == ("\nبه پرسش زیر به پاسخ بدهید و تنها از زبان فارسی استفاده کنید!\n## پرسش\nسؤال؟ \n\n\n"
+                               "## گزینه ها\n[A] : الف\n[B] : ب\n[C] : ج\n[D] : د \n\n\n\n\n")
+    assert "## متن\nCTX" in build_messages_gk("q", opts, "CTX")[0]["content"]
+    assert parse("گزینه [B] درست است.\n\nگزینه [A] نادرست است") == "B"
+    assert parse("**پاسخ صحیح:** C") == "C"
+    assert parse("بررسی گزینه‌ها: [A] ... [B] ...\nبنابراین، پاسخ صحیح [D] است.") == "D"
+    assert parse("برای پاسخ به این پرسش، باید دقت کنیم. گزینه ۲ مناسب است") == "B"
+    assert parse("هیچ‌کدام") is None
