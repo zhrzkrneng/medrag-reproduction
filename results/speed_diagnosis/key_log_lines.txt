@@ -1,0 +1,12 @@
+[fp16_tp2_flashinfer] (MainProcess pid=129) WARNING 11-08 22:20:38 [interface.py:1469] Unknown vLLM environment variable detected: VLLM_ATTENTION_BACKEND
+[fp16_tp2_flashinfer] (Worker_TP0 pid=198) INFO 11-08 22:21:14 [cuda.py:508] Using TRITON_ATTN attention backend out of potential backends: ['TRITON_ATTN', 'FLEX_ATTENTION'].
+[fp16_tp2_flashinfer] (Worker_TP1 pid=199) INFO 11-08 22:24:07 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.8909 wi
+[fp16_tp2_flashinfer] (Worker_TP0 pid=198) INFO 11-08 22:24:07 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.8909 wi
+[fp16_tp2_flashinfer] (EngineCore pid=190) INFO 11-08 22:24:07 [kv_cache_utils.py:1147] GPU KV cache size: 188,576 tokens, Maximum concurrency for 8,192 tokens per request: 23.02x
+[fp16_pp2] (Worker_PP0 pid=640) INFO 11-08 22:29:54 [cuda.py:508] Using TRITON_ATTN attention backend out of potential backends: ['TRITON_ATTN', 'FLEX_ATTENTION'].
+[fp16_pp2] (Worker_PP0 pid=640) INFO 11-08 22:30:52 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9001 wi
+[fp16_pp2] (Worker_PP1 pid=641) INFO 11-08 22:31:01 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.9000 wi
+[fp16_pp2] (EngineCore pid=632) INFO 11-08 22:31:01 [kv_cache_utils.py:1147] GPU KV cache size: 173,584 tokens, Maximum concurrency for 8,192 tokens per request: 21.19x
+[awq_tp1_one_gpu] (EngineCore pid=968) INFO 11-08 22:37:16 [cuda.py:508] Using TRITON_ATTN attention backend out of potential backends: ['TRITON_ATTN', 'FLEX_ATTENTION'].
+[awq_tp1_one_gpu] (EngineCore pid=968) INFO 11-08 22:39:07 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9200 is equivalent to --gpu-memory-utilization=0.8905 wi
+[awq_tp1_one_gpu] (EngineCore pid=968) INFO 11-08 22:39:07 [kv_cache_utils.py:1147] GPU KV cache size: 118,176 tokens, Maximum concurrency for 8,192 tokens per request: 14.43x

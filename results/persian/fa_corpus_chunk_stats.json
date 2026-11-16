@@ -1,0 +1,27 @@
+{
+ "dataset": "gaokerena/medical_corpus",
+ "revision": "1765dbdc64f75742d019e5e80010c62db27c63a1",
+ "splitter": "langchain RecursiveCharacterTextSplitter",
+ "chunk_size": 1000,
+ "chunk_overlap": 200,
+ "documents": 101954,
+ "exact_duplicates_removed": 2173,
+ "empty_removed": 1,
+ "documents_kept": 99780,
+ "snippets": 541926,
+ "chars_mean": 801,
+ "chars_median": 866.0,
+ "snippets_per_source": {
+  "hidoctor.ir": 348362,
+  "niniban.com": 92697,
+  "darmankade.com": 33128,
+  "doctoreto.com": 27968,
+  "paziresh24.com": 21860,
+  "salammag.com": 4972,
+  "seebmagazine.com": 3828,
+  "hamrah-teb.com": 2969,
+  "nabz.site": 2644,
+  "majalepezeshki.ir": 2608,
+  "extern.ir": 890
+ }
+}

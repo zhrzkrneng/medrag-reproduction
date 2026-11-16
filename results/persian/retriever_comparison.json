@@ -1,0 +1,140 @@
+{
+ "fa_mmlu": {
+  "bm25": {
+   "1": {
+    "gold_present_%": 2.4,
+    "wrong_present_%": 1.7
+   },
+   "4": {
+    "gold_present_%": 5.7,
+    "wrong_present_%": 6.5
+   },
+   "8": {
+    "gold_present_%": 6.3,
+    "wrong_present_%": 9.0
+   },
+   "16": {
+    "gold_present_%": 8.9,
+    "wrong_present_%": 11.7
+   },
+   "32": {
+    "gold_present_%": 10.3,
+    "wrong_present_%": 15.1
+   }
+  },
+  "bge_m3": {
+   "1": {
+    "gold_present_%": 3.0,
+    "wrong_present_%": 3.2
+   },
+   "4": {
+    "gold_present_%": 6.0,
+    "wrong_present_%": 7.3
+   },
+   "8": {
+    "gold_present_%": 7.2,
+    "wrong_present_%": 9.5
+   },
+   "16": {
+    "gold_present_%": 9.1,
+    "wrong_present_%": 12.0
+   },
+   "32": {
+    "gold_present_%": 10.9,
+    "wrong_present_%": 15.3
+   }
+  },
+  "rrf2": {
+   "1": {
+    "gold_present_%": 3.0,
+    "wrong_present_%": 3.6
+   },
+   "4": {
+    "gold_present_%": 5.6,
+    "wrong_present_%": 6.9
+   },
+   "8": {
+    "gold_present_%": 7.2,
+    "wrong_present_%": 10.2
+   },
+   "16": {
+    "gold_present_%": 9.2,
+    "wrong_present_%": 13.3
+   },
+   "32": {
+    "gold_present_%": 11.8,
+    "wrong_present_%": 16.4
+   }
+  },
+  "bm25_bge_m3_top32_overlap_%": 12.9
+ },
+ "kopp": {
+  "bm25": {
+   "1": {
+    "gold_present_%": 3.0,
+    "wrong_present_%": 3.7
+   },
+   "4": {
+    "gold_present_%": 6.3,
+    "wrong_present_%": 7.8
+   },
+   "8": {
+    "gold_present_%": 8.3,
+    "wrong_present_%": 10.6
+   },
+   "16": {
+    "gold_present_%": 10.5,
+    "wrong_present_%": 14.1
+   },
+   "32": {
+    "gold_present_%": 13.2,
+    "wrong_present_%": 18.3
+   }
+  },
+  "bge_m3": {
+   "1": {
+    "gold_present_%": 3.6,
+    "wrong_present_%": 4.4
+   },
+   "4": {
+    "gold_present_%": 8.0,
+    "wrong_present_%": 9.1
+   },
+   "8": {
+    "gold_present_%": 10.0,
+    "wrong_present_%": 12.9
+   },
+   "16": {
+    "gold_present_%": 11.8,
+    "wrong_present_%": 16.7
+   },
+   "32": {
+    "gold_present_%": 13.7,
+    "wrong_present_%": 19.9
+   }
+  },
+  "rrf2": {
+   "1": {
+    "gold_present_%": 3.8,
+    "wrong_present_%": 4.0
+   },
+   "4": {
+    "gold_present_%": 7.8,
+    "wrong_present_%": 9.1
+   },
+   "8": {
+    "gold_present_%": 10.2,
+    "wrong_present_%": 12.7
+   },
+   "16": {
+    "gold_present_%": 12.6,
+    "wrong_present_%": 16.6
+   },
+   "32": {
+    "gold_present_%": 14.6,
+    "wrong_present_%": 21.2
+   }
+  },
+  "bm25_bge_m3_top32_overlap_%": 13.0
+ }
+}

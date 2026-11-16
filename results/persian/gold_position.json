@@ -1,0 +1,162 @@
+{
+ "method": "RQ3, \"lost in the middle\": at k = 32, does it matter WHERE the correct option's text first appears\namong the retrieved snippets? English (MedQA, MMLU-Med, Textbooks) vs Persian (FA_MED_MMLU, web corpus).\n\nFor each question whose correct option's text occurs in the top 32 RRF-2 snippets (same lexical proxy\nas answer_coverage.py, generic options excluded), the rank of the first such snippet is binned\n(1, 2-4, 5-8, 9-16, 17-32). Per bin we report accuracy at k = 32 and, on the same questions, without\nretrieval (CoT), because questions whose answer ranks first are also easier: RAG minus CoT is the\nposition effect with question difficulty held fixed (paired, exact McNemar). No GPU; counts only.",
+ "en_medqa": {
+  "n": 1273,
+  "gold_in_top32": 179,
+  "bins": [
+   {
+    "rank": "1",
+    "n": 24,
+    "acc_k32_%": 83.3,
+    "acc_cot_%": 75.0,
+    "rag_minus_cot": 8.3,
+    "p": 0.625
+   },
+   {
+    "rank": "2-4",
+    "n": 50,
+    "acc_k32_%": 82.0,
+    "acc_cot_%": 76.0,
+    "rag_minus_cot": 6.0,
+    "p": 0.4531
+   },
+   {
+    "rank": "5-8",
+    "n": 34,
+    "acc_k32_%": 73.5,
+    "acc_cot_%": 67.6,
+    "rag_minus_cot": 5.9,
+    "p": 0.6875
+   },
+   {
+    "rank": "9-16",
+    "n": 29,
+    "acc_k32_%": 69.0,
+    "acc_cot_%": 65.5,
+    "rag_minus_cot": 3.4,
+    "p": 1.0
+   },
+   {
+    "rank": "17-32",
+    "n": 42,
+    "acc_k32_%": 83.3,
+    "acc_cot_%": 73.8,
+    "rag_minus_cot": 9.5,
+    "p": 0.2891
+   }
+  ],
+  "absent_or_generic": {
+   "n": 1094,
+   "acc_k32_%": 58.2,
+   "acc_cot_%": 60.0,
+   "rag_minus_cot": -1.7,
+   "p": 0.2759
+  }
+ },
+ "en_mmlu": {
+  "n": 1089,
+  "gold_in_top32": 201,
+  "bins": [
+   {
+    "rank": "1",
+    "n": 68,
+    "acc_k32_%": 94.1,
+    "acc_cot_%": 94.1,
+    "rag_minus_cot": 0.0,
+    "p": 1.0
+   },
+   {
+    "rank": "2-4",
+    "n": 61,
+    "acc_k32_%": 86.9,
+    "acc_cot_%": 86.9,
+    "rag_minus_cot": 0.0,
+    "p": 1.0
+   },
+   {
+    "rank": "5-8",
+    "n": 19,
+    "acc_k32_%": 89.5,
+    "acc_cot_%": 84.2,
+    "rag_minus_cot": 5.3,
+    "p": 1.0
+   },
+   {
+    "rank": "9-16",
+    "n": 33,
+    "acc_k32_%": 90.9,
+    "acc_cot_%": 93.9,
+    "rag_minus_cot": -3.0,
+    "p": 1.0
+   },
+   {
+    "rank": "17-32",
+    "n": 20,
+    "acc_k32_%": 80.0,
+    "acc_cot_%": 80.0,
+    "rag_minus_cot": 0.0,
+    "p": 1.0
+   }
+  ],
+  "absent_or_generic": {
+   "n": 888,
+   "acc_k32_%": 71.4,
+   "acc_cot_%": 75.9,
+   "rag_minus_cot": -4.5,
+   "p": 0.0043
+  }
+ },
+ "fa_mmlu": {
+  "n": 1089,
+  "gold_in_top32": 129,
+  "bins": [
+   {
+    "rank": "1",
+    "n": 33,
+    "acc_k32_%": 93.9,
+    "acc_cot_%": 81.8,
+    "rag_minus_cot": 12.1,
+    "p": 0.125
+   },
+   {
+    "rank": "2-4",
+    "n": 28,
+    "acc_k32_%": 78.6,
+    "acc_cot_%": 82.1,
+    "rag_minus_cot": -3.6,
+    "p": 1.0
+   },
+   {
+    "rank": "5-8",
+    "n": 17,
+    "acc_k32_%": 82.4,
+    "acc_cot_%": 52.9,
+    "rag_minus_cot": 29.4,
+    "p": 0.1797
+   },
+   {
+    "rank": "9-16",
+    "n": 22,
+    "acc_k32_%": 68.2,
+    "acc_cot_%": 63.6,
+    "rag_minus_cot": 4.5,
+    "p": 1.0
+   },
+   {
+    "rank": "17-32",
+    "n": 29,
+    "acc_k32_%": 48.3,
+    "acc_cot_%": 69.0,
+    "rag_minus_cot": -20.7,
+    "p": 0.146
+   }
+  ],
+  "absent_or_generic": {
+   "n": 960,
+   "acc_k32_%": 51.8,
+   "acc_cot_%": 57.4,
+   "rag_minus_cot": -5.6,
+   "p": 0.0029
+  }
+ }
+}

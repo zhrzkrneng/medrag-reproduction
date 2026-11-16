@@ -1,0 +1,115 @@
+{
+ "labels": "AI-assisted (not human); see the docstring",
+ "rows": 150,
+ "method": "Agreement between the answer parsers and a second reading of 150 Persian model answers.\n\nIMPORTANT, provenance of the labels: they were produced with an AI tool (files saved by openpyxl;\nthe tool's own notes say so), NOT by a human annotator. They are reported as an AI-assisted check\nof the parsers, never as human annotation or inter-annotator agreement.\n\nInputs (git-ignored, in data_local/labeling/): the two keys written by make_label_sheet.py and the\nreturned sheets. For the first 100 rows the final column of the third review is used; for the 50\nfresh rows, the only label column. 'unsure' rows are counted apart. A parser output of None (and,\nfor MedRAG's official parser, nothing: it never returns None) is compared as 'invalid'. MedRAG's\nofficial parser falls back to 'A' when it finds no answer (src/medrag_repro/evaluate.py,\nlocate_answer), which is why hard rows are reported separately.\n\nWilson 95% intervals. Output: results/persian/parser_check_ai_labels.json (counts only).",
+ "agreement": {
+  "all/all": {
+   "parser": "both",
+   "n": 150,
+   "agree": 116,
+   "unsure": 0,
+   "parser_A_label_other": 28,
+   "agree_%": 77.3,
+   "ci95": [
+    70.0,
+    83.3
+   ]
+  },
+  "all/hard": {
+   "parser": "both",
+   "n": 58,
+   "agree": 28,
+   "unsure": 0,
+   "parser_A_label_other": 26,
+   "agree_%": 48.3,
+   "ci95": [
+    35.9,
+    60.8
+   ]
+  },
+  "all/random": {
+   "parser": "both",
+   "n": 92,
+   "agree": 88,
+   "unsure": 0,
+   "parser_A_label_other": 2,
+   "agree_%": 95.7,
+   "ci95": [
+    89.3,
+    98.3
+   ]
+  },
+  "gaokerena/all": {
+   "parser": "gk_parse.py",
+   "n": 75,
+   "agree": 68,
+   "unsure": 0,
+   "parser_A_label_other": 1,
+   "agree_%": 90.7,
+   "ci95": [
+    82.0,
+    95.4
+   ]
+  },
+  "gaokerena/hard": {
+   "parser": "gk_parse.py",
+   "n": 26,
+   "agree": 22,
+   "unsure": 0,
+   "parser_A_label_other": 0,
+   "agree_%": 84.6,
+   "ci95": [
+    66.5,
+    93.9
+   ]
+  },
+  "gaokerena/random": {
+   "parser": "gk_parse.py",
+   "n": 49,
+   "agree": 46,
+   "unsure": 0,
+   "parser_A_label_other": 1,
+   "agree_%": 93.9,
+   "ci95": [
+    83.5,
+    97.9
+   ]
+  },
+  "medrag/all": {
+   "parser": "MedRAG official (medrag_repro.evaluate)",
+   "n": 75,
+   "agree": 48,
+   "unsure": 0,
+   "parser_A_label_other": 27,
+   "agree_%": 64.0,
+   "ci95": [
+    52.7,
+    73.9
+   ]
+  },
+  "medrag/hard": {
+   "parser": "MedRAG official (medrag_repro.evaluate)",
+   "n": 32,
+   "agree": 6,
+   "unsure": 0,
+   "parser_A_label_other": 26,
+   "agree_%": 18.8,
+   "ci95": [
+    8.9,
+    35.3
+   ]
+  },
+  "medrag/random": {
+   "parser": "MedRAG official (medrag_repro.evaluate)",
+   "n": 43,
+   "agree": 42,
+   "unsure": 0,
+   "parser_A_label_other": 1,
+   "agree_%": 97.7,
+   "ci95": [
+    87.9,
+    99.6
+   ]
+  }
+ }
+}

@@ -1,0 +1,1 @@
+{"model": "Qwen/Qwen2.5-7B-Instruct", "config": "rrf2@32", "dataset": "medqa", "n": 100, "seconds": 1330.6, "sec_per_q": 13.306, "hit_length_cap": 2}

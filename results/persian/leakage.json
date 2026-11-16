@@ -1,0 +1,237 @@
+{
+ "threshold": 0.5,
+ "benchmarks": {
+  "kopp": {
+   "8-gram": {
+    "questions": 1878,
+    "checkable": 1743,
+    "flagged": 0,
+    "flagged_%": 0.0,
+    "flagged_with_answer_in_doc": 0,
+    "max_share_histogram": {
+     ">=0.1": 4,
+     ">=0.2": 1,
+     ">=0.3": 0,
+     ">=0.4": 0,
+     ">=0.5": 0
+    },
+    "highest_overlaps": [
+     {
+      "qid": "kopp/other_years/1244",
+      "share": 0.2
+     },
+     {
+      "qid": "kopp/other_years/892",
+      "share": 0.143
+     },
+     {
+      "qid": "kopp/other_years/375",
+      "share": 0.125
+     },
+     {
+      "qid": "kopp/other_years/1059",
+      "share": 0.125
+     },
+     {
+      "qid": "kopp/other_years/398",
+      "share": 0.091
+     },
+     {
+      "qid": "kopp/other_years/501",
+      "share": 0.077
+     },
+     {
+      "qid": "kopp/other_years/1165",
+      "share": 0.077
+     },
+     {
+      "qid": "kopp/other_years/746",
+      "share": 0.05
+     },
+     {
+      "qid": "kopp/other_years/1513",
+      "share": 0.018
+     },
+     {
+      "qid": "kopp/sept23/0",
+      "share": 0.0
+     }
+    ],
+    "flagged_items": []
+   },
+   "13-gram": {
+    "questions": 1878,
+    "checkable": 978,
+    "flagged": 0,
+    "flagged_%": 0.0,
+    "flagged_with_answer_in_doc": 0,
+    "max_share_histogram": {
+     ">=0.1": 0,
+     ">=0.2": 0,
+     ">=0.3": 0,
+     ">=0.4": 0,
+     ">=0.5": 0
+    },
+    "highest_overlaps": [
+     {
+      "qid": "kopp/sept23/3",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/5",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/10",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/11",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/15",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/17",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/20",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/23",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/28",
+      "share": 0.0
+     },
+     {
+      "qid": "kopp/sept23/29",
+      "share": 0.0
+     }
+    ],
+    "flagged_items": []
+   }
+  },
+  "fa_mmlu": {
+   "8-gram": {
+    "questions": 1089,
+    "checkable": 983,
+    "flagged": 0,
+    "flagged_%": 0.0,
+    "flagged_with_answer_in_doc": 0,
+    "max_share_histogram": {
+     ">=0.1": 2,
+     ">=0.2": 1,
+     ">=0.3": 0,
+     ">=0.4": 0,
+     ">=0.5": 0
+    },
+    "highest_overlaps": [
+     {
+      "qid": "fa_mmlu/anatomy-117",
+      "share": 0.25
+     },
+     {
+      "qid": "fa_mmlu/anatomy-125",
+      "share": 0.1
+     },
+     {
+      "qid": "fa_mmlu/anatomy-058",
+      "share": 0.067
+     },
+     {
+      "qid": "fa_mmlu/clinical_knowledge-117",
+      "share": 0.05
+     },
+     {
+      "qid": "fa_mmlu/college_medicine-115",
+      "share": 0.05
+     },
+     {
+      "qid": "fa_mmlu/medical_genetics-017",
+      "share": 0.05
+     },
+     {
+      "qid": "fa_mmlu/professional_medicine-022",
+      "share": 0.046
+     },
+     {
+      "qid": "fa_mmlu/professional_medicine-076",
+      "share": 0.037
+     },
+     {
+      "qid": "fa_mmlu/college_medicine-017",
+      "share": 0.031
+     },
+     {
+      "qid": "fa_mmlu/college_medicine-048",
+      "share": 0.023
+     }
+    ],
+    "flagged_items": []
+   },
+   "13-gram": {
+    "questions": 1089,
+    "checkable": 731,
+    "flagged": 0,
+    "flagged_%": 0.0,
+    "flagged_with_answer_in_doc": 0,
+    "max_share_histogram": {
+     ">=0.1": 0,
+     ">=0.2": 0,
+     ">=0.3": 0,
+     ">=0.4": 0,
+     ">=0.5": 0
+    },
+    "highest_overlaps": [
+     {
+      "qid": "fa_mmlu/anatomy-000",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-002",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-004",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-005",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-006",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-007",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-010",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-011",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-013",
+      "share": 0.0
+     },
+     {
+      "qid": "fa_mmlu/anatomy-018",
+      "share": 0.0
+     }
+    ],
+    "flagged_items": []
+   }
+  }
+ }
+}

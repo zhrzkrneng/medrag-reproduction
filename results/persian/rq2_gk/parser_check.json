@@ -1,0 +1,38 @@
+{
+ "source": "github.com/Mehrdadghassabi/Gaokerena-V evaluation/multiple_choice_qa (commit 13eb1f7178edcc7138f17754bfef790fd687b2ff); hand labels = their AI_chosen_answer column",
+ "per_model": {
+  "aya": {
+   "n": 1257,
+   "agree": 1213,
+   "hand_invalid": 16,
+   "auto_invalid": 7,
+   "hand_correct": 566,
+   "auto_correct": 559,
+   "agree_pct": 96.5,
+   "hand_acc": 45.03,
+   "auto_acc": 44.47
+  },
+  "gaokerena": {
+   "n": 1257,
+   "agree": 1207,
+   "hand_invalid": 8,
+   "auto_invalid": 0,
+   "hand_correct": 602,
+   "auto_correct": 600,
+   "agree_pct": 96.02,
+   "hand_acc": 47.89,
+   "auto_acc": 47.73
+  },
+  "qwen": {
+   "n": 1257,
+   "agree": 1192,
+   "hand_invalid": 48,
+   "auto_invalid": 8,
+   "hand_correct": 544,
+   "auto_correct": 558,
+   "agree_pct": 94.83,
+   "hand_acc": 43.28,
+   "auto_acc": 44.39
+  }
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "retriever": "bm25",
+ "questions": 1089,
+ "english_textbooks": {
+  "1": {
+   "gold_present_%": 5.2,
+   "wrong_present_%": 4.4
+  },
+  "4": {
+   "gold_present_%": 10.7,
+   "wrong_present_%": 10.5
+  },
+  "8": {
+   "gold_present_%": 13.3,
+   "wrong_present_%": 14.2
+  },
+  "16": {
+   "gold_present_%": 15.0,
+   "wrong_present_%": 19.4
+  },
+  "32": {
+   "gold_present_%": 17.8,
+   "wrong_present_%": 23.1
+  }
+ },
+ "persian_web_corpus": {
+  "1": {
+   "gold_present_%": 2.4,
+   "wrong_present_%": 1.7
+  },
+  "4": {
+   "gold_present_%": 5.7,
+   "wrong_present_%": 6.5
+  },
+  "8": {
+   "gold_present_%": 6.3,
+   "wrong_present_%": 9.0
+  },
+  "16": {
+   "gold_present_%": 8.9,
+   "wrong_present_%": 11.7
+  },
+  "32": {
+   "gold_present_%": 10.3,
+   "wrong_present_%": 15.1
+  }
+ }
+}

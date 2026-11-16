@@ -21,7 +21,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from medrag_repro.templates import build_messages, format_snippet  # noqa: E402
+from medrag_repro.templates import build_messages, build_messages_gk, format_snippet  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -29,7 +29,19 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 # Llama-3 budget (8192 / 7168), the closest model MedRAG supports.
 MODELS = {
     "Qwen/Qwen2.5-7B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
-    "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024,
+    # official 4-bit AWQ build of the same model: fits on one T4, used only if fp16 is too slow (documented)
+    "Qwen/Qwen2.5-7B-Instruct-AWQ": {"max_length": 8192, "context_length": 7168, "template": None},
+    # RQ2: Gaokerena-V (LoRA on Aya-Expanse-8B, merged before generation; see kaggle/rq2) and its base model.
+    # Aya-Expanse-8B has an 8K context, so it gets the same budget; its own chat template is used.
+    "gaokerena/gaokerena-v1.0": {"max_length": 8192, "context_length": 7168, "template": None},
+    "CohereLabs/aya-expanse-8b": {"max_length": 8192, "context_length": 7168, "template": None},
+    # second model family for the Persian runs: Llama-3.1-8B-Instruct is MedRAG's Llama-3 budget exactly; its weights
+    # come from Meta's Kaggle Models copy (the Hugging Face repo is gated). Qwen3-8B is the ungated fallback and is
+    # run without its "thinking" mode, so its answers have the same shape as the other models'.
+    "meta-llama/Llama-3.1-8B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
+    "Qwen/Qwen3-8B": {"max_length": 8192, "context_length": 7168, "template": None,
+                      "chat_kwargs": {"enable_thinking": False}},
+    "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024, "add_bos": True,
                              "template": os.path.join(ROOT, "templates", "pmc_llama.jinja")},
 }
 
@@ -48,9 +60,25 @@ def main():
     p.add_argument("--configs", nargs="+", default=["cot"], help="'cot' or '<retriever>@<k>', e.g. rrf2@32")
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--max_new_tokens", type=int, default=1024)
+    p.add_argument("--chunk", type=int, default=200, help="questions per vLLM call; results appended after each")
     p.add_argument("--tp", type=int, default=2, help="tensor parallel size (2 for Kaggle T4 x2)")
+    p.add_argument("--time_budget_s", type=float, default=None,
+                   help="stop before starting a new chunk once this many seconds have passed (answers so far are kept)")
+    p.add_argument("--gpu_mem", type=float, default=0.92, help="vLLM gpu_memory_utilization")
+    p.add_argument("--enforce_eager", action="store_true", help="no CUDA graphs (saves GPU memory)")
+    p.add_argument("--quantization", default=None, help="e.g. bitsandbytes (documented deviation)")
+    p.add_argument("--pp", type=int, default=1, help="pipeline parallel size")
+    p.add_argument("--system_suffix", default="", help="extra system-prompt text (ablation; empty = MedRAG's prompt)")
+    p.add_argument("--tag", default="", help="suffix for output file names, e.g. 'en_think'")
+    p.add_argument("--model_path", default=None, help="local weights for --model (e.g. a merged LoRA); default: --model")
+    p.add_argument("--min_answer_tokens", type=int, default=256,
+                   help="if prompt + this would exceed max_length, the retrieved context is cut further from its end "
+                        "(documented deviation; MedRAG has no such guard and the prompt would not fit at all)")
+    p.add_argument("--prompt_style", default="medrag", choices=["medrag", "gaokerena"],
+                   help="'gaokerena': Gaokerena's own MCQ prompt (RQ2 check; answers parsed by scripts/persian/gk_parse.py)")
     p.add_argument("--out", default="results")
     a = p.parse_args()
+    T_START = time.time()
 
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
@@ -60,10 +88,15 @@ def main():
     if cfg["template"]:
         # MedRAG loads its jinja files with .replace('    ', '').replace('\n', '')
         template = open(cfg["template"]).read().replace("    ", "").replace("\n", "")
-    llm = LLM(a.model, dtype="half", tensor_parallel_size=a.tp, max_model_len=cfg["max_length"],
-              gpu_memory_utilization=0.92, seed=0)
+    weights = a.model_path or a.model
+    llm = LLM(weights, dtype="half", tensor_parallel_size=a.tp, pipeline_parallel_size=a.pp, max_model_len=cfg["max_length"],
+              gpu_memory_utilization=a.gpu_mem, enforce_eager=a.enforce_eager, quantization=a.quantization, seed=0)
     tok = llm.get_tokenizer()
     if template:
+        # vLLM wraps its tokenizer, and setting chat_template on the wrapper does not reach
+        # apply_chat_template; build prompts with the plain Hugging Face tokenizer instead
+        from transformers import AutoTokenizer
+        tok = AutoTokenizer.from_pretrained(weights)
         tok.chat_template = template
 
     bench = json.load(open(a.benchmark))
@@ -81,42 +114,86 @@ def main():
     slug = a.model.replace("/", "__")
     for conf in a.configs:
         for ds in a.datasets:
-            out_path = os.path.join(a.out, slug, ds, f"{conf.replace('@', '_k')}.jsonl")
-            if os.path.exists(out_path):
-                print("skip (exists)", out_path, flush=True)
-                continue
+            out_path = os.path.join(a.out, slug, ds, f"{conf.replace('@', '_k')}{'_' + a.tag if a.tag else ''}.jsonl")
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             qids = sorted(bench[ds])[: a.limit]
-            prompts, params, meta = [], [], []
-            for qid in qids:
-                item = bench[ds][qid]
-                context = None
-                if conf != "cot":
-                    retr, k = conf.split("@")
-                    snips = [corpus[i] for i in retrieved[(ds, qid)][retr][: int(k)]]
-                    joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
-                    ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
-                    context = tok.decode(ctx_ids)
-                msgs = build_messages(item["question"], item["options"], context)
-                text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-                ids = tok.encode(text, add_special_tokens=False)
-                budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
-                prompts.append(TokensPrompt(prompt_token_ids=ids))
-                params.append(SamplingParams(temperature=0.0, max_tokens=budget))
-                meta.append((qid, item["answer"], len(ids), budget))
-            t = time.time()
-            outs = llm.generate(prompts, params)
-            dt = time.time() - t
-            capped = 0
-            with open(out_path, "w") as f:
-                for (qid, gold, n_in, budget), o in zip(meta, outs):
-                    n_out = len(o.outputs[0].token_ids)
-                    capped += int(n_out >= budget)
-                    f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
-                                        "prompt_tokens": n_in, "output_tokens": n_out}) + "\n")
-            print(f"[{conf} | {ds}] {len(qids)} q in {dt:.0f}s ({dt/len(qids):.2f}s/q); "
-                  f"hit length cap: {capped}", flush=True)
-
+            done = set()
+            if os.path.exists(out_path):  # resume: keep answers already written
+                with open(out_path) as f:
+                    done = {json.loads(line)["qid"] for line in f if line.strip()}
+            todo = [q for q in qids if q not in done]
+            if not todo:
+                print("skip (complete)", out_path, flush=True)
+                continue
+            t_all, capped = time.time(), 0
+            # answered in chunks and appended after each one, so progress (and real speed) is visible
+            for start in range(0, len(todo), a.chunk):
+                if a.time_budget_s and time.time() - T_START > a.time_budget_s:
+                    print(json.dumps({"stopped": "time budget", "config": conf, "dataset": ds,
+                                      "answered": len(done) + start, "of": len(qids)}), flush=True)
+                    return
+                part = todo[start: start + a.chunk]
+                prompts, params, meta = [], [], []
+                for qid in part:
+                    item = bench[ds][qid]
+                    context = None
+                    if conf != "cot":
+                        retr, k = conf.split("@")
+                        snips = [corpus[i] for i in retrieved[(ds, qid)][retr][: int(k)]]
+                        joined = "\n".join(format_snippet(j, s) for j, s in enumerate(snips))
+                        ctx_ids = tok.encode(joined, add_special_tokens=False)[: cfg["context_length"]]
+                    trimmed = 0
+                    for _ in range(4):
+                        if conf != "cot":
+                            context = tok.decode(ctx_ids)
+                        if a.prompt_style == "gaokerena":
+                            msgs = build_messages_gk(item["question"], item["options"], context)
+                        else:
+                            msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
+                        text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
+                                                       **cfg.get("chat_kwargs", {}))
+                        ids = tok.encode(text, add_special_tokens=False)
+                        if cfg.get("add_bos") and tok.bos_token_id is not None:
+                            # MedRAG runs LLaMA models through a HF pipeline, whose tokenizer adds <s>
+                            ids = [tok.bos_token_id] + ids
+                        over = len(ids) + a.min_answer_tokens - cfg["max_length"]
+                        if conf == "cot" or over <= 0 or not ctx_ids:
+                            break
+                        # a long question: cut the context just enough (vLLM rejects a prompt over max_length
+                        # and would stop the whole run)
+                        cut = min(len(ctx_ids), over + 8)
+                        ctx_ids, trimmed = ctx_ids[: len(ctx_ids) - cut], trimmed + cut
+                    if len(ids) >= cfg["max_length"]:
+                        ids = ids[-(cfg["max_length"] - 1):]  # last resort (cot only); logged via context_trimmed=-1
+                        trimmed = -1
+                    budget = max(1, min(a.max_new_tokens, cfg["max_length"] - len(ids)))
+                    prompts.append(TokensPrompt(prompt_token_ids=ids))
+                    params.append(SamplingParams(temperature=0.0, max_tokens=budget))
+                    meta.append((qid, item["answer"], len(ids), budget, trimmed))
+                t = time.time()
+                outs = llm.generate(prompts, params, use_tqdm=False)
+                dt = max(time.time() - t, 1e-6)
+                n_in = n_out_all = 0
+                with open(out_path, "a") as f:
+                    for (qid, gold, n_prompt, budget, trimmed), o in zip(meta, outs):
+                        n_out = len(o.outputs[0].token_ids)
+                        capped += int(n_out >= budget)
+                        n_in += n_prompt
+                        n_out_all += n_out
+                        f.write(json.dumps({"qid": qid, "answer": gold, "response": o.outputs[0].text,
+                                            "prompt_tokens": n_prompt, "output_tokens": n_out,
+                                            **({"context_trimmed_tokens": trimmed} if trimmed else {})}) + "\n")
+                print(json.dumps({"progress": f"{len(done) + start + len(part)}/{len(qids)}", "config": conf,
+                                  "dataset": ds, "chunk_sec": round(dt, 1), "sec_per_q": round(dt / len(part), 3),
+                                  "prompt_tok_per_sec": round(n_in / dt), "output_tok_per_sec": round(n_out_all / dt)}),
+                      flush=True)
+            dt = max(time.time() - t_all, 1e-6)
+            msg = {"model": a.model, "config": conf, "dataset": ds, "n": len(todo), "seconds": round(dt, 1),
+                   "sec_per_q": round(dt / len(todo), 3), "hit_length_cap": capped}
+            print(json.dumps(msg), flush=True)
+            # also persisted, because vLLM's own logging can push this line out of a truncated console log
+            with open(os.path.join(a.out, "timing.jsonl"), "a") as tf:
+                tf.write(json.dumps(msg) + "\n")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,1 @@
+{"id": "zohrehzkrn/medrag-repro-run-fa32", "title": "medrag-repro-run-fa32", "code_file": "run_fa32_kernel.py", "language": "python", "kernel_type": "script", "is_private": true, "enable_gpu": true, "enable_internet": true, "machine_shape": "NvidiaTeslaT4", "dataset_sources": ["zohrehzkrn/medrag-repro-code"], "competition_sources": [], "kernel_sources": []}

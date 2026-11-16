@@ -1,0 +1,31 @@
+[
+ {
+  "variant": "fp16_tp2_eager",
+  "rc": 0,
+  "wall_sec_incl_load": 1809,
+  "timing": [
+   {
+    "config": "cot",
+    "sec_per_q": 13.694,
+    "hit_length_cap": 7
+   },
+   {
+    "config": "rrf2@32",
+    "sec_per_q": 27.629,
+    "hit_length_cap": 16
+   }
+  ],
+  "tokens": {
+   "cot.jsonl": {
+    "n": 30,
+    "avg_prompt": 374,
+    "avg_out": 549
+   },
+   "rrf2_k32.jsonl": {
+    "n": 30,
+    "avg_prompt": 1411,
+    "avg_out": 442
+   }
+  }
+ }
+]

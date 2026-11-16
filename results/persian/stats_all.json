@@ -1,0 +1,1284 @@
+{
+ "method": "All headline paired comparisons of the Persian extension in one family, with\nmultiple-comparison correction and bootstrap confidence intervals.\n\nInputs: only the committed files under results/ (ids, letters, booleans), so this needs no GPU and\nno gaokerena data. Output: results/persian/stats_all.json and a Markdown table (stats_all.md).\n\n  * p_raw: exact two-sided McNemar test (same function as every other analysis here).\n  * p_holm: Holm (1979) step-down correction, controls the family-wise error rate.\n  * q_bh: Benjamini-Hochberg (1995) adjusted p, controls the false discovery rate.\n  * 95% CIs: paired percentile bootstrap over questions (10,000 resamples, seed 0) for each\n    accuracy and for each accuracy difference (b - a).\n\nExploratory subgroup analyses (gold in the top k, strictly parsed subsets, per subject) are not in\nthe family; they stay labelled as exploratory in the README.",
+ "family_size": 44,
+ "bootstrap_resamples": 10000,
+ "seed": 0,
+ "comparisons": [
+  {
+   "question": "RQ1 language gap",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN CoT",
+   "b": "Qwen FA CoT",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_a_ci95": [
+    75.94,
+    80.81
+   ],
+   "acc_b": 59.14,
+   "acc_b_ci95": [
+    56.2,
+    62.08
+   ],
+   "diff_b_minus_a": -19.28,
+   "diff_ci95": [
+    -22.41,
+    -16.07
+   ],
+   "b_only_correct": 68,
+   "a_only_correct": 278,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 English RAG (reproduction)",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN CoT",
+   "b": "Qwen EN Textbooks@32",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_a_ci95": [
+    76.03,
+    80.81
+   ],
+   "acc_b": 74.75,
+   "acc_b_ci95": [
+    72.18,
+    77.32
+   ],
+   "diff_b_minus_a": -3.67,
+   "diff_ci95": [
+    -6.24,
+    -1.1
+   ],
+   "b_only_correct": 83,
+   "a_only_correct": 123,
+   "p_raw": 0.0064,
+   "p_holm": 0.1664,
+   "q_bh": 0.0148,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 Persian RAG k=4",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA web@4",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_a_ci95": [
+    56.29,
+    62.08
+   ],
+   "acc_b": 53.35,
+   "acc_b_ci95": [
+    50.41,
+    56.29
+   ],
+   "diff_b_minus_a": -5.79,
+   "diff_ci95": [
+    -9.09,
+    -2.48
+   ],
+   "b_only_correct": 143,
+   "a_only_correct": 206,
+   "p_raw": 0.0009,
+   "p_holm": 0.027,
+   "q_bh": 0.0026,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 Persian RAG k=4",
+   "dataset": "kopp",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA web@4",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_a_ci95": [
+    49.36,
+    53.89
+   ],
+   "acc_b": 47.55,
+   "acc_b_ci95": [
+    45.31,
+    49.84
+   ],
+   "diff_b_minus_a": -4.1,
+   "diff_ci95": [
+    -6.71,
+    -1.38
+   ],
+   "b_only_correct": 286,
+   "a_only_correct": 363,
+   "p_raw": 0.0028,
+   "p_holm": 0.0812,
+   "q_bh": 0.0077,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 Persian RAG k=32",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA web@32",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_a_ci95": [
+    56.2,
+    62.08
+   ],
+   "acc_b": 54.45,
+   "acc_b_ci95": [
+    51.52,
+    57.39
+   ],
+   "diff_b_minus_a": -4.68,
+   "diff_ci95": [
+    -8.08,
+    -1.29
+   ],
+   "b_only_correct": 151,
+   "a_only_correct": 202,
+   "p_raw": 0.0077,
+   "p_holm": 0.1875,
+   "q_bh": 0.0161,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 k=32 vs k=4",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA web@4",
+   "b": "Qwen FA web@32",
+   "n": 1089,
+   "acc_a": 53.35,
+   "acc_a_ci95": [
+    50.41,
+    56.38
+   ],
+   "acc_b": 54.45,
+   "acc_b_ci95": [
+    51.61,
+    57.39
+   ],
+   "diff_b_minus_a": 1.1,
+   "diff_ci95": [
+    -2.2,
+    4.32
+   ],
+   "b_only_correct": 179,
+   "a_only_correct": 167,
+   "p_raw": 0.5543,
+   "p_holm": 1.0,
+   "q_bh": 0.6076,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ1 2x2: question language (Textbooks)",
+   "dataset": "fa_mmlu",
+   "a": "2x2 FA q + Textbooks@4",
+   "b": "2x2 EN q + Textbooks@4",
+   "n": 1089,
+   "acc_a": 47.75,
+   "acc_a_ci95": [
+    44.81,
+    50.69
+   ],
+   "acc_b": 73.92,
+   "acc_b_ci95": [
+    71.26,
+    76.49
+   ],
+   "diff_b_minus_a": 26.17,
+   "diff_ci95": [
+    22.77,
+    29.57
+   ],
+   "b_only_correct": 355,
+   "a_only_correct": 70,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 2x2: question language (FA web)",
+   "dataset": "fa_mmlu",
+   "a": "2x2 FA q + FA web@4 (BGE-M3)",
+   "b": "2x2 EN q + FA web@4 (BGE-M3)",
+   "n": 1089,
+   "acc_a": 52.98,
+   "acc_a_ci95": [
+    49.95,
+    56.01
+   ],
+   "acc_b": 70.43,
+   "acc_b_ci95": [
+    67.77,
+    73.09
+   ],
+   "diff_b_minus_a": 17.45,
+   "diff_ci95": [
+    14.23,
+    20.66
+   ],
+   "b_only_correct": 278,
+   "a_only_correct": 88,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 2x2: corpus (FA question)",
+   "dataset": "fa_mmlu",
+   "a": "2x2 FA q + Textbooks@4",
+   "b": "2x2 FA q + FA web@4 (BGE-M3)",
+   "n": 1089,
+   "acc_a": 47.75,
+   "acc_a_ci95": [
+    44.72,
+    50.78
+   ],
+   "acc_b": 52.98,
+   "acc_b_ci95": [
+    49.95,
+    55.92
+   ],
+   "diff_b_minus_a": 5.23,
+   "diff_ci95": [
+    1.74,
+    8.72
+   ],
+   "b_only_correct": 218,
+   "a_only_correct": 161,
+   "p_raw": 0.004,
+   "p_holm": 0.108,
+   "q_bh": 0.0098,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 2x2: corpus (EN question)",
+   "dataset": "fa_mmlu",
+   "a": "2x2 EN q + FA web@4 (BGE-M3)",
+   "b": "2x2 EN q + Textbooks@4",
+   "n": 1089,
+   "acc_a": 70.43,
+   "acc_a_ci95": [
+    67.68,
+    73.09
+   ],
+   "acc_b": 73.92,
+   "acc_b_ci95": [
+    71.26,
+    76.49
+   ],
+   "diff_b_minus_a": 3.49,
+   "diff_ci95": [
+    0.83,
+    6.24
+   ],
+   "b_only_correct": 134,
+   "a_only_correct": 96,
+   "p_raw": 0.0145,
+   "p_holm": 0.3045,
+   "q_bh": 0.0264,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 translate-first",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Translate-first CoT",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_a_ci95": [
+    56.2,
+    62.08
+   ],
+   "acc_b": 66.85,
+   "acc_b_ci95": [
+    64.0,
+    69.61
+   ],
+   "diff_b_minus_a": 7.71,
+   "diff_ci95": [
+    4.5,
+    10.93
+   ],
+   "b_only_correct": 204,
+   "a_only_correct": 120,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 translate-first + RAG vs same RAG in Persian",
+   "dataset": "fa_mmlu",
+   "a": "2x2 FA q + Textbooks@4",
+   "b": "Translate-first Textbooks@4",
+   "n": 1089,
+   "acc_a": 47.75,
+   "acc_a_ci95": [
+    44.81,
+    50.69
+   ],
+   "acc_b": 63.54,
+   "acc_b_ci95": [
+    60.7,
+    66.39
+   ],
+   "diff_b_minus_a": 15.79,
+   "diff_ci95": [
+    12.4,
+    19.19
+   ],
+   "b_only_correct": 274,
+   "a_only_correct": 102,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 translate-first: RAG effect",
+   "dataset": "fa_mmlu",
+   "a": "Translate-first CoT",
+   "b": "Translate-first Textbooks@4",
+   "n": 1089,
+   "acc_a": 66.85,
+   "acc_a_ci95": [
+    64.1,
+    69.61
+   ],
+   "acc_b": 63.54,
+   "acc_b_ci95": [
+    60.7,
+    66.39
+   ],
+   "diff_b_minus_a": -3.31,
+   "diff_ci95": [
+    -5.88,
+    -0.73
+   ],
+   "b_only_correct": 86,
+   "a_only_correct": 122,
+   "p_raw": 0.015,
+   "p_holm": 0.3045,
+   "q_bh": 0.0264,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 translate-first vs English original",
+   "dataset": "fa_mmlu",
+   "a": "Translate-first CoT",
+   "b": "Qwen EN CoT",
+   "n": 1089,
+   "acc_a": 66.85,
+   "acc_a_ci95": [
+    64.0,
+    69.61
+   ],
+   "acc_b": 78.42,
+   "acc_b_ci95": [
+    75.94,
+    80.81
+   ],
+   "diff_b_minus_a": 11.57,
+   "diff_ci95": [
+    8.82,
+    14.33
+   ],
+   "b_only_correct": 189,
+   "a_only_correct": 63,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ1 think in English (CoT)",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Think-in-English CoT",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_a_ci95": [
+    56.2,
+    62.08
+   ],
+   "acc_b": 59.78,
+   "acc_b_ci95": [
+    56.84,
+    62.63
+   ],
+   "diff_b_minus_a": 0.64,
+   "diff_ci95": [
+    -2.3,
+    3.58
+   ],
+   "b_only_correct": 140,
+   "a_only_correct": 133,
+   "p_raw": 0.7166,
+   "p_holm": 1.0,
+   "q_bh": 0.7333,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ1 think in English (Textbooks@4)",
+   "dataset": "fa_mmlu",
+   "a": "2x2 FA q + Textbooks@4",
+   "b": "Think-in-English Textbooks@4",
+   "n": 1089,
+   "acc_a": 47.75,
+   "acc_a_ci95": [
+    44.81,
+    50.69
+   ],
+   "acc_b": 51.06,
+   "acc_b_ci95": [
+    48.12,
+    53.99
+   ],
+   "diff_b_minus_a": 3.31,
+   "diff_ci95": [
+    0.55,
+    6.15
+   ],
+   "b_only_correct": 140,
+   "a_only_correct": 104,
+   "p_raw": 0.0248,
+   "p_holm": 0.4712,
+   "q_bh": 0.042,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 fine-tuning effect [MedRAG prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Gaokerena CoT [MedRAG prompt]",
+   "n": 1089,
+   "acc_a": 52.71,
+   "acc_a_ci95": [
+    49.68,
+    55.65
+   ],
+   "acc_b": 47.2,
+   "acc_b_ci95": [
+    44.26,
+    50.14
+   ],
+   "diff_b_minus_a": -5.51,
+   "diff_ci95": [
+    -8.63,
+    -2.3
+   ],
+   "b_only_correct": 124,
+   "a_only_correct": 184,
+   "p_raw": 0.0007,
+   "p_holm": 0.0224,
+   "q_bh": 0.0022,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 RAG effect, Aya [MedRAG prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Aya web@4 [MedRAG prompt]",
+   "n": 1089,
+   "acc_a": 52.71,
+   "acc_a_ci95": [
+    49.77,
+    55.74
+   ],
+   "acc_b": 48.21,
+   "acc_b_ci95": [
+    45.27,
+    51.15
+   ],
+   "diff_b_minus_a": -4.5,
+   "diff_ci95": [
+    -7.81,
+    -1.19
+   ],
+   "b_only_correct": 147,
+   "a_only_correct": 196,
+   "p_raw": 0.0094,
+   "p_holm": 0.207,
+   "q_bh": 0.018,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 RAG effect, Gaokerena [MedRAG prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Gaokerena web@4 [MedRAG prompt]",
+   "n": 1089,
+   "acc_a": 47.2,
+   "acc_a_ci95": [
+    44.17,
+    50.14
+   ],
+   "acc_b": 42.52,
+   "acc_b_ci95": [
+    39.49,
+    45.55
+   ],
+   "diff_b_minus_a": -4.68,
+   "diff_ci95": [
+    -8.08,
+    -1.19
+   ],
+   "b_only_correct": 158,
+   "a_only_correct": 209,
+   "p_raw": 0.009,
+   "p_holm": 0.207,
+   "q_bh": 0.018,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [MedRAG prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Aya web@4 [MedRAG prompt]",
+   "n": 1089,
+   "acc_a": 47.2,
+   "acc_a_ci95": [
+    44.26,
+    50.14
+   ],
+   "acc_b": 48.21,
+   "acc_b_ci95": [
+    45.27,
+    51.15
+   ],
+   "diff_b_minus_a": 1.01,
+   "diff_ci95": [
+    -2.48,
+    4.5
+   ],
+   "b_only_correct": 190,
+   "a_only_correct": 179,
+   "p_raw": 0.6027,
+   "p_holm": 1.0,
+   "q_bh": 0.6314,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 fine-tuning effect [GK prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [GK prompt]",
+   "b": "Gaokerena CoT [GK prompt]",
+   "n": 1089,
+   "acc_a": 46.1,
+   "acc_a_ci95": [
+    43.07,
+    49.13
+   ],
+   "acc_b": 48.85,
+   "acc_b_ci95": [
+    45.82,
+    51.88
+   ],
+   "diff_b_minus_a": 2.75,
+   "diff_ci95": [
+    0.28,
+    5.33
+   ],
+   "b_only_correct": 113,
+   "a_only_correct": 83,
+   "p_raw": 0.038,
+   "p_holm": 0.684,
+   "q_bh": 0.0619,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 RAG effect, Aya [GK prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [GK prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1089,
+   "acc_a": 46.1,
+   "acc_a_ci95": [
+    43.25,
+    49.13
+   ],
+   "acc_b": 47.29,
+   "acc_b_ci95": [
+    44.35,
+    50.32
+   ],
+   "diff_b_minus_a": 1.19,
+   "diff_ci95": [
+    -1.65,
+    4.04
+   ],
+   "b_only_correct": 132,
+   "a_only_correct": 119,
+   "p_raw": 0.4489,
+   "p_holm": 1.0,
+   "q_bh": 0.5338,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 RAG effect, Gaokerena [GK prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena CoT [GK prompt]",
+   "b": "Gaokerena web@4 [GK prompt]",
+   "n": 1089,
+   "acc_a": 48.85,
+   "acc_a_ci95": [
+    45.82,
+    51.79
+   ],
+   "acc_b": 47.47,
+   "acc_b_ci95": [
+    44.54,
+    50.51
+   ],
+   "diff_b_minus_a": -1.38,
+   "diff_ci95": [
+    -4.22,
+    1.56
+   ],
+   "b_only_correct": 122,
+   "a_only_correct": 137,
+   "p_raw": 0.3844,
+   "p_holm": 1.0,
+   "q_bh": 0.4698,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [GK prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena CoT [GK prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1089,
+   "acc_a": 48.85,
+   "acc_a_ci95": [
+    45.91,
+    51.79
+   ],
+   "acc_b": 47.29,
+   "acc_b_ci95": [
+    44.26,
+    50.23
+   ],
+   "diff_b_minus_a": -1.56,
+   "diff_ci95": [
+    -4.5,
+    1.38
+   ],
+   "b_only_correct": 125,
+   "a_only_correct": 142,
+   "p_raw": 0.3275,
+   "p_holm": 1.0,
+   "q_bh": 0.4367,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 Qwen vs Aya [MedRAG prompt]",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Qwen FA CoT",
+   "n": 1089,
+   "acc_a": 52.71,
+   "acc_a_ci95": [
+    49.68,
+    55.65
+   ],
+   "acc_b": 59.14,
+   "acc_b_ci95": [
+    56.2,
+    62.08
+   ],
+   "diff_b_minus_a": 6.43,
+   "diff_ci95": [
+    2.94,
+    9.92
+   ],
+   "b_only_correct": 225,
+   "a_only_correct": 155,
+   "p_raw": 0.0004,
+   "p_holm": 0.0136,
+   "q_bh": 0.0016,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Aya CoT",
+   "dataset": "fa_mmlu",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Aya CoT [GK prompt]",
+   "n": 1089,
+   "acc_a": 52.71,
+   "acc_a_ci95": [
+    49.68,
+    55.74
+   ],
+   "acc_b": 46.1,
+   "acc_b_ci95": [
+    43.16,
+    49.04
+   ],
+   "diff_b_minus_a": -6.61,
+   "diff_ci95": [
+    -9.55,
+    -3.76
+   ],
+   "b_only_correct": 93,
+   "a_only_correct": 165,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Aya web@4",
+   "dataset": "fa_mmlu",
+   "a": "Aya web@4 [MedRAG prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1089,
+   "acc_a": 48.21,
+   "acc_a_ci95": [
+    45.27,
+    51.24
+   ],
+   "acc_b": 47.29,
+   "acc_b_ci95": [
+    44.35,
+    50.23
+   ],
+   "diff_b_minus_a": -0.92,
+   "diff_ci95": [
+    -3.67,
+    1.93
+   ],
+   "b_only_correct": 118,
+   "a_only_correct": 128,
+   "p_raw": 0.5662,
+   "p_holm": 1.0,
+   "q_bh": 0.6076,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 prompt effect, Gaokerena CoT",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Gaokerena CoT [GK prompt]",
+   "n": 1089,
+   "acc_a": 47.2,
+   "acc_a_ci95": [
+    44.35,
+    50.23
+   ],
+   "acc_b": 48.85,
+   "acc_b_ci95": [
+    45.91,
+    51.88
+   ],
+   "diff_b_minus_a": 1.65,
+   "diff_ci95": [
+    -1.56,
+    4.87
+   ],
+   "b_only_correct": 167,
+   "a_only_correct": 149,
+   "p_raw": 0.3389,
+   "p_holm": 1.0,
+   "q_bh": 0.4386,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 prompt effect, Gaokerena web@4",
+   "dataset": "fa_mmlu",
+   "a": "Gaokerena web@4 [MedRAG prompt]",
+   "b": "Gaokerena web@4 [GK prompt]",
+   "n": 1089,
+   "acc_a": 42.52,
+   "acc_a_ci95": [
+    39.67,
+    45.45
+   ],
+   "acc_b": 47.47,
+   "acc_b_ci95": [
+    44.54,
+    50.51
+   ],
+   "diff_b_minus_a": 4.96,
+   "diff_ci95": [
+    1.74,
+    8.17
+   ],
+   "b_only_correct": 187,
+   "a_only_correct": 133,
+   "p_raw": 0.003,
+   "p_holm": 0.084,
+   "q_bh": 0.0078,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Qwen CoT",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA CoT [GK prompt]",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_a_ci95": [
+    56.2,
+    62.08
+   ],
+   "acc_b": 45.82,
+   "acc_b_ci95": [
+    42.88,
+    48.85
+   ],
+   "diff_b_minus_a": -13.31,
+   "diff_ci95": [
+    -16.62,
+    -10.01
+   ],
+   "b_only_correct": 107,
+   "a_only_correct": 252,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 fine-tuning effect [MedRAG prompt]",
+   "dataset": "kopp",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Gaokerena CoT [MedRAG prompt]",
+   "n": 1878,
+   "acc_a": 46.33,
+   "acc_a_ci95": [
+    44.04,
+    48.56
+   ],
+   "acc_b": 41.96,
+   "acc_b_ci95": [
+    39.72,
+    44.25
+   ],
+   "diff_b_minus_a": -4.37,
+   "diff_ci95": [
+    -6.76,
+    -1.97
+   ],
+   "b_only_correct": 231,
+   "a_only_correct": 313,
+   "p_raw": 0.0005,
+   "p_holm": 0.0165,
+   "q_bh": 0.0018,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 RAG effect, Aya [MedRAG prompt]",
+   "dataset": "kopp",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Aya web@4 [MedRAG prompt]",
+   "n": 1878,
+   "acc_a": 46.33,
+   "acc_a_ci95": [
+    44.09,
+    48.56
+   ],
+   "acc_b": 43.66,
+   "acc_b_ci95": [
+    41.48,
+    45.95
+   ],
+   "diff_b_minus_a": -2.66,
+   "diff_ci95": [
+    -5.22,
+    -0.21
+   ],
+   "b_only_correct": 260,
+   "a_only_correct": 310,
+   "p_raw": 0.04,
+   "p_holm": 0.684,
+   "q_bh": 0.0629,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 RAG effect, Gaokerena [MedRAG prompt]",
+   "dataset": "kopp",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Gaokerena web@4 [MedRAG prompt]",
+   "n": 1878,
+   "acc_a": 41.96,
+   "acc_a_ci95": [
+    39.72,
+    44.2
+   ],
+   "acc_b": 40.68,
+   "acc_b_ci95": [
+    38.45,
+    42.92
+   ],
+   "diff_b_minus_a": -1.28,
+   "diff_ci95": [
+    -3.99,
+    1.33
+   ],
+   "b_only_correct": 312,
+   "a_only_correct": 336,
+   "p_raw": 0.3663,
+   "p_holm": 1.0,
+   "q_bh": 0.4605,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [MedRAG prompt]",
+   "dataset": "kopp",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Aya web@4 [MedRAG prompt]",
+   "n": 1878,
+   "acc_a": 41.96,
+   "acc_a_ci95": [
+    39.67,
+    44.2
+   ],
+   "acc_b": 43.66,
+   "acc_b_ci95": [
+    41.43,
+    45.95
+   ],
+   "diff_b_minus_a": 1.7,
+   "diff_ci95": [
+    -0.85,
+    4.31
+   ],
+   "b_only_correct": 328,
+   "a_only_correct": 296,
+   "p_raw": 0.2146,
+   "p_holm": 1.0,
+   "q_bh": 0.3147,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 fine-tuning effect [GK prompt]",
+   "dataset": "kopp",
+   "a": "Aya CoT [GK prompt]",
+   "b": "Gaokerena CoT [GK prompt]",
+   "n": 1878,
+   "acc_a": 43.24,
+   "acc_a_ci95": [
+    41.0,
+    45.42
+   ],
+   "acc_b": 43.29,
+   "acc_b_ci95": [
+    41.0,
+    45.53
+   ],
+   "diff_b_minus_a": 0.05,
+   "diff_ci95": [
+    -1.86,
+    2.02
+   ],
+   "b_only_correct": 169,
+   "a_only_correct": 168,
+   "p_raw": 1.0,
+   "p_holm": 1.0,
+   "q_bh": 1.0,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 RAG effect, Aya [GK prompt]",
+   "dataset": "kopp",
+   "a": "Aya CoT [GK prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1878,
+   "acc_a": 43.24,
+   "acc_a_ci95": [
+    41.0,
+    45.47
+   ],
+   "acc_b": 42.44,
+   "acc_b_ci95": [
+    40.26,
+    44.73
+   ],
+   "diff_b_minus_a": -0.8,
+   "diff_ci95": [
+    -3.19,
+    1.6
+   ],
+   "b_only_correct": 255,
+   "a_only_correct": 270,
+   "p_raw": 0.5412,
+   "p_holm": 1.0,
+   "q_bh": 0.6076,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 RAG effect, Gaokerena [GK prompt]",
+   "dataset": "kopp",
+   "a": "Gaokerena CoT [GK prompt]",
+   "b": "Gaokerena web@4 [GK prompt]",
+   "n": 1878,
+   "acc_a": 43.29,
+   "acc_a_ci95": [
+    41.0,
+    45.58
+   ],
+   "acc_b": 44.94,
+   "acc_b_ci95": [
+    42.71,
+    47.18
+   ],
+   "diff_b_minus_a": 1.65,
+   "diff_ci95": [
+    -0.69,
+    3.89
+   ],
+   "b_only_correct": 259,
+   "a_only_correct": 228,
+   "p_raw": 0.1739,
+   "p_holm": 1.0,
+   "q_bh": 0.2638,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [GK prompt]",
+   "dataset": "kopp",
+   "a": "Gaokerena CoT [GK prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1878,
+   "acc_a": 43.29,
+   "acc_a_ci95": [
+    41.05,
+    45.53
+   ],
+   "acc_b": 42.44,
+   "acc_b_ci95": [
+    40.26,
+    44.68
+   ],
+   "diff_b_minus_a": -0.85,
+   "diff_ci95": [
+    -3.3,
+    1.54
+   ],
+   "b_only_correct": 264,
+   "a_only_correct": 280,
+   "p_raw": 0.5202,
+   "p_holm": 1.0,
+   "q_bh": 0.6023,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 Qwen vs Aya [MedRAG prompt]",
+   "dataset": "kopp",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Qwen FA CoT",
+   "n": 1878,
+   "acc_a": 46.33,
+   "acc_a_ci95": [
+    44.04,
+    48.56
+   ],
+   "acc_b": 51.65,
+   "acc_b_ci95": [
+    49.41,
+    53.89
+   ],
+   "diff_b_minus_a": 5.32,
+   "diff_ci95": [
+    2.61,
+    7.99
+   ],
+   "b_only_correct": 392,
+   "a_only_correct": 292,
+   "p_raw": 0.0001,
+   "p_holm": 0.0035,
+   "q_bh": 0.0004,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Aya CoT",
+   "dataset": "kopp",
+   "a": "Aya CoT [MedRAG prompt]",
+   "b": "Aya CoT [GK prompt]",
+   "n": 1878,
+   "acc_a": 46.33,
+   "acc_a_ci95": [
+    44.09,
+    48.56
+   ],
+   "acc_b": 43.24,
+   "acc_b_ci95": [
+    40.95,
+    45.47
+   ],
+   "diff_b_minus_a": -3.09,
+   "diff_ci95": [
+    -5.32,
+    -0.8
+   ],
+   "b_only_correct": 199,
+   "a_only_correct": 257,
+   "p_raw": 0.0075,
+   "p_holm": 0.1875,
+   "q_bh": 0.0161,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Aya web@4",
+   "dataset": "kopp",
+   "a": "Aya web@4 [MedRAG prompt]",
+   "b": "Aya web@4 [GK prompt]",
+   "n": 1878,
+   "acc_a": 43.66,
+   "acc_a_ci95": [
+    41.43,
+    45.9
+   ],
+   "acc_b": 42.44,
+   "acc_b_ci95": [
+    40.2,
+    44.68
+   ],
+   "diff_b_minus_a": -1.22,
+   "diff_ci95": [
+    -3.25,
+    0.85
+   ],
+   "b_only_correct": 185,
+   "a_only_correct": 208,
+   "p_raw": 0.2671,
+   "p_holm": 1.0,
+   "q_bh": 0.3791,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 prompt effect, Gaokerena CoT",
+   "dataset": "kopp",
+   "a": "Gaokerena CoT [MedRAG prompt]",
+   "b": "Gaokerena CoT [GK prompt]",
+   "n": 1878,
+   "acc_a": 41.96,
+   "acc_a_ci95": [
+    39.72,
+    44.25
+   ],
+   "acc_b": 43.29,
+   "acc_b_ci95": [
+    41.05,
+    45.63
+   ],
+   "diff_b_minus_a": 1.33,
+   "diff_ci95": [
+    -1.12,
+    3.78
+   ],
+   "b_only_correct": 292,
+   "a_only_correct": 267,
+   "p_raw": 0.3101,
+   "p_holm": 1.0,
+   "q_bh": 0.4264,
+   "significant_holm_0.05": false,
+   "significant_bh_0.05": false
+  },
+  {
+   "question": "RQ2 prompt effect, Gaokerena web@4",
+   "dataset": "kopp",
+   "a": "Gaokerena web@4 [MedRAG prompt]",
+   "b": "Gaokerena web@4 [GK prompt]",
+   "n": 1878,
+   "acc_a": 40.68,
+   "acc_a_ci95": [
+    38.45,
+    42.86
+   ],
+   "acc_b": 44.94,
+   "acc_b_ci95": [
+    42.76,
+    47.18
+   ],
+   "diff_b_minus_a": 4.26,
+   "diff_ci95": [
+    1.86,
+    6.66
+   ],
+   "b_only_correct": 311,
+   "a_only_correct": 231,
+   "p_raw": 0.0007,
+   "p_holm": 0.0224,
+   "q_bh": 0.0022,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  },
+  {
+   "question": "RQ2 prompt effect, Qwen CoT",
+   "dataset": "kopp",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA CoT [GK prompt]",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_a_ci95": [
+    49.41,
+    53.89
+   ],
+   "acc_b": 41.85,
+   "acc_b_ci95": [
+    39.62,
+    44.04
+   ],
+   "diff_b_minus_a": -9.8,
+   "diff_ci95": [
+    -12.35,
+    -7.24
+   ],
+   "b_only_correct": 216,
+   "a_only_correct": 400,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0,
+   "significant_holm_0.05": true,
+   "significant_bh_0.05": true
+  }
+ ]
+}

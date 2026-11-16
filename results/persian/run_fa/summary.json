@@ -1,0 +1,74 @@
+{
+ "fa_mmlu": {
+  "n": 1089,
+  "cot_%": 59.14,
+  "rrf2_k4_%": 53.35,
+  "rag_fixes": 143,
+  "rag_breaks": 206,
+  "mcnemar_p": 0.0009,
+  "by_gold_in_top4": {
+   "present": {
+    "n": 61,
+    "cot_%": 82.0,
+    "rrf2_k4_%": 80.3,
+    "mcnemar_p": 1.0
+   },
+   "absent": {
+    "n": 1013,
+    "cot_%": 57.8,
+    "rrf2_k4_%": 51.6,
+    "mcnemar_p": 0.0006
+   },
+   "not_measurable": {
+    "n": 15,
+    "cot_%": 53.3,
+    "rrf2_k4_%": 60.0,
+    "mcnemar_p": 1.0
+   }
+  }
+ },
+ "kopp": {
+  "n": 1878,
+  "cot_%": 51.65,
+  "rrf2_k4_%": 47.55,
+  "rag_fixes": 286,
+  "rag_breaks": 363,
+  "mcnemar_p": 0.0028,
+  "by_gold_in_top4": {
+   "present": {
+    "n": 147,
+    "cot_%": 58.5,
+    "rrf2_k4_%": 71.4,
+    "mcnemar_p": 0.0026
+   },
+   "absent": {
+    "n": 1696,
+    "cot_%": 50.7,
+    "rrf2_k4_%": 45.2,
+    "mcnemar_p": 0.0001
+   },
+   "not_measurable": {
+    "n": 35,
+    "cot_%": 68.6,
+    "rrf2_k4_%": 62.9,
+    "mcnemar_p": 0.7266
+   }
+  }
+ },
+ "language_gap_mmlu": {
+  "cot": {
+   "en_%": 78.42,
+   "fa_%": 59.14,
+   "only_en_correct": 278,
+   "only_fa_correct": 68,
+   "mcnemar_p": 0.0
+  },
+  "rrf2_k4": {
+   "en_%": 74.29,
+   "fa_%": 53.35,
+   "only_en_correct": 318,
+   "only_fa_correct": 90,
+   "mcnemar_p": 0.0
+  }
+ }
+}

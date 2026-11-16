@@ -1,0 +1,76 @@
+{
+ "questions": 1089,
+ "k": 4,
+ "cells": {
+  "1_en_q__textbooks": {
+   "acc_%": 73.92,
+   "cot_same_language_%": 78.42,
+   "vs_cot_p": 0.0005,
+   "gold_in_top4": 124,
+   "present: n, cot_%, rag_%": [
+    124,
+    91.1,
+    90.3
+   ],
+   "absent: n, cot_%, rag_%": [
+    965,
+    76.8,
+    71.8
+   ]
+  },
+  "2_fa_q__textbooks": {
+   "acc_%": 47.75,
+   "cot_same_language_%": 59.14,
+   "vs_cot_p": 0.0,
+   "gold_in_top4": 102,
+   "present: n, cot_%, rag_%": [
+    102,
+    70.6,
+    67.6
+   ],
+   "absent: n, cot_%, rag_%": [
+    987,
+    58.0,
+    45.7
+   ]
+  },
+  "3_fa_q__fa_web": {
+   "acc_%": 52.98,
+   "cot_same_language_%": 59.14,
+   "vs_cot_p": 0.0002,
+   "gold_in_top4": 65,
+   "present: n, cot_%, rag_%": [
+    65,
+    78.5,
+    84.6
+   ],
+   "absent: n, cot_%, rag_%": [
+    1024,
+    57.9,
+    51.0
+   ]
+  },
+  "4_en_q__fa_web": {
+   "acc_%": 70.43,
+   "cot_same_language_%": 78.42,
+   "vs_cot_p": 0.0,
+   "gold_in_top4": 50,
+   "present: n, cot_%, rag_%": [
+    50,
+    88.0,
+    90.0
+   ],
+   "absent: n, cot_%, rag_%": [
+    1039,
+    78.0,
+    69.5
+   ]
+  }
+ },
+ "paired_tests": {
+  "1_en_q__textbooks vs 2_fa_q__textbooks": 0.0,
+  "4_en_q__fa_web vs 3_fa_q__fa_web": 0.0,
+  "1_en_q__textbooks vs 4_en_q__fa_web": 0.0145,
+  "2_fa_q__textbooks vs 3_fa_q__fa_web": 0.004
+ }
+}
