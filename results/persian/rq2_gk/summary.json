@@ -1,0 +1,271 @@
+{
+ "model_revisions": {
+  "CohereLabs/aya-expanse-8b": "5062468bf9bc0c6035fd64e06274333ec127d980",
+  "gaokerena/gaokerena-v1.0": "dcb0a40aebff3dffabaefe06d09b646a459e8910",
+  "base_source": "kaggle:cohereforai/aya-expanse/transformers/8b/5",
+  "base_verification": {
+   "config.json": {
+    "size_ok": false,
+    "hash_ok": false
+   },
+   "model-00001-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00002-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00003-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "model-00004-of-00004.safetensors": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "tokenizer.json": {
+    "size_ok": true,
+    "hash_ok": true
+   },
+   "tokenizer_config.json": {
+    "size_ok": false,
+    "hash_ok": false
+   }
+  }
+ },
+ "prompt": "Gaokerena prompt_eval_bare (github.com/Mehrdadghassabi/Gaokerena-V @ 13eb1f7); RAG adds RRF-2 k = 4 under '## متن'",
+ "parser": "scripts/persian/gk_parse.py (agreement with their hand labels: results/persian/rq2_gk/parser_check.json)",
+ "fa_mmlu": {
+  "n": 1089,
+  "accuracy_%": {
+   "gaokerena_cot": 48.85,
+   "gaokerena_rrf2_k4": 47.47,
+   "aya_cot": 46.1,
+   "aya_rrf2_k4": 47.29,
+   "qwen_cot": 45.82
+  },
+  "invalid": {
+   "gaokerena_cot": 0,
+   "gaokerena_rrf2_k4": 3,
+   "aya_cot": 6,
+   "aya_rrf2_k4": 22,
+   "qwen_cot": 5
+  },
+  "answer_hit_length_cap": {
+   "gaokerena_cot": 1,
+   "gaokerena_rrf2_k4": 1,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0,
+   "qwen_cot": 1
+  },
+  "paired_tests": {
+   "aya_cot vs gaokerena_cot": {
+    "diff_points": 2.75,
+    "p": 0.038
+   },
+   "aya_cot vs aya_rrf2_k4": {
+    "diff_points": 1.19,
+    "p": 0.4489
+   },
+   "gaokerena_cot vs gaokerena_rrf2_k4": {
+    "diff_points": -1.38,
+    "p": 0.3844
+   },
+   "gaokerena_cot vs aya_rrf2_k4": {
+    "diff_points": -1.56,
+    "p": 0.3275
+   },
+   "aya_cot vs gaokerena_rrf2_k4": {
+    "diff_points": 1.38,
+    "p": 0.4119
+   },
+   "aya_rrf2_k4 vs gaokerena_rrf2_k4": {
+    "diff_points": 0.18,
+    "p": 0.9453
+   },
+   "qwen_cot vs gaokerena_cot": {
+    "diff_points": 3.03,
+    "p": 0.1001
+   },
+   "qwen_cot vs aya_cot": {
+    "diff_points": 0.28,
+    "p": 0.9152
+   }
+  },
+  "prompt_effect (MedRAG -> Gaokerena prompt)": {
+   "gaokerena_cot": {
+    "medrag_prompt_%": 47.2,
+    "gaokerena_prompt_%": 48.85,
+    "diff_points": 1.65,
+    "p": 0.3389
+   },
+   "gaokerena_rrf2_k4": {
+    "medrag_prompt_%": 42.52,
+    "gaokerena_prompt_%": 47.47,
+    "diff_points": 4.96,
+    "p": 0.003
+   },
+   "aya_cot": {
+    "medrag_prompt_%": 52.71,
+    "gaokerena_prompt_%": 46.1,
+    "diff_points": -6.61,
+    "p": 0.0
+   },
+   "aya_rrf2_k4": {
+    "medrag_prompt_%": 48.21,
+    "gaokerena_prompt_%": 47.29,
+    "diff_points": -0.92,
+    "p": 0.5662
+   },
+   "qwen_cot": {
+    "medrag_prompt_%": 59.14,
+    "gaokerena_prompt_%": 45.82,
+    "diff_points": -13.31,
+    "p": 0.0
+   }
+  },
+  "vs_published (their hand labels, same items, no retrieval)": {
+   "gaokerena": {
+    "n_matched": 1045,
+    "published_%": 49.38,
+    "ours_%": 48.9,
+    "diff_points": -0.48,
+    "p": 0.5515,
+    "same_letter_%": 91.77
+   },
+   "aya": {
+    "n_matched": 1049,
+    "published_%": 46.52,
+    "ours_%": 45.95,
+    "diff_points": -0.57,
+    "p": 0.3616,
+    "same_letter_%": 94.95
+   },
+   "qwen": {
+    "n_matched": 1050,
+    "published_%": 44.48,
+    "ours_%": 45.52,
+    "diff_points": 1.05,
+    "p": 0.375,
+    "same_letter_%": 79.52
+   }
+  }
+ },
+ "kopp": {
+  "n": 1878,
+  "accuracy_%": {
+   "gaokerena_cot": 43.29,
+   "gaokerena_rrf2_k4": 44.94,
+   "aya_cot": 43.24,
+   "aya_rrf2_k4": 42.44,
+   "qwen_cot": 41.85
+  },
+  "invalid": {
+   "gaokerena_cot": 0,
+   "gaokerena_rrf2_k4": 3,
+   "aya_cot": 11,
+   "aya_rrf2_k4": 48,
+   "qwen_cot": 13
+  },
+  "answer_hit_length_cap": {
+   "gaokerena_cot": 7,
+   "gaokerena_rrf2_k4": 2,
+   "aya_cot": 0,
+   "aya_rrf2_k4": 0,
+   "qwen_cot": 1
+  },
+  "paired_tests": {
+   "aya_cot vs gaokerena_cot": {
+    "diff_points": 0.05,
+    "p": 1.0
+   },
+   "aya_cot vs aya_rrf2_k4": {
+    "diff_points": -0.8,
+    "p": 0.5412
+   },
+   "gaokerena_cot vs gaokerena_rrf2_k4": {
+    "diff_points": 1.65,
+    "p": 0.1739
+   },
+   "gaokerena_cot vs aya_rrf2_k4": {
+    "diff_points": -0.85,
+    "p": 0.5202
+   },
+   "aya_cot vs gaokerena_rrf2_k4": {
+    "diff_points": 1.7,
+    "p": 0.1886
+   },
+   "aya_rrf2_k4 vs gaokerena_rrf2_k4": {
+    "diff_points": 2.5,
+    "p": 0.0238
+   },
+   "qwen_cot vs gaokerena_cot": {
+    "diff_points": 1.44,
+    "p": 0.3275
+   },
+   "qwen_cot vs aya_cot": {
+    "diff_points": 1.38,
+    "p": 0.3356
+   }
+  },
+  "prompt_effect (MedRAG -> Gaokerena prompt)": {
+   "gaokerena_cot": {
+    "medrag_prompt_%": 41.96,
+    "gaokerena_prompt_%": 43.29,
+    "diff_points": 1.33,
+    "p": 0.3101
+   },
+   "gaokerena_rrf2_k4": {
+    "medrag_prompt_%": 40.68,
+    "gaokerena_prompt_%": 44.94,
+    "diff_points": 4.26,
+    "p": 0.0007
+   },
+   "aya_cot": {
+    "medrag_prompt_%": 46.33,
+    "gaokerena_prompt_%": 43.24,
+    "diff_points": -3.09,
+    "p": 0.0075
+   },
+   "aya_rrf2_k4": {
+    "medrag_prompt_%": 43.66,
+    "gaokerena_prompt_%": 42.44,
+    "diff_points": -1.22,
+    "p": 0.2671
+   },
+   "qwen_cot": {
+    "medrag_prompt_%": 51.65,
+    "gaokerena_prompt_%": 41.85,
+    "diff_points": -9.8,
+    "p": 0.0
+   }
+  },
+  "vs_published (their hand labels, same items, no retrieval)": {
+   "gaokerena": {
+    "n_matched": 167,
+    "published_%": 38.92,
+    "ours_%": 38.32,
+    "diff_points": -0.6,
+    "p": 1.0,
+    "same_letter_%": 97.01
+   },
+   "aya": {
+    "n_matched": 167,
+    "published_%": 34.73,
+    "ours_%": 34.13,
+    "diff_points": -0.6,
+    "p": 1.0,
+    "same_letter_%": 94.61
+   },
+   "qwen": {
+    "n_matched": 168,
+    "published_%": 33.33,
+    "ours_%": 36.9,
+    "diff_points": 3.57,
+    "p": 0.3269,
+    "same_letter_%": 74.4
+   }
+  }
+ }
+}
