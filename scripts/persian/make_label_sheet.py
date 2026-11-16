@@ -40,6 +40,10 @@ INSTRUCTIONS = [
     "  unsure : مطمئن نیستید (در ستون «توضیح» بنویسید چرا)",
     "",
     "قواعد:",
+    "روش سریع: اول ستون سبز «پایان جواب مدل» را بخوانید؛ بیشتر مدل‌ها انتخاب نهایی را در آخر جواب می‌نویسند.",
+    "نمونه‌ها: «پاسخ صحیح گزینه [C] است» → C ؛ \"answer_choice\": \"B\" → B ؛ «بنابراین گزینه الف درست است» → A ؛ «هیچ‌کدام از گزینه‌ها درست نیست» → invalid",
+    "اگر در پایان جواب، انتخابی نبود یا مبهم بود، ستون «جواب کامل مدل» را بخوانید.",
+    "",
     "1. جواب نهایی ملاک است. اگر مدل اول B گفته و در آخر C را انتخاب کرده، C بنویسید.",
     "2. لازم نیست بدانید جواب درست کدام است. درستی پزشکی مهم نیست؛ فقط انتخاب مدل مهم است.",
     "3. اگر مدل به جای حرف، متن گزینه را نوشته، با ستون «گزینه‌ها» حرفش را پیدا کنید.",
@@ -105,7 +109,7 @@ def main():
     ws = wb.active
     ws.title = "برچسب"
     ws.sheet_view.rightToLeft = True
-    head = ["شناسه", "گزینه‌ها", "جواب مدل", "برچسب شما", "توضیح (اختیاری)"]
+    head = ["شناسه", "گزینه‌ها", "پایان جواب مدل (معمولاً انتخاب نهایی اینجاست)", "جواب کامل مدل", "برچسب شما", "توضیح (اختیاری)"]
     ws.append(head)
     for c in ws[1]:
         c.font = Font(bold=True)
@@ -113,14 +117,17 @@ def main():
     for i, x in enumerate(rows, 1):
         rid = f"L{i:03d}"
         opts = bench[x["dataset"]][x["qid"]]["options"]
-        ws.append([rid, "\n".join(f"{k}: {v}" for k, v in opts.items()), x["response"].strip()[:32000], "", ""])
+        resp = x["response"].strip()
+        tail = resp if len(resp) <= 400 else "… " + resp[-400:]
+        ws.append([rid, "\n".join(f"{k}: {v}" for k, v in opts.items()), tail, resp[:32000], "", ""])
         key.append({"id": rid, **{k: x[k] for k in ("dataset", "qid", "model", "prompt", "config", "parsed", "sample")}})
-    for col, w in zip("ABCDE", (9, 40, 110, 14, 30)):
+    for col, w in zip("ABCDEF", (9, 40, 60, 90, 14, 30)):
         ws.column_dimensions[col].width = w
     for row in ws.iter_rows(min_row=2):
         for c in row:
             c.alignment = Alignment(wrap_text=True, vertical="top")
-        row[3].fill = PatternFill("solid", fgColor="FFF2CC")
+        row[4].fill = PatternFill("solid", fgColor="FFF2CC")
+        row[2].fill = PatternFill("solid", fgColor="E2EFDA")
     ws.freeze_panes = "A2"
     ins = wb.create_sheet("راهنما", 0)
     ins.sheet_view.rightToLeft = True
