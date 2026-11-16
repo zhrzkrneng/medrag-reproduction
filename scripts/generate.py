@@ -35,6 +35,12 @@ MODELS = {
     # Aya-Expanse-8B has an 8K context, so it gets the same budget; its own chat template is used.
     "gaokerena/gaokerena-v1.0": {"max_length": 8192, "context_length": 7168, "template": None},
     "CohereLabs/aya-expanse-8b": {"max_length": 8192, "context_length": 7168, "template": None},
+    # second model family for the Persian runs: Llama-3.1-8B-Instruct is MedRAG's Llama-3 budget exactly; its weights
+    # come from Meta's Kaggle Models copy (the Hugging Face repo is gated). Qwen3-8B is the ungated fallback and is
+    # run without its "thinking" mode, so its answers have the same shape as the other models'.
+    "meta-llama/Llama-3.1-8B-Instruct": {"max_length": 8192, "context_length": 7168, "template": None},
+    "Qwen/Qwen3-8B": {"max_length": 8192, "context_length": 7168, "template": None,
+                      "chat_kwargs": {"enable_thinking": False}},
     "axiong/PMC_LLaMA_13B": {"max_length": 2048, "context_length": 1024, "add_bos": True,
                              "template": os.path.join(ROOT, "templates", "pmc_llama.jinja")},
 }
@@ -144,7 +150,8 @@ def main():
                             msgs = build_messages_gk(item["question"], item["options"], context)
                         else:
                             msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
-                        text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+                        text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
+                                                       **cfg.get("chat_kwargs", {}))
                         ids = tok.encode(text, add_special_tokens=False)
                         if cfg.get("add_bos") and tok.bos_token_id is not None:
                             # MedRAG runs LLaMA models through a HF pipeline, whose tokenizer adds <s>
