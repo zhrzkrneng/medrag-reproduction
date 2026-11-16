@@ -1,14 +1,14 @@
 # Kaggle kernel: a second model family for the Persian results (reviewers will ask whether the findings are
 # Qwen-specific). Same prompts (MedRAG), corpus, chunks, top-32 lists and length budget as run_fa / rq2.
 #   English MMLU-Med CoT (language gap on the same 1,089 items), Persian CoT and RRF-2@4 on FA_MED_MMLU and KOPP.
-# MODEL = Llama-3.1-8B-Instruct from Meta's Kaggle Models copy (needs the licence accepted on kaggle.com once);
+# MODEL = Llama-3.1-8B-Instruct, weights from unsloth's ungated copy, checked file by file against Meta's SHA-256;
 # fallback Qwen/Qwen3-8B (Apache-2.0, public on Hugging Face, run without thinking mode).
 # Cost estimate from Qwen2.5's Persian speed: ~3 GPU-hours.
 CODE_STAMP = "code-2026-11-16b"   # must match scripts/persian/CODE_STAMP in the attached code dataset
 EXPECTED = {"snippets": 541926, "fingerprint": "399761caa137ba97"}
 CORPUS_REVISION = "1765dbdc64f75742d019e5e80010c62db27c63a1"
 MODEL = "meta-llama/Llama-3.1-8B-Instruct"   # or "Qwen/Qwen3-8B"
-KAGGLE_MODEL = "metaresearch/llama-3.1/transformers/8b-instruct"
+MIRROR = "unsloth/Llama-3.1-8B-Instruct"
 KERNEL_BUDGET_S = int(10.0 * 3600)
 import glob, gzip, hashlib, json, os, subprocess, sys, time
 T0 = time.time()
@@ -21,32 +21,46 @@ assert stamp == CODE_STAMP, f"stale code dataset (stamp {stamp!r}, expected {COD
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
 model_path = None
 if MODEL.startswith("meta-llama"):
-    cs = [os.path.dirname(c) for c in glob.glob("/kaggle/input/**/config.json", recursive=True)
-          if glob.glob(os.path.join(os.path.dirname(c), "*.safetensors")) and "llama" in c.lower()]
-    assert cs, "Llama weights not mounted: accept the licence on the Kaggle model page"
-    model_path = cs[0]
-    print("model dir:", model_path, sorted(os.listdir(model_path)), flush=True)
+    # Kaggle has paused access requests for Meta's Kaggle copy (2026-11-16) and the Hugging Face repo is gated, so the
+    # weights come from unsloth's public, ungated copy (Llama 3.1 Community License allows redistribution). Each
+    # safetensors file is checked against the SHA-256 that Meta's gated repo publishes in its (public) file metadata.
+    from huggingface_hub import HfApi, snapshot_download
+    api = HfApi()
+    mirror_rev = api.model_info(MIRROR).sha
+    model_path = snapshot_download(MIRROR, revision=mirror_rev, local_dir=f"{TMP}/llama",
+                                   allow_patterns=["*.json", "*.safetensors", "tokenizer*"])
+    print("mirror", MIRROR, mirror_rev, sorted(os.listdir(model_path)), flush=True)
     tc = json.load(open(os.path.join(model_path, "tokenizer_config.json")))
-    assert tc.get("chat_template"), "no chat template in the Kaggle copy"
-    # compare with the (gated) Hugging Face repo's public metadata where it is readable; recorded, not required
-    check = {}
+    assert tc.get("chat_template"), "no chat template in the mirror"
+    check = {"mirror": MIRROR, "mirror_revision": mirror_rev}
     try:
-        from huggingface_hub import HfApi
-        info = HfApi().model_info(MODEL, files_metadata=True)
-        for f in info.siblings:
-            if f.rfilename.endswith(".safetensors"):
-                lp = os.path.join(model_path, f.rfilename)
-                hh = hashlib.sha256()
-                with open(lp, "rb") as fh:
-                    for blk in iter(lambda: fh.read(1 << 24), b""):
-                        hh.update(blk)
-                check[f.rfilename] = os.path.exists(lp) and f.lfs is not None and hh.hexdigest() == f.lfs.sha256
-        check["hf_revision"] = info.sha
-    except Exception as e:  # gated repo metadata may be refused without a token
+        info = api.model_info(MODEL, files_metadata=True)
+        check["official_revision"] = info.sha
+        want = {f.rfilename: f.lfs.sha256 for f in info.siblings if f.rfilename.endswith(".safetensors") and f.lfs}
+        got = {}
+        for fn in sorted(glob.glob(os.path.join(model_path, "*.safetensors"))):
+            hh = hashlib.sha256()
+            with open(fn, "rb") as fh:
+                for blk in iter(lambda: fh.read(1 << 24), b""):
+                    hh.update(blk)
+            got[os.path.basename(fn)] = hh.hexdigest()
+        check["files_match"] = {k: got.get(k) == v for k, v in want.items()}
+        check["extra_files"] = sorted(set(got) - set(want))
+        # small files: git blob sha1 against Meta's (recorded, not required: a mirror may rename _name_or_path etc.)
+        blobs = {f.rfilename: f.blob_id for f in info.siblings if f.rfilename in
+                 ("config.json", "generation_config.json", "tokenizer.json", "tokenizer_config.json")}
+        for fn, bid in blobs.items():
+            lp = os.path.join(model_path, fn)
+            if os.path.exists(lp):
+                data = open(lp, "rb").read()
+                check[f"same_{fn}"] = hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest() == bid
+    except Exception as e:  # gated metadata may be refused; then the run is still recorded as unverified
         check["error"] = repr(e)[:300]
     print("weights check", json.dumps(check), flush=True)
     os.makedirs(f"{OUT}/results", exist_ok=True)
-    json.dump({"source": "kaggle:" + KAGGLE_MODEL, "check": check}, open(f"{OUT}/results/model_source.json", "w"), indent=1)
+    json.dump(check, open(f"{OUT}/results/model_source.json", "w"), indent=1)
+    if "files_match" in check:
+        assert want and all(check["files_match"].values()) and not check["extra_files"], "mirror weights differ from Meta's"
 P = lambda *x: os.path.join(ROOT, "scripts", *x)
 assert glob.glob(os.path.join(ROOT, "**", "fa_retrieval_top32.jsonl*"), recursive=True), "retrieval file missing"
 TMP, OUT = "/kaggle/tmp", "/kaggle/working"
