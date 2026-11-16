@@ -42,3 +42,12 @@ def test_gaokerena_prompt_and_parser():
     assert parse("بررسی گزینه‌ها: [A] ... [B] ...\nبنابراین، پاسخ صحیح [D] است.") == "D"
     assert parse("برای پاسخ به این پرسش، باید دقت کنیم. گزینه ۲ مناسب است") == "B"
     assert parse("هیچ‌کدام") is None
+
+
+def test_holm_and_bh_corrections():
+    from stats_all import bh, holm
+    ps = [0.01, 0.04, 0.03, 0.5]
+    # Holm: sorted 0.01*4, 0.03*3, 0.04*2, 0.5*1, made monotone
+    assert [round(x, 4) for x in holm(ps)] == [0.04, 0.09, 0.09, 0.5]
+    # BH: 0.01*4/1, 0.03*4/2, 0.04*4/3, 0.5*4/4, made monotone from the top
+    assert [round(x, 4) for x in bh(ps)] == [0.04, 0.0533, 0.0533, 0.5]
