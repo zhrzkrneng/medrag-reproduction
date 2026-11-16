@@ -27,6 +27,15 @@
    "capped_and_repeating": 12,
    "answers_mostly_in_persian": 0
   },
+  "mmlu/rrf2_k4": {
+   "n": 1089,
+   "acc_%": 76.68,
+   "strict_acc_%": 76.31,
+   "strict_unparsed": 31,
+   "answer_hit_length_cap": 30,
+   "capped_and_repeating": 11,
+   "answers_mostly_in_persian": 0
+  },
   "fa_mmlu/cot": {
    "n": 1089,
    "acc_%": 47.93,
@@ -76,6 +85,16 @@
    "q_bh": 0.0
   },
   {
+   "test": "Llama RAG effect mmlu: CoT -> RRF-2@4",
+   "n": 1089,
+   "acc_a": 77.13,
+   "acc_b": 76.68,
+   "diff_b_minus_a": -0.46,
+   "p_raw": 0.7723,
+   "p_holm": 1.0,
+   "q_bh": 0.8581
+  },
+  {
    "test": "Llama RAG effect fa_mmlu: CoT -> RRF-2@4",
    "n": 1089,
    "acc_a": 47.93,
@@ -93,7 +112,7 @@
    "diff_b_minus_a": -0.53,
    "p_raw": 0.7237,
    "p_holm": 1.0,
-   "q_bh": 0.8271
+   "q_bh": 0.8581
   },
   {
    "test": "Qwen -> Llama, mmlu/cot",
@@ -103,7 +122,17 @@
    "diff_b_minus_a": -1.29,
    "p_raw": 0.3456,
    "p_holm": 1.0,
-   "q_bh": 0.553
+   "q_bh": 0.576
+  },
+  {
+   "test": "Qwen -> Llama, mmlu/rrf2_k4",
+   "n": 1089,
+   "acc_a": 74.29,
+   "acc_b": 76.68,
+   "diff_b_minus_a": 2.39,
+   "p_raw": 0.1078,
+   "p_holm": 0.6468,
+   "q_bh": 0.2156
   },
   {
    "test": "Qwen -> Llama, fa_mmlu/cot",
@@ -122,8 +151,8 @@
    "acc_b": 48.21,
    "diff_b_minus_a": -5.14,
    "p_raw": 0.0033,
-   "p_holm": 0.0198,
-   "q_bh": 0.007
+   "p_holm": 0.0264,
+   "q_bh": 0.0088
   },
   {
    "test": "Qwen -> Llama, kopp/cot",
@@ -132,8 +161,8 @@
    "acc_b": 47.39,
    "diff_b_minus_a": -4.26,
    "p_raw": 0.0035,
-   "p_holm": 0.0198,
-   "q_bh": 0.007
+   "p_holm": 0.0264,
+   "q_bh": 0.0088
   },
   {
    "test": "Qwen -> Llama, kopp/rrf2_k4",
@@ -143,7 +172,7 @@
    "diff_b_minus_a": -0.69,
    "p_raw": 0.634,
    "p_holm": 1.0,
-   "q_bh": 0.8271
+   "q_bh": 0.8581
   }
  ],
  "rag_effect_on_strictly_parsed_both": {
