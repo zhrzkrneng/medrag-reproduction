@@ -13,6 +13,7 @@ import argparse
 import gzip
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -46,18 +47,24 @@ def main():
             continue
         rows = jl(path)
         d = {}
-        unp = capped = 0
+        unp = capped = fa_reason = looping = 0
         for r in rows:
+            t = r["response"]
+            nfa, nen, nzh = (len(re.findall(x, t)) for x in ("[\u0600-\u06FF]", "[A-Za-z]", "[\u4e00-\u9fff]"))
+            fa_reason += nfa / (nfa + nen + nzh + 1) > 0.5
             off = official_prediction(r["response"])
             st = strict_prediction(r["response"])
             d[r["qid"]] = {"gold": r["answer"], "pred": off, "strict": st}
             unp += st is None
             budget = min(1024, 8192 - r["prompt_tokens"])
-            capped += r["output_tokens"] >= budget
+            hit = r["output_tokens"] >= budget
+            capped += hit
+            looping += hit and len(set(t[-400:].split())) < 30  # the last 400 characters use < 30 distinct words
         llama[(ds, conf)] = d
         info[f"{ds}/{conf}"] = {"n": len(d), "acc_%": round(100 * sum(v["pred"] == v["gold"] for v in d.values()) / len(d), 2),
                                 "strict_acc_%": round(100 * sum(v["strict"] == v["gold"] for v in d.values()) / len(d), 2),
-                                "strict_unparsed": unp, "answer_hit_length_cap": capped}
+                                "strict_unparsed": unp, "answer_hit_length_cap": capped,
+                                "capped_and_repeating": looping, "answers_mostly_in_persian": fa_reason}
     # Qwen on the same questions
     qwen = {}
     base = os.path.join(ROOT, "results", "qwen_full", "Qwen__Qwen2.5-7B-Instruct", "mmlu", "cot.jsonl")
@@ -84,13 +91,22 @@ def main():
             test(f"Llama RAG effect {ds}: CoT -> RRF-2@4", ok[(ds, "cot")], ok[(ds, "rrf2_k4")])
     for k in ok:
         test(f"Qwen -> Llama, {k[0]}/{k[1]}", qwen[k], ok[k])
+    robust = {}
+    for ds in ("fa_mmlu", "kopp"):
+        if (ds, "cot") in llama and (ds, "rrf2_k4") in llama:
+            A, B = llama[(ds, "cot")], llama[(ds, "rrf2_k4")]
+            qs = [q for q in A if A[q]["strict"] and q in B and B[q]["strict"]]
+            x = [A[q]["strict"] == A[q]["gold"] for q in qs]
+            y = [B[q]["strict"] == B[q]["gold"] for q in qs]
+            robust[ds] = {"n_both_strictly_parsed": len(qs), "cot_%": round(100 * sum(x) / len(qs), 2),
+                          "rrf2_k4_%": round(100 * sum(y) / len(qs), 2), "p": mcnemar(x, y)}
     ps = [t["p_raw"] for t in tests]
     for t, h, q in zip(tests, holm(ps), bh(ps)):
         t["p_holm"], t["q_bh"] = round(h, 4), round(q, 4)
     src = os.path.join(res, "model_source.json")
     out = {"model": "meta-llama/Llama-3.1-8B-Instruct", "weights": json.load(open(src)) if os.path.exists(src) else None,
            "prompt": "MedRAG (English instructions, JSON CoT); Persian question, options and snippets",
-           "accuracy": info, "tests": tests,
+           "accuracy": info, "tests": tests, "rag_effect_on_strictly_parsed_both": robust,
            "note": "official MIRAGE parser (falls back to 'A'); strict parser counts unparsable answers as wrong"}
     os.makedirs(a.out_dir, exist_ok=True)
     json.dump(out, open(os.path.join(a.out_dir, "summary.json"), "w"), indent=1)
