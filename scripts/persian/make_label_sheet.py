@@ -33,6 +33,7 @@ INSTRUCTIONS = [
     "",
     "در هر ردیف، جوابی را که یک مدل زبانی به یک سؤال چهارگزینه‌ای پزشکی داده می‌بینید.",
     "کار شما فقط این است: مدل در نهایت کدام گزینه را انتخاب کرده؟",
+    "مهم: این بررسیِ انسانی است. لطفاً خودتان و بدون کمک هیچ ابزار هوش مصنوعی برچسب بزنید؛ وگرنه نمی‌توان آن را در مقاله «برچسب دستی» گزارش کرد.",
     "",
     "در ستون «برچسب شما» یکی از این‌ها را بنویسید:",
     "  A یا B یا C یا D : گزینه‌ای که مدل در نهایت انتخاب کرده",
@@ -64,15 +65,22 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--runs", required=True)
     p.add_argument("--out_dir", default=os.path.join(ROOT, "data_local", "labeling"))
-    p.add_argument("--n_per_cell", type=int, default=25, help="per prompt x dataset; split over the 3 models")
+    p.add_argument("--n_per_cell", type=int, nargs=4, default=[25, 25, 25, 25],
+                   help="rows per (prompt, dataset) cell, in the order medrag/fa_mmlu, medrag/kopp, gaokerena/fa_mmlu, gaokerena/kopp")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--exclude_key", nargs="*", default=[], help="label_key.json files whose rows are not drawn again")
+    p.add_argument("--name", default="label_sheet", help="output base name (<name>.xlsx and <name>_key.json)")
     a = p.parse_args()
     bench = {**json.load(open(os.path.join(ROOT, "data_local", "fa_mmlu_benchmark.json"))),
              **json.load(open(os.path.join(ROOT, "data_local", "kopp_benchmark.json")))}
-    rng = random.Random(0)
+    rng = random.Random(a.seed)
+    seen = {(k["dataset"], k["qid"], k["model"], k["prompt"], k["config"]) for f in a.exclude_key for k in json.load(open(f))}
     rows = []
+    cells = iter(a.n_per_cell)
     for prompt in ("medrag", "gaokerena"):
         for ds in ("fa_mmlu", "kopp"):
-            per_model = [9, 8, 8]
+            n_cell = next(cells)
+            per_model = [n_cell // 3 + (1 if i < n_cell % 3 else 0) for i in range(3)]
             for (mname, slug), n in zip(MODELS.items(), per_model):
                 pool = []
                 for conf in ("cot", "rrf2_k4"):
@@ -84,6 +92,8 @@ def main():
                             continue
                         path = os.path.join(a.runs, "out_rq2gk", "results", slug, ds, f"{conf}_gk.jsonl")
                     for r in jl(path):
+                        if (ds, r["qid"], mname, prompt, conf) in seen:
+                            continue
                         resp = r["response"]
                         if prompt == "medrag":
                             parsed = official_prediction(resp)
@@ -135,9 +145,9 @@ def main():
         ins.append([line])
     ins.column_dimensions["A"].width = 140
     ins["A1"].font = Font(bold=True, size=14)
-    xlsx = os.path.join(a.out_dir, "label_sheet.xlsx")
+    xlsx = os.path.join(a.out_dir, f"{a.name}.xlsx")
     wb.save(xlsx)
-    json.dump(key, open(os.path.join(a.out_dir, "label_key.json"), "w"), indent=1)
+    json.dump(key, open(os.path.join(a.out_dir, f"{a.name}_key.json" if a.name != "label_sheet" else "label_key.json"), "w"), indent=1)
     from collections import Counter
     print(xlsx, len(rows), Counter((x["prompt"], x["model"], x["sample"]) for x in rows))
 
