@@ -236,6 +236,24 @@ Positive control: 20 benchmark questions planted into a copy of corpus documents
 - **Retrieval has no effect on Llama** in either language (English −0.5, p = 0.77; FA_MED_MMLU +0.3, p = 0.91; KOPP −0.5, p = 0.72), unlike Qwen (English −4.1, Persian −5.8 / −4.1); with retrieval the language gap is −28.5 points. The same holds on answers both runs parse strictly (49.2 → 49.7, p = 0.80; 49.7 → 51.5, p = 0.25).
 - **Answer format:** Llama's Persian answers often run past the 1,024-token cap (60–314 per run, about half of them repetition loops), so the strict parser misses 60–334 answers and the official parser's fallback "A" is used for them; English: 18. Strict accuracies: 46.74 / 45.09 (FA_MED_MMLU CoT / RAG) and 44.94 / 41.85 (KOPP).
 
+**RQ3: do MedRAG's findings on retrievers and k hold in Persian?** `kaggle/rq3/`, analysis `scripts/persian/analyze_rq3.py` → `results/persian/rq3/summary.json`, figure `docs/k_sweep_fa.png` (ids, letters, counts). Qwen2.5-7B-Instruct, MedRAG prompts, Persian web corpus, same length budget; 7 new runs (BM25@4 on both datasets, BGE-M3@4 on KOPP, RRF-2 at k = 1, 2, 8, 16 on FA_MED_MMLU), all complete (n = 1,089 / 1,878), 10.9 GPU-hours. Combined with the earlier runs (RRF-2@4, RRF-2@32, FA_MED_MMLU BGE-M3@4). Exact McNemar; Holm and BH within this 18-test family.
+
+| Accuracy (%) | CoT | BM25@4 | BGE-M3@4 | RRF-2@4 |
+|---|---|---|---|---|
+| FA_MED_MMLU | 59.14 | 53.54 | 52.98 | 53.35 |
+| KOPP | 51.65 | 47.07 | 48.35 | 47.55 |
+| answer in top 4 (FA / KOPP) | | 5.8 / 6.4 | 6.1 / 8.2 | 5.7 / 8.0 |
+
+| FA_MED_MMLU, RRF-2 | k = 1 | 2 | 4 | 8 | 16 | 32 | CoT |
+|---|---|---|---|---|---|---|---|
+| Persian (web corpus) | 49.68 | 50.60 | 53.35 | 53.81 | 54.18 | 54.45 | 59.14 |
+| English (Textbooks, same items) | 72.64 | 72.45 | 74.29 | 73.83 | 76.12 | 74.75 | 78.42 |
+| Persian: answer in top k | 3.1 | 4.2 | 5.7 | 7.3 | 9.3 | 12.0 | |
+
+- **The choice of retriever does not matter in Persian.** BM25, BGE-M3 and RRF-2 are within 0.6 (FA_MED_MMLU) and 1.3 points (KOPP) of each other (all p ≥ 0.36), and every one is below CoT (FA_MED_MMLU −5.6 to −6.2, all significant after Holm; KOPP −3.3 to −4.6, significant after Holm except BGE-M3, p_Holm = 0.12, q_BH = 0.03). The retrievers find the correct option's text for only 6–8% of questions, so there is little for the reader to use whichever retriever is chosen.
+- **Every k is below CoT, and accuracy rises with k** from 49.7 (k = 1) to 54.5 (k = 32). The rise is monotone but the k = 1 → 16 difference (+4.5) survives only BH (p = 0.010, p_Holm = 0.08); k = 1, 2, 4, 8, 16 are below CoT after Holm, k = 32 only after BH. In English the curve is flat and also below CoT at every k. MedRAG reports that the effect of k depends on the dataset and the model; here more snippets mainly mean less damage, not a gain.
+- **The losses have two different causes.** At small k they are not a length problem (k = 1: 6 answers at the cap; on the other 1,083 questions 59.1 → 49.6, p < 0.0001): one or two snippets that rarely contain the answer pull the model away from what it knows. At k = 16, 100 answers hit the cap (k = 32: 95); on the remaining 989 questions k = 16 and CoT do not differ (59.5 vs 57.8, p = 0.38).
+
 
 
 **Persian RAG accuracy (Qwen2.5-7B-Instruct, k = 4).** `kaggle/run_fa/`, analysis `scripts/persian/analyze_fa_runs.py` → `results/persian/run_fa/summary.json` (per-question predictions are committed as ids and letters only). Prompts are MedRAG's English instructions with Persian question, options and snippets; RRF-2 = BM25 + BGE-M3 over the Persian web corpus. k = 4 rather than 32 because Persian snippets take about twice as many tokens (k = 4 ≈ 2,300 prompt tokens, k = 32 ≈ 7,500) and k = 32 did not fit this week's GPU quota.
@@ -464,6 +482,10 @@ MIRAGE برای این دیتاست‌ها شاهد درست (gold evidence) ن�
     - **Llama به فارسی استدلال می‌کند** (در ۹۹٫۸ تا ۱۰۰ درصد جواب‌ها بیش از نیمی از حروف فارسی است؛ هیچ چینی ندارد)، برخلاف Qwen که به انگلیسی یا چینی استدلال می‌کند. استدلال به زبان سؤال شکاف را کم نمی‌کند، که با آزمایش «به انگلیسی فکر کن» هم‌خوان است: زبان استدلال علت اصلی نیست.
     - **بازیابی روی Llama در هیچ زبانی اثر ندارد** (انگلیسی ۰٫۵−، p = 0.77؛ FA_MED_MMLU ۰٫۳+، p = 0.91؛ KOPP ۰٫۵−، p = 0.72)، برخلاف Qwen. با بازیابی، شکاف زبانی ۲۸٫۵ امتیاز است. روی جواب‌هایی که هر دو اجرا کاملاً خوانا دارند هم همین است.
     - **قالب جواب:** جواب‌های فارسی Llama اغلب از سقف ۱٬۰۲۴ توکن می‌گذرند (۶۰ تا ۳۱۴ جواب در هر اجرا، حدود نیمی تکرار حلقه‌ای)، پس parser سخت‌گیرانه ۶۰ تا ۳۳۴ جواب را نمی‌خواند و برای آن‌ها پیش‌فرض «A» parser رسمی به کار می‌رود. دقت سخت‌گیرانه: ۴۶٫۷۴ / ۴۵٫۰۹ و ۴۴٫۹۴ / ۴۱٫۸۵.
+  - **RQ3: آیا یافته‌های MedRAG دربارهٔ بازیاب و k در فارسی هم برقرار است؟** پوشهٔ `kaggle/rq3/`، تحلیل با `scripts/persian/analyze_rq3.py`، نتیجه در `results/persian/rq3/summary.json` و نمودار `docs/k_sweep_fa.png`. مدل Qwen2.5-7B-Instruct با پرامپت‌های MedRAG و پیکرهٔ وب فارسی. ۷ اجرای جدید (BM25@4 روی هر دو دیتاست، BGE-M3@4 روی KOPP، و RRF-2 با k = 1, 2, 8, 16 روی FA_MED_MMLU) همه کامل شد؛ هزینه ۱۰٫۹ ساعت GPU. آزمون McNemar دقیق؛ Holm و BH درون همین خانوادهٔ ۱۸ آزمونی.
+    - **انتخاب بازیاب در فارسی فرقی ایجاد نمی‌کند.** دقت با k = 4 روی FA_MED_MMLU: BM25 ۵۳٫۵۴، BGE-M3 ۵۲٫۹۸، RRF-2 ۵۳٫۳۵ (CoT ۵۹٫۱۴)؛ روی KOPP: ۴۷٫۰۷، ۴۸٫۳۵، ۴۷٫۵۵ (CoT ۵۱٫۶۵). تفاوت بازیاب‌ها با هم معنادار نیست (همه p ≥ 0.36) و همه پایین‌تر از CoT هستند. متن گزینهٔ درست فقط در ۶ تا ۸ درصد سؤال‌ها در ۴ قطعهٔ اول هست.
+    - **همهٔ مقدارهای k پایین‌تر از CoT هستند و دقت با k بالا می‌رود:** k = 1: ۴۹٫۶۸، ۲: ۵۰٫۶۰، ۴: ۵۳٫۳۵، ۸: ۵۳٫۸۱، ۱۶: ۵۴٫۱۸، ۳۲: ۵۴٫۴۵. افزایش k = 1 → 16 (۴٫۵+) فقط با BH معنادار می‌ماند (p = 0.010). در انگلیسی منحنی تقریباً صاف است (۷۲٫۴ تا ۷۶٫۱) و آن هم در همهٔ k ها زیر CoT (۷۸٫۴۲). یعنی قطعهٔ بیشتر عمدتاً «آسیب کمتر» است، نه سود.
+    - **افت دو علت متفاوت دارد.** در k کوچک مشکل طول نیست (k = 1: فقط ۶ جواب به سقف رسید؛ روی ۱٬۰۸۳ سؤال دیگر ۵۹٫۱ → ۴۹٫۶، p < 0.0001): یکی دو قطعه که به‌ندرت جواب را دارند مدل را از دانستهٔ خودش دور می‌کنند. در k = 16، ۱۰۰ جواب به سقف طول رسید؛ روی ۹۸۹ سؤال باقی‌مانده k = 16 با CoT فرقی ندارد (۵۹٫۵ و ۵۷٫۸، p = 0.38).
 
 - **دقت RAG فارسی (Qwen2.5-7B-Instruct، k = 4):** پوشهٔ `kaggle/run_fa/`، تحلیل با `scripts/persian/analyze_fa_runs.py` و نتیجه در `results/persian/run_fa/summary.json`. از پیش‌بینی‌ها فقط شناسه و حرف گزینه در مخزن است. k = 4 به جای ۳۲ انتخاب شد، چون قطعه‌های فارسی حدود دو برابر توکن می‌گیرند و k = 32 در سهمیهٔ GPU این هفته جا نمی‌شد.
   - FA_MED_MMLU (۱٬۰۸۹ سؤال): بدون بازیابی **۵۹.۱۴٪**، با RRF-2 **۵۳.۳۵٪**. RAG در ۱۴۳ سؤال جواب را درست کرد و در ۲۰۶ سؤال خراب کرد (p < 0.001).

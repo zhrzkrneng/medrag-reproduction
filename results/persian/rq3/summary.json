@@ -1,0 +1,347 @@
+{
+ "model": "Qwen/Qwen2.5-7B-Instruct",
+ "prompt": "MedRAG",
+ "tables": {
+  "retrievers_k4": {
+   "fa_mmlu/bm25": {
+    "acc_%": 53.54,
+    "n": 1089,
+    "coverage_top4_%": 5.8
+   },
+   "fa_mmlu/bge_m3": {
+    "acc_%": 52.98,
+    "n": 1089,
+    "coverage_top4_%": 6.1
+   },
+   "fa_mmlu/rrf2": {
+    "acc_%": 53.35,
+    "n": 1089,
+    "coverage_top4_%": 5.7
+   },
+   "fa_mmlu/cot": {
+    "acc_%": 59.14,
+    "n": 1089
+   },
+   "kopp/bm25": {
+    "acc_%": 47.07,
+    "n": 1878,
+    "coverage_top4_%": 6.4
+   },
+   "kopp/bge_m3": {
+    "acc_%": 48.35,
+    "n": 1878,
+    "coverage_top4_%": 8.2
+   },
+   "kopp/rrf2": {
+    "acc_%": 47.55,
+    "n": 1878,
+    "coverage_top4_%": 8.0
+   },
+   "kopp/cot": {
+    "acc_%": 51.65,
+    "n": 1878
+   }
+  },
+  "k_sweep_fa_mmlu": {
+   "1": {
+    "acc_%": 49.68,
+    "n": 1089,
+    "coverage_%": 3.1
+   },
+   "2": {
+    "acc_%": 50.6,
+    "n": 1089,
+    "coverage_%": 4.2
+   },
+   "4": {
+    "acc_%": 53.35,
+    "n": 1089,
+    "coverage_%": 5.7
+   },
+   "8": {
+    "acc_%": 53.81,
+    "n": 1089,
+    "coverage_%": 7.3
+   },
+   "16": {
+    "acc_%": 54.18,
+    "n": 1089,
+    "coverage_%": 9.3
+   },
+   "32": {
+    "acc_%": 54.45,
+    "n": 1089,
+    "coverage_%": 12.0
+   },
+   "cot": 59.14
+  },
+  "k_sweep_en_mmlu": {
+   "1": {
+    "acc_%": 72.64
+   },
+   "2": {
+    "acc_%": 72.45
+   },
+   "4": {
+    "acc_%": 74.29
+   },
+   "8": {
+    "acc_%": 73.83
+   },
+   "16": {
+    "acc_%": 76.12
+   },
+   "32": {
+    "acc_%": 74.75
+   },
+   "cot": 78.42
+  }
+ },
+ "tests": [
+  {
+   "test": "fa_mmlu: CoT -> bm25@4",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 53.54,
+   "diff_b_minus_a": -5.6,
+   "p_raw": 0.0013,
+   "p_holm": 0.0169,
+   "q_bh": 0.0039
+  },
+  {
+   "test": "fa_mmlu: CoT -> bge_m3@4",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 52.98,
+   "diff_b_minus_a": -6.15,
+   "p_raw": 0.0002,
+   "p_holm": 0.0032,
+   "q_bh": 0.0012
+  },
+  {
+   "test": "fa_mmlu: CoT -> rrf2@4",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 53.35,
+   "diff_b_minus_a": -5.79,
+   "p_raw": 0.0009,
+   "p_holm": 0.0126,
+   "q_bh": 0.0032
+  },
+  {
+   "test": "fa_mmlu: bm25@4 -> bge_m3@4",
+   "n": 1089,
+   "acc_a": 53.54,
+   "acc_b": 52.98,
+   "diff_b_minus_a": -0.55,
+   "p_raw": 0.7887,
+   "p_holm": 1.0,
+   "q_bh": 0.8873
+  },
+  {
+   "test": "fa_mmlu: bm25@4 -> rrf2@4",
+   "n": 1089,
+   "acc_a": 53.54,
+   "acc_b": 53.35,
+   "diff_b_minus_a": -0.18,
+   "p_raw": 0.9557,
+   "p_holm": 1.0,
+   "q_bh": 0.9557
+  },
+  {
+   "test": "fa_mmlu: bge_m3@4 -> rrf2@4",
+   "n": 1089,
+   "acc_a": 52.98,
+   "acc_b": 53.35,
+   "diff_b_minus_a": 0.37,
+   "p_raw": 0.8647,
+   "p_holm": 1.0,
+   "q_bh": 0.9156
+  },
+  {
+   "test": "kopp: CoT -> bm25@4",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 47.07,
+   "diff_b_minus_a": -4.58,
+   "p_raw": 0.0008,
+   "p_holm": 0.012,
+   "q_bh": 0.0032
+  },
+  {
+   "test": "kopp: CoT -> bge_m3@4",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 48.35,
+   "diff_b_minus_a": -3.3,
+   "p_raw": 0.017,
+   "p_holm": 0.119,
+   "q_bh": 0.0255
+  },
+  {
+   "test": "kopp: CoT -> rrf2@4",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 47.55,
+   "diff_b_minus_a": -4.1,
+   "p_raw": 0.0028,
+   "p_holm": 0.0308,
+   "q_bh": 0.0063
+  },
+  {
+   "test": "kopp: bm25@4 -> bge_m3@4",
+   "n": 1878,
+   "acc_a": 47.07,
+   "acc_b": 48.35,
+   "diff_b_minus_a": 1.28,
+   "p_raw": 0.3595,
+   "p_holm": 1.0,
+   "q_bh": 0.4978
+  },
+  {
+   "test": "kopp: bm25@4 -> rrf2@4",
+   "n": 1878,
+   "acc_a": 47.07,
+   "acc_b": 47.55,
+   "diff_b_minus_a": 0.48,
+   "p_raw": 0.7387,
+   "p_holm": 1.0,
+   "q_bh": 0.8864
+  },
+  {
+   "test": "kopp: bge_m3@4 -> rrf2@4",
+   "n": 1878,
+   "acc_a": 48.35,
+   "acc_b": 47.55,
+   "diff_b_minus_a": -0.8,
+   "p_raw": 0.5517,
+   "p_holm": 1.0,
+   "q_bh": 0.7093
+  },
+  {
+   "test": "fa_mmlu: CoT -> RRF-2@1",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 49.68,
+   "diff_b_minus_a": -9.46,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "fa_mmlu: CoT -> RRF-2@2",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 50.6,
+   "diff_b_minus_a": -8.54,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "fa_mmlu: CoT -> RRF-2@8",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 53.81,
+   "diff_b_minus_a": -5.33,
+   "p_raw": 0.0023,
+   "p_holm": 0.0276,
+   "q_bh": 0.0059
+  },
+  {
+   "test": "fa_mmlu: CoT -> RRF-2@16",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 54.18,
+   "diff_b_minus_a": -4.96,
+   "p_raw": 0.0049,
+   "p_holm": 0.049,
+   "q_bh": 0.0098
+  },
+  {
+   "test": "fa_mmlu: CoT -> RRF-2@32",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 54.45,
+   "diff_b_minus_a": -4.68,
+   "p_raw": 0.0077,
+   "p_holm": 0.0693,
+   "q_bh": 0.0139
+  },
+  {
+   "test": "fa_mmlu: RRF-2@1 -> RRF-2@16",
+   "n": 1089,
+   "acc_a": 49.68,
+   "acc_b": 54.18,
+   "diff_b_minus_a": 4.5,
+   "p_raw": 0.0099,
+   "p_holm": 0.0792,
+   "q_bh": 0.0162
+  }
+ ],
+ "timing": [
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "bm25@4",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 3187.0,
+   "sec_per_q": 2.927,
+   "hit_length_cap": 2
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "bm25@4",
+   "dataset": "kopp",
+   "n": 1878,
+   "seconds": 5122.2,
+   "sec_per_q": 2.727,
+   "hit_length_cap": 2
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "bge_m3@4",
+   "dataset": "kopp",
+   "n": 1878,
+   "seconds": 5048.3,
+   "sec_per_q": 2.688,
+   "hit_length_cap": 5
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "rrf2@1",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 1237.9,
+   "sec_per_q": 1.137,
+   "hit_length_cap": 6
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "rrf2@2",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 1553.3,
+   "sec_per_q": 1.426,
+   "hit_length_cap": 2
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "rrf2@8",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 6743.6,
+   "sec_per_q": 6.192,
+   "hit_length_cap": 2
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "rrf2@16",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 15193.6,
+   "sec_per_q": 13.952,
+   "hit_length_cap": 100
+  }
+ ]
+}
