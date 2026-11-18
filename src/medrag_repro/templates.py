@@ -80,3 +80,44 @@ def build_messages_gk(question: str, options: dict, context: str | None) -> list
     if context is None:
         return [{"role": "user", "content": GK_PROMPT.format(question=question, choices=ch)}]
     return [{"role": "user", "content": GK_PROMPT_RAG.format(context=context, question=question, choices=ch)}]
+
+
+# --- MedRAG's prompts translated into Persian (review check: is the Persian result tied to English instructions?) ---
+# Our translation of COT_SYSTEM / COT_PROMPT / MEDRAG_SYSTEM / MEDRAG_PROMPT, sentence by sentence. The JSON keys stay
+# in Latin script so the official MIRAGE answer parser applies unchanged; document and option formats are MedRAG's.
+FA_COT_SYSTEM = '''شما یک متخصص پزشکی کمک‌کننده هستید و وظیفهٔ شما پاسخ دادن به یک پرسش پزشکی چندگزینه‌ای است. لطفاً ابتدا گام‌به‌گام فکر کنید و سپس پاسخ را از میان گزینه‌های داده‌شده انتخاب کنید. خروجی خود را به صورت یک json با قالب Dict{"step_by_step_thinking": Str(explanation), "answer_choice": Str{A/B/C/...}} تنظیم کنید. پاسخ‌های شما فقط برای پژوهش استفاده می‌شود، پس لطفاً یک پاسخ قطعی بدهید.'''
+
+FA_COT_PROMPT = '''
+پرسش این است:
+{question}
+
+گزینه‌های ممکن این‌ها هستند:
+{options}
+
+لطفاً گام‌به‌گام فکر کنید و خروجی خود را به صورت json تولید کنید:
+'''
+
+FA_MEDRAG_SYSTEM = '''شما یک متخصص پزشکی کمک‌کننده هستید و وظیفهٔ شما پاسخ دادن به یک پرسش پزشکی چندگزینه‌ای با استفاده از اسناد مرتبط است. لطفاً ابتدا گام‌به‌گام فکر کنید و سپس پاسخ را از میان گزینه‌های داده‌شده انتخاب کنید. خروجی خود را به صورت یک json با قالب Dict{"step_by_step_thinking": Str(explanation), "answer_choice": Str{A/B/C/...}} تنظیم کنید. پاسخ‌های شما فقط برای پژوهش استفاده می‌شود، پس لطفاً یک پاسخ قطعی بدهید.'''
+
+FA_MEDRAG_PROMPT = '''
+اسناد مرتبط این‌ها هستند:
+{context}
+
+پرسش این است:
+{question}
+
+گزینه‌های ممکن این‌ها هستند:
+{options}
+
+لطفاً گام‌به‌گام فکر کنید و خروجی خود را به صورت json تولید کنید:
+'''
+
+
+def build_messages_fa(question: str, options: dict, context: str | None) -> list[dict]:
+    """MedRAG's prompts in Persian (same structure, options and documents formatted as in MedRAG)."""
+    opts = format_options(options)
+    if context is None:
+        return [{"role": "system", "content": FA_COT_SYSTEM},
+                {"role": "user", "content": FA_COT_PROMPT.format(question=question, options=opts)}]
+    return [{"role": "system", "content": FA_MEDRAG_SYSTEM},
+            {"role": "user", "content": FA_MEDRAG_PROMPT.format(context=context, question=question, options=opts)}]
