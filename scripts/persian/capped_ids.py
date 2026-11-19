@@ -42,6 +42,11 @@ for ds, confs in (("fa_mmlu", ["bm25_k4", "rrf2_k1", "rrf2_k2", "rrf2_k8", "rrf2
         RUNS[f"qwen/{ds}/{c}"] = ("scratch", f"out_rq3/results/{Q}/{ds}/{c}.jsonl")
 
 
+for ds, conf in (("kopp_mt", "cot"), ("mmlu_rot", "cot"), ("fa_mmlu", "oracle_k4"), ("kopp", "oracle_k4"), ("mmlu", "oracle_k4"),
+                 ("fa_mmlu", "cot_fa_prompt"), ("fa_mmlu", "rrf2_k4_fa_prompt")):
+    RUNS[f"qwen/{ds}/{conf}"] = ("scratch", f"out_review/results/{Q}/{ds}/{conf}.jsonl")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--scratch", required=True)

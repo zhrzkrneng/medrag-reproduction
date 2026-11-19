@@ -1,6 +1,6 @@
 {
  "method": "One Holm / BH family for the whole study, with each test labelled confirmatory or exploratory,\nthe language x retrieval interaction, and every comparison repeated on answers that did not hit the\nanswer-length cap.\n\n  * family: the 44 tests of stats_all.py + the second model family (Llama) + RQ3 (retrievers, k sweep)\n    + three interaction tests; duplicates removed. Holm (FWER) and BH (FDR) over all of them.\n  * confirmatory = planned before the corresponding results were seen (RQ1 language gap and Persian\n    RAG, RQ2 fine-tuning vs RAG under MedRAG's prompt, RQ3, the second model). exploratory = added after\n    seeing earlier results (translate-first, \"think in English\", Gaokerena's prompt, prompt effects,\n    the 2x2, k = 32, the interaction tests).\n  * interaction: is the effect of retrieval different in Persian than in English on the same 1,089\n    aligned items? Per item d = correct(RAG) - correct(CoT) in each language; exact two-sided sign test\n    on d_FA - d_EN (items where it is non-zero).\n  * uncapped: the same comparison on items where neither run hit the length cap (capped_ids.json).\n\nInputs: committed files only (ids, letters, booleans). Output: results/persian/stats_study.json and .md.",
- "family_size": 72,
+ "family_size": 84,
  "n_confirmatory": 39,
  "comparisons": [
   {
@@ -43,8 +43,8 @@
     "diff_b_minus_a": -3.51,
     "p": 0.0087
    },
-   "p_holm": 0.2688,
-   "q_bh": 0.0149,
+   "p_holm": 0.3072,
+   "q_bh": 0.0145,
    "p_holm_confirmatory_only": 0.1344
   },
   {
@@ -65,8 +65,8 @@
     "diff_b_minus_a": -5.7,
     "p": 0.001
    },
-   "p_holm": 0.0459,
-   "q_bh": 0.0029,
+   "p_holm": 0.0522,
+   "q_bh": 0.0028,
    "p_holm_confirmatory_only": 0.0252
   },
   {
@@ -87,8 +87,8 @@
     "diff_b_minus_a": -4.11,
     "p": 0.0028
    },
-   "p_holm": 0.1344,
-   "q_bh": 0.0081,
+   "p_holm": 0.1512,
+   "q_bh": 0.0076,
    "p_holm_confirmatory_only": 0.07
   },
   {
@@ -109,8 +109,8 @@
     "diff_b_minus_a": -1.91,
     "p": 0.2963
    },
-   "p_holm": 0.308,
-   "q_bh": 0.0168
+   "p_holm": 0.3542,
+   "q_bh": 0.0166
   },
   {
    "question": "RQ1 k=32 vs k=4",
@@ -131,7 +131,7 @@
     "p": 0.0148
    },
    "p_holm": 1.0,
-   "q_bh": 0.6764
+   "q_bh": 0.6652
   },
   {
    "question": "RQ1 2x2: question language (Textbooks)",
@@ -186,8 +186,8 @@
     "diff_b_minus_a": 5.35,
     "p": 0.0033
    },
-   "p_holm": 0.176,
-   "q_bh": 0.0099
+   "p_holm": 0.2,
+   "q_bh": 0.0096
   },
   {
    "question": "RQ1 2x2: corpus (EN question)",
@@ -200,8 +200,8 @@
    "acc_b": 73.92,
    "diff_b_minus_a": 3.49,
    "p_raw": 0.0145,
-   "p_holm": 0.522,
-   "q_bh": 0.0282
+   "p_holm": 0.609,
+   "q_bh": 0.0283
   },
   {
    "question": "RQ1 translate-first",
@@ -263,8 +263,8 @@
     "diff_b_minus_a": -3.31,
     "p": 0.015
    },
-   "p_holm": 0.525,
-   "q_bh": 0.0284
+   "p_holm": 0.615,
+   "q_bh": 0.0286
   },
   {
    "question": "RQ1 translate-first vs English original",
@@ -299,7 +299,7 @@
    "diff_b_minus_a": 0.64,
    "p_raw": 0.7166,
    "p_holm": 1.0,
-   "q_bh": 0.8016
+   "q_bh": 0.7999
   },
   {
    "question": "RQ1 think in English (Textbooks@4)",
@@ -312,8 +312,8 @@
    "acc_b": 51.06,
    "diff_b_minus_a": 3.31,
    "p_raw": 0.0248,
-   "p_holm": 0.8184,
-   "q_bh": 0.0446
+   "p_holm": 0.9672,
+   "q_bh": 0.0453
   },
   {
    "question": "RQ2 fine-tuning effect [MedRAG prompt]",
@@ -326,8 +326,8 @@
    "acc_b": 47.2,
    "diff_b_minus_a": -5.51,
    "p_raw": 0.0007,
-   "p_holm": 0.0378,
-   "q_bh": 0.0025,
+   "p_holm": 0.0427,
+   "q_bh": 0.0024,
    "p_holm_confirmatory_only": 0.021
   },
   {
@@ -341,7 +341,7 @@
    "acc_b": 48.21,
    "diff_b_minus_a": -4.5,
    "p_raw": 0.0094,
-   "p_holm": 0.3572,
+   "p_holm": 0.4136,
    "q_bh": 0.0193,
    "p_holm_confirmatory_only": 0.18
   },
@@ -356,8 +356,8 @@
    "acc_b": 42.52,
    "diff_b_minus_a": -4.68,
    "p_raw": 0.009,
-   "p_holm": 0.351,
-   "q_bh": 0.0191,
+   "p_holm": 0.405,
+   "q_bh": 0.0189,
    "p_holm_confirmatory_only": 0.18
   },
   {
@@ -372,7 +372,7 @@
    "diff_b_minus_a": 1.01,
    "p_raw": 0.6027,
    "p_holm": 1.0,
-   "q_bh": 0.7114,
+   "q_bh": 0.7032,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -387,7 +387,7 @@
    "diff_b_minus_a": 2.75,
    "p_raw": 0.038,
    "p_holm": 1.0,
-   "q_bh": 0.0667
+   "q_bh": 0.0679
   },
   {
    "question": "RQ2 RAG effect, Aya [GK prompt]",
@@ -401,7 +401,7 @@
    "diff_b_minus_a": 1.19,
    "p_raw": 0.4489,
    "p_holm": 1.0,
-   "q_bh": 0.5877
+   "q_bh": 0.5863
   },
   {
    "question": "RQ2 RAG effect, Gaokerena [GK prompt]",
@@ -415,7 +415,7 @@
    "diff_b_minus_a": -1.38,
    "p_raw": 0.3844,
    "p_holm": 1.0,
-   "q_bh": 0.5222
+   "q_bh": 0.5208
   },
   {
    "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [GK prompt]",
@@ -429,7 +429,7 @@
    "diff_b_minus_a": -1.56,
    "p_raw": 0.3275,
    "p_holm": 1.0,
-   "q_bh": 0.4913
+   "q_bh": 0.4826
   },
   {
    "question": "RQ2 Qwen vs Aya [MedRAG prompt]",
@@ -442,8 +442,8 @@
    "acc_b": 59.14,
    "diff_b_minus_a": 6.43,
    "p_raw": 0.0004,
-   "p_holm": 0.0224,
-   "q_bh": 0.0017,
+   "p_holm": 0.0252,
+   "q_bh": 0.0015,
    "p_holm_confirmatory_only": 0.0128
   },
   {
@@ -472,7 +472,7 @@
    "diff_b_minus_a": -0.92,
    "p_raw": 0.5662,
    "p_holm": 1.0,
-   "q_bh": 0.6794
+   "q_bh": 0.6699
   },
   {
    "question": "RQ2 prompt effect, Gaokerena CoT",
@@ -486,7 +486,7 @@
    "diff_b_minus_a": 1.65,
    "p_raw": 0.3389,
    "p_holm": 1.0,
-   "q_bh": 0.4977
+   "q_bh": 0.4908
   },
   {
    "question": "RQ2 prompt effect, Gaokerena web@4",
@@ -499,8 +499,8 @@
    "acc_b": 47.47,
    "diff_b_minus_a": 4.96,
    "p_raw": 0.003,
-   "p_holm": 0.141,
-   "q_bh": 0.0083
+   "p_holm": 0.159,
+   "q_bh": 0.0079
   },
   {
    "question": "RQ2 prompt effect, Qwen CoT",
@@ -527,8 +527,8 @@
    "acc_b": 41.96,
    "diff_b_minus_a": -4.37,
    "p_raw": 0.0005,
-   "p_holm": 0.0275,
-   "q_bh": 0.002,
+   "p_holm": 0.031,
+   "q_bh": 0.0018,
    "p_holm_confirmatory_only": 0.0155
   },
   {
@@ -558,7 +558,7 @@
    "diff_b_minus_a": -1.28,
    "p_raw": 0.3663,
    "p_holm": 1.0,
-   "q_bh": 0.5072,
+   "q_bh": 0.5044,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -573,7 +573,7 @@
    "diff_b_minus_a": 1.7,
    "p_raw": 0.2146,
    "p_holm": 1.0,
-   "q_bh": 0.3434,
+   "q_bh": 0.3401,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -602,7 +602,7 @@
    "diff_b_minus_a": -0.8,
    "p_raw": 0.5412,
    "p_holm": 1.0,
-   "q_bh": 0.6764
+   "q_bh": 0.6652
   },
   {
    "question": "RQ2 RAG effect, Gaokerena [GK prompt]",
@@ -616,7 +616,7 @@
    "diff_b_minus_a": 1.65,
    "p_raw": 0.1739,
    "p_holm": 1.0,
-   "q_bh": 0.2846
+   "q_bh": 0.2809
   },
   {
    "question": "RQ2 head-to-head: Aya+RAG vs Gaokerena [GK prompt]",
@@ -630,7 +630,7 @@
    "diff_b_minus_a": -0.85,
    "p_raw": 0.5202,
    "p_holm": 1.0,
-   "q_bh": 0.6688
+   "q_bh": 0.6621
   },
   {
    "question": "RQ2 Qwen vs Aya [MedRAG prompt]",
@@ -643,7 +643,7 @@
    "acc_b": 51.65,
    "diff_b_minus_a": 5.32,
    "p_raw": 0.0001,
-   "p_holm": 0.0059,
+   "p_holm": 0.0067,
    "q_bh": 0.0005,
    "p_holm_confirmatory_only": 0.0034
   },
@@ -658,8 +658,8 @@
    "acc_b": 43.24,
    "diff_b_minus_a": -3.09,
    "p_raw": 0.0075,
-   "p_holm": 0.3075,
-   "q_bh": 0.0168
+   "p_holm": 0.3525,
+   "q_bh": 0.0166
   },
   {
    "question": "RQ2 prompt effect, Aya web@4",
@@ -673,7 +673,7 @@
    "diff_b_minus_a": -1.22,
    "p_raw": 0.2671,
    "p_holm": 1.0,
-   "q_bh": 0.4181
+   "q_bh": 0.4155
   },
   {
    "question": "RQ2 prompt effect, Gaokerena CoT",
@@ -687,7 +687,7 @@
    "diff_b_minus_a": 1.33,
    "p_raw": 0.3101,
    "p_holm": 1.0,
-   "q_bh": 0.475
+   "q_bh": 0.4651
   },
   {
    "question": "RQ2 prompt effect, Gaokerena web@4",
@@ -700,8 +700,8 @@
    "acc_b": 44.94,
    "diff_b_minus_a": 4.26,
    "p_raw": 0.0007,
-   "p_holm": 0.0378,
-   "q_bh": 0.0025
+   "p_holm": 0.0427,
+   "q_bh": 0.0024
   },
   {
    "question": "RQ2 prompt effect, Qwen CoT",
@@ -758,7 +758,7 @@
     "p": 0.8763
    },
    "p_holm": 1.0,
-   "q_bh": 0.8299,
+   "q_bh": 0.8317,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -780,7 +780,7 @@
     "p": 0.9019
    },
    "p_holm": 1.0,
-   "q_bh": 0.9386,
+   "q_bh": 0.9463,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -823,8 +823,8 @@
     "diff_b_minus_a": -3.44,
     "p": 0.0591
    },
-   "p_holm": 0.1518,
-   "q_bh": 0.0088,
+   "p_holm": 0.1716,
+   "q_bh": 0.0084,
    "p_holm_confirmatory_only": 0.0792
   },
   {
@@ -846,7 +846,7 @@
     "p": 0.3117
    },
    "p_holm": 1.0,
-   "q_bh": 0.8016,
+   "q_bh": 0.7999,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -867,8 +867,8 @@
     "diff_b_minus_a": -3.93,
     "p": 0.0091
    },
-   "p_holm": 0.1575,
-   "q_bh": 0.009,
+   "p_holm": 0.1785,
+   "q_bh": 0.0086,
    "p_holm_confirmatory_only": 0.0805
   },
   {
@@ -890,7 +890,7 @@
     "p": 0.2607
    },
    "p_holm": 1.0,
-   "q_bh": 0.7363,
+   "q_bh": 0.7295,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -912,7 +912,7 @@
     "p": 0.7638
    },
    "p_holm": 1.0,
-   "q_bh": 0.4977,
+   "q_bh": 0.492,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -934,7 +934,7 @@
     "p": 0.0162
    },
    "p_holm": 1.0,
-   "q_bh": 0.1805,
+   "q_bh": 0.1776,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -955,8 +955,8 @@
     "diff_b_minus_a": -5.52,
     "p": 0.0015
    },
-   "p_holm": 0.065,
-   "q_bh": 0.0041,
+   "p_holm": 0.0741,
+   "q_bh": 0.0038,
    "p_holm_confirmatory_only": 0.0351
   },
   {
@@ -977,8 +977,8 @@
     "diff_b_minus_a": -5.98,
     "p": 0.0004
    },
-   "p_holm": 0.0116,
-   "q_bh": 0.001,
+   "p_holm": 0.0132,
+   "q_bh": 0.0008,
    "p_holm_confirmatory_only": 0.0066
   },
   {
@@ -1000,7 +1000,7 @@
     "p": 0.8295
    },
    "p_holm": 1.0,
-   "q_bh": 0.8351,
+   "q_bh": 0.8386,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -1022,7 +1022,7 @@
     "p": 0.9111
    },
    "p_holm": 1.0,
-   "q_bh": 0.9692,
+   "q_bh": 0.979,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -1044,7 +1044,7 @@
     "p": 0.9094
    },
    "p_holm": 1.0,
-   "q_bh": 0.9023,
+   "q_bh": 0.9079,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -1065,8 +1065,8 @@
     "diff_b_minus_a": -4.64,
     "p": 0.0007
    },
-   "p_holm": 0.0416,
-   "q_bh": 0.0027,
+   "p_holm": 0.0472,
+   "q_bh": 0.0026,
    "p_holm_confirmatory_only": 0.0232
   },
   {
@@ -1087,8 +1087,8 @@
     "diff_b_minus_a": -3.21,
     "p": 0.0206
    },
-   "p_holm": 0.578,
-   "q_bh": 0.0314,
+   "p_holm": 0.68,
+   "q_bh": 0.0317,
    "p_holm_confirmatory_only": 0.289
   },
   {
@@ -1110,7 +1110,7 @@
     "p": 0.3169
    },
    "p_holm": 1.0,
-   "q_bh": 0.5072,
+   "q_bh": 0.5033,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -1154,7 +1154,7 @@
     "p": 0.5217
    },
    "p_holm": 1.0,
-   "q_bh": 0.6764,
+   "q_bh": 0.6652,
    "p_holm_confirmatory_only": 1.0
   },
   {
@@ -1219,8 +1219,8 @@
     "diff_b_minus_a": -5.34,
     "p": 0.0023
    },
-   "p_holm": 0.1127,
-   "q_bh": 0.0069,
+   "p_holm": 0.1265,
+   "q_bh": 0.0064,
    "p_holm_confirmatory_only": 0.0598
   },
   {
@@ -1241,8 +1241,8 @@
     "diff_b_minus_a": -1.62,
     "p": 0.3849
    },
-   "p_holm": 0.2107,
-   "q_bh": 0.0118,
+   "p_holm": 0.2401,
+   "q_bh": 0.0114,
    "p_holm_confirmatory_only": 0.1078
   },
   {
@@ -1263,9 +1263,240 @@
     "diff_b_minus_a": 7.83,
     "p": 0.0
    },
-   "p_holm": 0.3663,
+   "p_holm": 0.4257,
    "q_bh": 0.0198,
    "p_holm_confirmatory_only": 0.18
+  },
+  {
+   "question": "review: translate-first on KOPP (no English original)",
+   "type": "exploratory",
+   "dataset": "kopp",
+   "a": "Qwen FA CoT",
+   "b": "Translate-first CoT",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 60.33,
+   "diff_b_minus_a": 8.68,
+   "p_raw": 0.0,
+   "uncapped": {
+    "n": 1875,
+    "acc_a": 51.68,
+    "acc_b": 60.37,
+    "diff_b_minus_a": 8.69,
+    "p": 0.0
+   },
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "question": "review: options rotated (MMLU recall probe)",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN CoT",
+   "b": "Qwen EN CoT rotated",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_b": 76.49,
+   "diff_b_minus_a": -1.93,
+   "p_raw": 0.0987,
+   "uncapped": {
+    "n": 1089,
+    "acc_a": 78.42,
+    "acc_b": 76.49,
+    "diff_b_minus_a": -1.93,
+    "p": 0.0987
+   },
+   "p_holm": 1.0,
+   "q_bh": 0.1658
+  },
+  {
+   "question": "review: oracle, CoT -> oracle@4",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT [oracle items]",
+   "b": "Qwen FA oracle@4",
+   "n": 148,
+   "acc_a": 68.92,
+   "acc_b": 79.05,
+   "diff_b_minus_a": 10.14,
+   "p_raw": 0.04,
+   "uncapped": {
+    "n": 148,
+    "acc_a": 68.92,
+    "acc_b": 79.05,
+    "diff_b_minus_a": 10.14,
+    "p": 0.04
+   },
+   "p_holm": 1.0,
+   "q_bh": 0.0686
+  },
+  {
+   "question": "review: oracle, RRF-2@4 -> oracle@4",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA web@4 [oracle items]",
+   "b": "Qwen FA oracle@4",
+   "n": 148,
+   "acc_a": 66.22,
+   "acc_b": 79.05,
+   "diff_b_minus_a": 12.84,
+   "p_raw": 0.0013,
+   "uncapped": {
+    "n": 148,
+    "acc_a": 66.22,
+    "acc_b": 79.05,
+    "diff_b_minus_a": 12.84,
+    "p": 0.0013
+   },
+   "p_holm": 0.0741,
+   "q_bh": 0.0038
+  },
+  {
+   "question": "review: oracle, CoT -> oracle@4",
+   "type": "exploratory",
+   "dataset": "kopp",
+   "a": "Qwen FA CoT [oracle items]",
+   "b": "Qwen FA oracle@4",
+   "n": 325,
+   "acc_a": 56.62,
+   "acc_b": 72.92,
+   "diff_b_minus_a": 16.31,
+   "p_raw": 0.0,
+   "uncapped": {
+    "n": 324,
+    "acc_a": 56.79,
+    "acc_b": 73.15,
+    "diff_b_minus_a": 16.36,
+    "p": 0.0
+   },
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "question": "review: oracle, RRF-2@4 -> oracle@4",
+   "type": "exploratory",
+   "dataset": "kopp",
+   "a": "Qwen FA web@4 [oracle items]",
+   "b": "Qwen FA oracle@4",
+   "n": 325,
+   "acc_a": 59.08,
+   "acc_b": 72.92,
+   "diff_b_minus_a": 13.85,
+   "p_raw": 0.0,
+   "uncapped": {
+    "n": 324,
+    "acc_a": 59.26,
+    "acc_b": 72.84,
+    "diff_b_minus_a": 13.58,
+    "p": 0.0
+   },
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "question": "review: oracle (English), CoT -> oracle@4",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN CoT [oracle items]",
+   "b": "Qwen EN oracle@4",
+   "n": 231,
+   "acc_a": 86.58,
+   "acc_b": 86.58,
+   "diff_b_minus_a": 0.0,
+   "p_raw": 1.0,
+   "uncapped": {
+    "n": 231,
+    "acc_a": 86.58,
+    "acc_b": 86.58,
+    "diff_b_minus_a": 0.0,
+    "p": 1.0
+   },
+   "p_holm": 1.0,
+   "q_bh": 1.0
+  },
+  {
+   "question": "review: oracle (English), RRF-2@4 -> oracle@4",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN RRF-2@4 [oracle items]",
+   "b": "Qwen EN oracle@4",
+   "n": 231,
+   "acc_a": 84.85,
+   "acc_b": 86.58,
+   "diff_b_minus_a": 1.73,
+   "p_raw": 0.5413,
+   "uncapped": {
+    "n": 231,
+    "acc_a": 84.85,
+    "acc_b": 86.58,
+    "diff_b_minus_a": 1.73,
+    "p": 0.5413
+   },
+   "p_holm": 1.0,
+   "q_bh": 0.6652
+  },
+  {
+   "question": "review: Persian instructions, CoT",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT",
+   "b": "Qwen FA CoT [FA prompt]",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 48.67,
+   "diff_b_minus_a": -10.47,
+   "p_raw": 0.0,
+   "uncapped": {
+    "n": 1087,
+    "acc_a": 59.15,
+    "acc_b": 48.67,
+    "diff_b_minus_a": -10.49,
+    "p": 0.0
+   },
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "question": "review: Persian instructions, RRF-2@4",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA web@4",
+   "b": "Qwen FA web@4 [FA prompt]",
+   "n": 1089,
+   "acc_a": 53.35,
+   "acc_b": 47.29,
+   "diff_b_minus_a": -6.06,
+   "p_raw": 0.0002,
+   "uncapped": {
+    "n": 1083,
+    "acc_a": 53.28,
+    "acc_b": 47.37,
+    "diff_b_minus_a": -5.91,
+    "p": 0.0003
+   },
+   "p_holm": 0.0132,
+   "q_bh": 0.0008
+  },
+  {
+   "question": "review: Persian instructions, RAG effect",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen FA CoT [FA prompt]",
+   "b": "Qwen FA web@4 [FA prompt]",
+   "n": 1089,
+   "acc_a": 48.67,
+   "acc_b": 47.29,
+   "diff_b_minus_a": -1.38,
+   "p_raw": 0.4537,
+   "uncapped": {
+    "n": 1082,
+    "acc_a": 48.61,
+    "acc_b": 47.41,
+    "diff_b_minus_a": -1.2,
+    "p": 0.5195
+   },
+   "p_holm": 1.0,
+   "q_bh": 0.5863
   },
   {
    "question": "interaction: RAG effect FA vs EN, Qwen, same Textbooks corpus (BGE-M3@4)",
@@ -1286,8 +1517,8 @@
     "diff_b_minus_a": -6.72,
     "p": 0.0005232315311964156
    },
-   "p_holm": 0.0216,
-   "q_bh": 0.0017
+   "p_holm": 0.0242,
+   "q_bh": 0.0015
   },
   {
    "question": "interaction: RAG effect FA vs EN, Qwen, own-language corpus (RRF-2@4)",
@@ -1331,7 +1562,29 @@
     "p": 0.6234990820144497
    },
    "p_holm": 1.0,
-   "q_bh": 0.7658
+   "q_bh": 0.7606
+  },
+  {
+   "question": "interaction (review): oracle effect FA vs EN, items in both oracle subsets",
+   "type": "exploratory",
+   "dataset": "fa_mmlu",
+   "a": "Qwen EN CoT -> Qwen EN oracle@4",
+   "b": "Qwen FA CoT -> Qwen FA oracle@4",
+   "n": 115,
+   "rag_effect_en": 2.61,
+   "rag_effect_fa": 8.7,
+   "diff_b_minus_a": 6.09,
+   "p_raw": 0.296206368599087,
+   "test": "exact sign test on d_FA - d_EN",
+   "uncapped": {
+    "n": 115,
+    "rag_effect_en": 2.61,
+    "rag_effect_fa": 8.7,
+    "diff_b_minus_a": 6.09,
+    "p": 0.296206368599087
+   },
+   "p_holm": 1.0,
+   "q_bh": 0.4524
   }
  ]
 }

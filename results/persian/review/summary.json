@@ -1,0 +1,277 @@
+{
+ "model": "Qwen/Qwen2.5-7B-Instruct",
+ "accuracy": {
+  "kopp_mt/cot": {
+   "n": 1878,
+   "acc_%": 60.33,
+   "strict_acc_%": 60.17,
+   "strict_unparsed": 13,
+   "hit_length_cap": 0,
+   "answers_mostly_persian": 0,
+   "answers_mostly_chinese": 6
+  },
+  "mmlu_rot/cot": {
+   "n": 1089,
+   "acc_%": 76.49,
+   "strict_acc_%": 76.31,
+   "strict_unparsed": 3,
+   "hit_length_cap": 0,
+   "answers_mostly_persian": 0,
+   "answers_mostly_chinese": 0
+  },
+  "fa_mmlu/oracle_k4": {
+   "n": 148,
+   "acc_%": 79.05,
+   "strict_acc_%": 79.05,
+   "strict_unparsed": 0,
+   "hit_length_cap": 0,
+   "answers_mostly_persian": 0,
+   "answers_mostly_chinese": 82
+  },
+  "kopp/oracle_k4": {
+   "n": 325,
+   "acc_%": 72.92,
+   "strict_acc_%": 72.92,
+   "strict_unparsed": 3,
+   "hit_length_cap": 0,
+   "answers_mostly_persian": 3,
+   "answers_mostly_chinese": 197
+  },
+  "mmlu/oracle_k4": {
+   "n": 231,
+   "acc_%": 86.58,
+   "strict_acc_%": 86.58,
+   "strict_unparsed": 0,
+   "hit_length_cap": 0,
+   "answers_mostly_persian": 0,
+   "answers_mostly_chinese": 0
+  },
+  "fa_mmlu/cot_fa_prompt": {
+   "n": 1089,
+   "acc_%": 48.67,
+   "strict_acc_%": 48.48,
+   "strict_unparsed": 5,
+   "hit_length_cap": 2,
+   "answers_mostly_persian": 1081,
+   "answers_mostly_chinese": 6
+  },
+  "fa_mmlu/rrf2_k4_fa_prompt": {
+   "n": 1089,
+   "acc_%": 47.29,
+   "strict_acc_%": 46.65,
+   "strict_unparsed": 41,
+   "hit_length_cap": 5,
+   "answers_mostly_persian": 1080,
+   "answers_mostly_chinese": 9
+  }
+ },
+ "tests": [
+  {
+   "test": "KOPP: Persian CoT -> translate-first CoT",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 60.33,
+   "diff_b_minus_a": 8.68,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "MMLU-Med EN: CoT -> CoT with options rotated",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_b": 76.49,
+   "diff_b_minus_a": -1.93,
+   "p_raw": 0.0987,
+   "p_holm": 0.4935,
+   "q_bh": 0.1426
+  },
+  {
+   "test": "MMLU-Med EN (strict parser): CoT -> rotated",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_b": 76.31,
+   "diff_b_minus_a": -2.11,
+   "p_raw": 0.0711,
+   "p_holm": 0.4266,
+   "q_bh": 0.1155
+  },
+  {
+   "test": "fa_mmlu: CoT -> oracle@4 (oracle items)",
+   "n": 148,
+   "acc_a": 68.92,
+   "acc_b": 79.05,
+   "diff_b_minus_a": 10.14,
+   "p_raw": 0.04,
+   "p_holm": 0.28,
+   "q_bh": 0.0743
+  },
+  {
+   "test": "fa_mmlu: RRF-2@4 -> oracle@4 (oracle items)",
+   "n": 148,
+   "acc_a": 66.22,
+   "acc_b": 79.05,
+   "diff_b_minus_a": 12.84,
+   "p_raw": 0.0013,
+   "p_holm": 0.0104,
+   "q_bh": 0.0028
+  },
+  {
+   "test": "kopp: CoT -> oracle@4 (oracle items)",
+   "n": 325,
+   "acc_a": 56.62,
+   "acc_b": 72.92,
+   "diff_b_minus_a": 16.31,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "kopp: RRF-2@4 -> oracle@4 (oracle items)",
+   "n": 325,
+   "acc_a": 59.08,
+   "acc_b": 72.92,
+   "diff_b_minus_a": 13.85,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "mmlu: CoT -> oracle@4 (oracle items)",
+   "n": 231,
+   "acc_a": 86.58,
+   "acc_b": 86.58,
+   "diff_b_minus_a": 0.0,
+   "p_raw": 1.0,
+   "p_holm": 1.0,
+   "q_bh": 1.0
+  },
+  {
+   "test": "mmlu: RRF-2@4 -> oracle@4 (oracle items)",
+   "n": 231,
+   "acc_a": 84.85,
+   "acc_b": 86.58,
+   "diff_b_minus_a": 1.73,
+   "p_raw": 0.5413,
+   "p_holm": 1.0,
+   "q_bh": 0.5864
+  },
+  {
+   "test": "FA_MED_MMLU: English-instruction CoT -> Persian-instruction CoT",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 48.67,
+   "diff_b_minus_a": -10.47,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "FA_MED_MMLU: English-instruction RRF-2@4 -> Persian-instruction RRF-2@4",
+   "n": 1089,
+   "acc_a": 53.35,
+   "acc_b": 47.29,
+   "diff_b_minus_a": -6.06,
+   "p_raw": 0.0002,
+   "p_holm": 0.0018,
+   "q_bh": 0.0005
+  },
+  {
+   "test": "FA_MED_MMLU, Persian instructions: CoT -> RRF-2@4",
+   "n": 1089,
+   "acc_a": 48.67,
+   "acc_b": 47.29,
+   "diff_b_minus_a": -1.38,
+   "p_raw": 0.4537,
+   "p_holm": 1.0,
+   "q_bh": 0.5362
+  },
+  {
+   "test": "oracle effect FA vs EN (items in both oracle subsets)",
+   "n": 115,
+   "oracle_effect_en": 2.61,
+   "oracle_effect_fa": 8.7,
+   "diff_b_minus_a": 6.09,
+   "p_raw": 0.296206368599087,
+   "method": "exact sign test",
+   "p_holm": 1.0,
+   "q_bh": 0.3851
+  }
+ ],
+ "kopp_translation": {
+  "n": 1878,
+  "parse_failures": 6
+ },
+ "oracle_sizes": {
+  "fa_mmlu": 148,
+  "kopp": 325,
+  "mmlu": 231,
+  "fa_and_en": 115
+ },
+ "timing": [
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "cot",
+   "dataset": "kopp_mt",
+   "n": 1878,
+   "seconds": 682.4,
+   "sec_per_q": 0.363,
+   "hit_length_cap": 0
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "oracle@4",
+   "dataset": "fa_mmlu",
+   "n": 148,
+   "seconds": 397.9,
+   "sec_per_q": 2.689,
+   "hit_length_cap": 0
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "oracle@4",
+   "dataset": "kopp",
+   "n": 325,
+   "seconds": 842.6,
+   "sec_per_q": 2.593,
+   "hit_length_cap": 0
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "oracle@4",
+   "dataset": "mmlu",
+   "n": 231,
+   "seconds": 257.3,
+   "sec_per_q": 1.114,
+   "hit_length_cap": 0
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "cot",
+   "dataset": "mmlu_rot",
+   "n": 1089,
+   "seconds": 452.5,
+   "sec_per_q": 0.416,
+   "hit_length_cap": 0
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "cot",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 938.7,
+   "sec_per_q": 0.862,
+   "hit_length_cap": 2
+  },
+  {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "config": "rrf2@4",
+   "dataset": "fa_mmlu",
+   "n": 1089,
+   "seconds": 3729.5,
+   "sec_per_q": 3.425,
+   "hit_length_cap": 5
+  }
+ ],
+ "note": "official MIRAGE parser unless stated; strict parser counts unparsable answers as wrong"
+}

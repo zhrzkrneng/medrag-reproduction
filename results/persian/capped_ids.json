@@ -1049,6 +1049,50 @@
     "kopp/other_years/905",
     "kopp/sept23/10"
    ]
+  },
+  "qwen/kopp_mt/cot": {
+   "n": 1878,
+   "n_capped": 0,
+   "capped_qids": []
+  },
+  "qwen/mmlu_rot/cot": {
+   "n": 1089,
+   "n_capped": 0,
+   "capped_qids": []
+  },
+  "qwen/fa_mmlu/oracle_k4": {
+   "n": 148,
+   "n_capped": 0,
+   "capped_qids": []
+  },
+  "qwen/kopp/oracle_k4": {
+   "n": 325,
+   "n_capped": 0,
+   "capped_qids": []
+  },
+  "qwen/mmlu/oracle_k4": {
+   "n": 231,
+   "n_capped": 0,
+   "capped_qids": []
+  },
+  "qwen/fa_mmlu/cot_fa_prompt": {
+   "n": 1089,
+   "n_capped": 2,
+   "capped_qids": [
+    "anatomy-052",
+    "professional_medicine-084"
+   ]
+  },
+  "qwen/fa_mmlu/rrf2_k4_fa_prompt": {
+   "n": 1089,
+   "n_capped": 5,
+   "capped_qids": [
+    "anatomy-029",
+    "anatomy-041",
+    "college_biology-073",
+    "professional_medicine-051",
+    "professional_medicine-138"
+   ]
   }
  }
 }

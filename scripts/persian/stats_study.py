@@ -47,7 +47,7 @@ def sign_test(diffs):
     return min(1.0, 2 * sum(comb(n, i) for i in range(k + 1)) / 2 ** n)
 
 
-EXPLORATORY = ("translate", "think in English", "GK prompt", "prompt effect", "2x2", "k=32", "interaction")
+EXPLORATORY = ("translate", "think in English", "GK prompt", "prompt effect", "2x2", "k=32", "interaction", "review")
 
 
 def main():
@@ -64,16 +64,36 @@ def main():
     for kk in (1, 2, 8, 16):
         m[f"Qwen FA web@{kk}"] = r3[("fa_mmlu", f"rrf2_k{kk}")]
 
+    # checks added after the self-review (kaggle/review): all exploratory
+    rv = preds(os.path.join(P, "review", "predictions.jsonl.gz"))
+    k["Translate-first CoT"] = rv[("kopp_mt", "cot")]
+    m["Qwen EN CoT rotated"] = rv[("mmlu_rot", "cot")]
+    for ds, d in (("fa_mmlu", m), ("kopp", k)):
+        sub = rv[(ds, "oracle_k4")]
+        d["Qwen FA oracle@4"] = sub
+        d["Qwen FA CoT [oracle items]"] = {q: d["Qwen FA CoT"][q] for q in sub}
+        d["Qwen FA web@4 [oracle items]"] = {q: d["Qwen FA web@4"][q] for q in sub}
+    sub = rv[("mmlu", "oracle_k4")]
+    m["Qwen EN oracle@4"] = sub
+    m["Qwen EN CoT [oracle items]"] = {q: m["Qwen EN CoT"][q] for q in sub}
+    m["Qwen EN RRF-2@4 [oracle items]"] = {q: m["Qwen EN RRF-2@4"][q] for q in sub}
+    m["Qwen FA CoT [FA prompt]"], m["Qwen FA web@4 [FA prompt]"] = rv[("fa_mmlu", "cot_fa_prompt")], rv[("fa_mmlu", "rrf2_k4_fa_prompt")]
+
     # condition -> run in capped_ids.json
     CAP = {"Qwen EN CoT": "qwen/mmlu/cot", "Qwen EN Textbooks@32": "qwen/mmlu/rrf2_k32", "Qwen EN RRF-2@4": "qwen/mmlu/rrf2_k4",
            "Qwen FA CoT": "qwen/{ds}/cot", "Qwen FA web@4": "qwen/{ds}/rrf2_k4", "Qwen FA web@32": "qwen/fa_mmlu/rrf2_k32",
            "2x2 EN q + Textbooks@4": "qwen/mmlu/bge_tb_k4", "2x2 FA q + Textbooks@4": "qwen/fa_mmlu/bge_tb_k4",
            "2x2 FA q + FA web@4 (BGE-M3)": "qwen/fa_mmlu/bge_m3_k4", "Qwen FA BGE-M3@4": "qwen/{ds}/bge_m3_k4",
-           "Translate-first CoT": "qwen/fa_mmlu_mt/cot", "Translate-first Textbooks@4": "qwen/fa_mmlu_mt/bge_tb_k4",
+           "Translate-first CoT": "qwen/{ds}_mt/cot", "Translate-first Textbooks@4": "qwen/fa_mmlu_mt/bge_tb_k4",
            "Llama EN CoT": "llama/mmlu/cot", "Llama EN RRF-2@4": "llama/mmlu/rrf2_k4",
            "Llama FA CoT": "llama/{ds}/cot", "Llama FA web@4": "llama/{ds}/rrf2_k4", "Qwen FA BM25@4": "qwen/{ds}/bm25_k4"}
     for kk in (1, 2, 8, 16):
         CAP[f"Qwen FA web@{kk}"] = f"qwen/fa_mmlu/rrf2_k{kk}"
+    CAP.update({"Qwen EN CoT rotated": "qwen/mmlu_rot/cot", "Qwen FA oracle@4": "qwen/{ds}/oracle_k4",
+                "Qwen FA CoT [oracle items]": "qwen/{ds}/cot", "Qwen FA web@4 [oracle items]": "qwen/{ds}/rrf2_k4",
+                "Qwen EN oracle@4": "qwen/mmlu/oracle_k4", "Qwen EN CoT [oracle items]": "qwen/mmlu/cot",
+                "Qwen EN RRF-2@4 [oracle items]": "qwen/mmlu/rrf2_k4", "Qwen FA CoT [FA prompt]": "qwen/fa_mmlu/cot_fa_prompt",
+                "Qwen FA web@4 [FA prompt]": "qwen/fa_mmlu/rrf2_k4_fa_prompt"})
     capped = {n: set(v["capped_qids"]) for n, v in json.load(open(os.path.join(P, "capped_ids.json")))["runs"].items()}
 
     def cap_set(cond, ds):
@@ -100,6 +120,16 @@ def main():
     for kk in (1, 2, 8, 16):
         F.append((f"RQ3 k sweep: CoT -> RRF-2@{kk}", "fa_mmlu", "Qwen FA CoT", f"Qwen FA web@{kk}"))
     F.append(("RQ3 k sweep: RRF-2@1 -> RRF-2@16", "fa_mmlu", "Qwen FA web@1", "Qwen FA web@16"))
+    F += [("review: translate-first on KOPP (no English original)", "kopp", "Qwen FA CoT", "Translate-first CoT"),
+          ("review: options rotated (MMLU recall probe)", "fa_mmlu", "Qwen EN CoT", "Qwen EN CoT rotated")]
+    for ds in ("fa_mmlu", "kopp"):
+        F += [("review: oracle, CoT -> oracle@4", ds, "Qwen FA CoT [oracle items]", "Qwen FA oracle@4"),
+              ("review: oracle, RRF-2@4 -> oracle@4", ds, "Qwen FA web@4 [oracle items]", "Qwen FA oracle@4")]
+    F += [("review: oracle (English), CoT -> oracle@4", "fa_mmlu", "Qwen EN CoT [oracle items]", "Qwen EN oracle@4"),
+          ("review: oracle (English), RRF-2@4 -> oracle@4", "fa_mmlu", "Qwen EN RRF-2@4 [oracle items]", "Qwen EN oracle@4"),
+          ("review: Persian instructions, CoT", "fa_mmlu", "Qwen FA CoT", "Qwen FA CoT [FA prompt]"),
+          ("review: Persian instructions, RRF-2@4", "fa_mmlu", "Qwen FA web@4", "Qwen FA web@4 [FA prompt]"),
+          ("review: Persian instructions, RAG effect", "fa_mmlu", "Qwen FA CoT [FA prompt]", "Qwen FA web@4 [FA prompt]")]
     keys = [(ds, a, b) for _, ds, a, b in F]
     assert len(keys) == len(set(keys)), "duplicate test"
 
@@ -107,7 +137,7 @@ def main():
     for q, ds, ca, cb in F:
         A, B = c[ds][ca], c[ds][cb]
         qs = sorted(set(A) & set(B))
-        assert len(qs) == len(A) == len(B), (q, ds, ca, cb)
+        assert len(qs) == min(len(A), len(B)), (q, ds, ca, cb)  # equal sets, or a subset (oracle items)
         a, b = [A[i] for i in qs], [B[i] for i in qs]
         r = {"question": q, "type": "exploratory" if any(e in q or e in ca + cb for e in EXPLORATORY) else "confirmatory",
              "dataset": ds, "a": ca, "b": cb, "n": len(qs), "acc_a": round(100 * sum(a) / len(qs), 2),
@@ -127,7 +157,9 @@ def main():
              ("interaction: RAG effect FA vs EN, Qwen, own-language corpus (RRF-2@4)",
               ("Qwen EN CoT", "Qwen EN RRF-2@4"), ("Qwen FA CoT", "Qwen FA web@4")),
              ("interaction: RAG effect FA vs EN, Llama, own-language corpus (RRF-2@4)",
-              ("Llama EN CoT", "Llama EN RRF-2@4"), ("Llama FA CoT", "Llama FA web@4"))]
+              ("Llama EN CoT", "Llama EN RRF-2@4"), ("Llama FA CoT", "Llama FA web@4")),
+             ("interaction (review): oracle effect FA vs EN, items in both oracle subsets",
+              ("Qwen EN CoT", "Qwen EN oracle@4"), ("Qwen FA CoT", "Qwen FA oracle@4"))]
     for name, (e0, e1), (f0, f1) in inter:
         qs = sorted(set(m[e0]) & set(m[e1]) & set(m[f0]) & set(m[f1]))
         de = [int(m[e1][i]) - int(m[e0][i]) for i in qs]
