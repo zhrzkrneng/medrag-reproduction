@@ -1,0 +1,1 @@
+{"id": "zohrehzkrn/medrag-repro-model2-en", "title": "medrag-repro-model2-en", "code_file": "model2_en_kernel.py", "language": "python", "kernel_type": "script", "is_private": true, "enable_gpu": true, "enable_internet": true, "machine_shape": "NvidiaTeslaT4", "dataset_sources": ["zohrehzkrn/medrag-repro-code"], "competition_sources": [], "kernel_sources": []}

@@ -7,12 +7,13 @@ Qwen2.5-7B-Instruct on the same questions.
 Official MIRAGE parser (with its fallback "A") and the strict parser; exact McNemar; Holm and BH within
 this family. Writes ids / letters / booleans only.
 
-Usage: python scripts/persian/analyze_model2.py --run <kernel output dir> --out_dir results/persian/model2
+Usage: python scripts/persian/analyze_model2.py --run <model2 output dir> [<model2_en output dir>] --out_dir results/persian/model2
 """
 import argparse
 import gzip
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,34 +35,43 @@ def jl(path):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--run", required=True)
+    p.add_argument("--run", required=True, nargs="+", help="kernel output dirs (model2, model2_en)")
     p.add_argument("--out_dir", default=os.path.join(ROOT, "results", "persian", "model2"))
     a = p.parse_args()
-    res = os.path.join(a.run, "results")
+    res_dirs = [os.path.join(r, "results") for r in a.run]
     llama, info = {}, {}
-    for ds, conf in [("mmlu", "cot"), ("fa_mmlu", "cot"), ("fa_mmlu", "rrf2_k4"), ("kopp", "cot"), ("kopp", "rrf2_k4")]:
-        path = os.path.join(res, SLUG, ds, f"{conf}.jsonl")
+    for ds, conf in [("mmlu", "cot"), ("mmlu", "rrf2_k4"), ("fa_mmlu", "cot"), ("fa_mmlu", "rrf2_k4"), ("kopp", "cot"), ("kopp", "rrf2_k4")]:
+        found = [os.path.join(r, SLUG, ds, f"{conf}.jsonl") for r in res_dirs if os.path.exists(os.path.join(r, SLUG, ds, f"{conf}.jsonl"))]
+        path = found[0] if found else os.path.join(res_dirs[0], SLUG, ds, f"{conf}.jsonl")
         if not os.path.exists(path):
             print("missing", path)
             continue
         rows = jl(path)
         d = {}
-        unp = capped = 0
+        unp = capped = fa_reason = looping = 0
         for r in rows:
+            t = r["response"]
+            nfa, nen, nzh = (len(re.findall(x, t)) for x in ("[\u0600-\u06FF]", "[A-Za-z]", "[\u4e00-\u9fff]"))
+            fa_reason += nfa / (nfa + nen + nzh + 1) > 0.5
             off = official_prediction(r["response"])
             st = strict_prediction(r["response"])
             d[r["qid"]] = {"gold": r["answer"], "pred": off, "strict": st}
             unp += st is None
             budget = min(1024, 8192 - r["prompt_tokens"])
-            capped += r["output_tokens"] >= budget
+            hit = r["output_tokens"] >= budget
+            capped += hit
+            looping += hit and len(set(t[-400:].split())) < 30  # the last 400 characters use < 30 distinct words
         llama[(ds, conf)] = d
         info[f"{ds}/{conf}"] = {"n": len(d), "acc_%": round(100 * sum(v["pred"] == v["gold"] for v in d.values()) / len(d), 2),
                                 "strict_acc_%": round(100 * sum(v["strict"] == v["gold"] for v in d.values()) / len(d), 2),
-                                "strict_unparsed": unp, "answer_hit_length_cap": capped}
+                                "strict_unparsed": unp, "answer_hit_length_cap": capped,
+                                "capped_and_repeating": looping, "answers_mostly_in_persian": fa_reason}
     # Qwen on the same questions
     qwen = {}
     base = os.path.join(ROOT, "results", "qwen_full", "Qwen__Qwen2.5-7B-Instruct", "mmlu", "cot.jsonl")
     qwen[("mmlu", "cot")] = {r["qid"]: official_prediction(r["response"]) == r["answer"] for r in jl(base)}
+    qwen[("mmlu", "rrf2_k4")] = {r["qid"]: official_prediction(r["response"]) == r["answer"]
+                                 for r in jl(base.replace("cot.jsonl", "rrf2_k4.jsonl"))}
     for ds in ("fa_mmlu", "kopp"):
         rows = jl(os.path.join(ROOT, "results", "persian", "run_fa", f"{ds}_predictions.jsonl.gz"))
         qwen[(ds, "cot")] = {r["qid"]: r["cot"] == r["gold"] for r in rows}
@@ -79,18 +89,27 @@ def main():
 
     if ("mmlu", "cot") in ok and ("fa_mmlu", "cot") in ok:
         test("Llama language gap: EN CoT -> FA CoT (FA_MED_MMLU items)", ok[("mmlu", "cot")], ok[("fa_mmlu", "cot")])
-    for ds in ("fa_mmlu", "kopp"):
+    for ds in ("mmlu", "fa_mmlu", "kopp"):
         if (ds, "cot") in ok and (ds, "rrf2_k4") in ok:
             test(f"Llama RAG effect {ds}: CoT -> RRF-2@4", ok[(ds, "cot")], ok[(ds, "rrf2_k4")])
     for k in ok:
         test(f"Qwen -> Llama, {k[0]}/{k[1]}", qwen[k], ok[k])
+    robust = {}
+    for ds in ("fa_mmlu", "kopp"):
+        if (ds, "cot") in llama and (ds, "rrf2_k4") in llama:
+            A, B = llama[(ds, "cot")], llama[(ds, "rrf2_k4")]
+            qs = [q for q in A if A[q]["strict"] and q in B and B[q]["strict"]]
+            x = [A[q]["strict"] == A[q]["gold"] for q in qs]
+            y = [B[q]["strict"] == B[q]["gold"] for q in qs]
+            robust[ds] = {"n_both_strictly_parsed": len(qs), "cot_%": round(100 * sum(x) / len(qs), 2),
+                          "rrf2_k4_%": round(100 * sum(y) / len(qs), 2), "p": mcnemar(x, y)}
     ps = [t["p_raw"] for t in tests]
     for t, h, q in zip(tests, holm(ps), bh(ps)):
         t["p_holm"], t["q_bh"] = round(h, 4), round(q, 4)
-    src = os.path.join(res, "model_source.json")
+    src = os.path.join(res_dirs[0], "model_source.json")
     out = {"model": "meta-llama/Llama-3.1-8B-Instruct", "weights": json.load(open(src)) if os.path.exists(src) else None,
            "prompt": "MedRAG (English instructions, JSON CoT); Persian question, options and snippets",
-           "accuracy": info, "tests": tests,
+           "accuracy": info, "tests": tests, "rag_effect_on_strictly_parsed_both": robust,
            "note": "official MIRAGE parser (falls back to 'A'); strict parser counts unparsable answers as wrong"}
     os.makedirs(a.out_dir, exist_ok=True)
     json.dump(out, open(os.path.join(a.out_dir, "summary.json"), "w"), indent=1)

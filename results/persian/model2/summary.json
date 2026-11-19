@@ -1,0 +1,193 @@
+{
+ "model": "meta-llama/Llama-3.1-8B-Instruct",
+ "weights": {
+  "mirror": "unsloth/Llama-3.1-8B-Instruct",
+  "mirror_revision": "4699cc75b550f9c6f3173fb80f4703b62d946aa5",
+  "official_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+  "files_match": {
+   "model-00001-of-00004.safetensors": true,
+   "model-00002-of-00004.safetensors": true,
+   "model-00003-of-00004.safetensors": true,
+   "model-00004-of-00004.safetensors": true
+  },
+  "extra_files": [],
+  "same_config.json": false,
+  "same_generation_config.json": false,
+  "same_tokenizer.json": false,
+  "same_tokenizer_config.json": false
+ },
+ "prompt": "MedRAG (English instructions, JSON CoT); Persian question, options and snippets",
+ "accuracy": {
+  "mmlu/cot": {
+   "n": 1089,
+   "acc_%": 77.13,
+   "strict_acc_%": 77.04,
+   "strict_unparsed": 17,
+   "answer_hit_length_cap": 18,
+   "capped_and_repeating": 12,
+   "answers_mostly_in_persian": 0
+  },
+  "mmlu/rrf2_k4": {
+   "n": 1089,
+   "acc_%": 76.68,
+   "strict_acc_%": 76.31,
+   "strict_unparsed": 31,
+   "answer_hit_length_cap": 30,
+   "capped_and_repeating": 11,
+   "answers_mostly_in_persian": 0
+  },
+  "fa_mmlu/cot": {
+   "n": 1089,
+   "acc_%": 47.93,
+   "strict_acc_%": 46.74,
+   "strict_unparsed": 60,
+   "answer_hit_length_cap": 60,
+   "capped_and_repeating": 32,
+   "answers_mostly_in_persian": 1089
+  },
+  "fa_mmlu/rrf2_k4": {
+   "n": 1089,
+   "acc_%": 48.21,
+   "strict_acc_%": 45.09,
+   "strict_unparsed": 109,
+   "answer_hit_length_cap": 99,
+   "capped_and_repeating": 37,
+   "answers_mostly_in_persian": 1088
+  },
+  "kopp/cot": {
+   "n": 1878,
+   "acc_%": 47.39,
+   "strict_acc_%": 44.94,
+   "strict_unparsed": 147,
+   "answer_hit_length_cap": 146,
+   "capped_and_repeating": 118,
+   "answers_mostly_in_persian": 1875
+  },
+  "kopp/rrf2_k4": {
+   "n": 1878,
+   "acc_%": 46.86,
+   "strict_acc_%": 41.85,
+   "strict_unparsed": 334,
+   "answer_hit_length_cap": 314,
+   "capped_and_repeating": 156,
+   "answers_mostly_in_persian": 1874
+  }
+ },
+ "tests": [
+  {
+   "test": "Llama language gap: EN CoT -> FA CoT (FA_MED_MMLU items)",
+   "n": 1089,
+   "acc_a": 77.13,
+   "acc_b": 47.93,
+   "diff_b_minus_a": -29.2,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "Llama RAG effect mmlu: CoT -> RRF-2@4",
+   "n": 1089,
+   "acc_a": 77.13,
+   "acc_b": 76.68,
+   "diff_b_minus_a": -0.46,
+   "p_raw": 0.7723,
+   "p_holm": 1.0,
+   "q_bh": 0.8581
+  },
+  {
+   "test": "Llama RAG effect fa_mmlu: CoT -> RRF-2@4",
+   "n": 1089,
+   "acc_a": 47.93,
+   "acc_b": 48.21,
+   "diff_b_minus_a": 0.28,
+   "p_raw": 0.9125,
+   "p_holm": 1.0,
+   "q_bh": 0.9125
+  },
+  {
+   "test": "Llama RAG effect kopp: CoT -> RRF-2@4",
+   "n": 1878,
+   "acc_a": 47.39,
+   "acc_b": 46.86,
+   "diff_b_minus_a": -0.53,
+   "p_raw": 0.7237,
+   "p_holm": 1.0,
+   "q_bh": 0.8581
+  },
+  {
+   "test": "Qwen -> Llama, mmlu/cot",
+   "n": 1089,
+   "acc_a": 78.42,
+   "acc_b": 77.13,
+   "diff_b_minus_a": -1.29,
+   "p_raw": 0.3456,
+   "p_holm": 1.0,
+   "q_bh": 0.576
+  },
+  {
+   "test": "Qwen -> Llama, mmlu/rrf2_k4",
+   "n": 1089,
+   "acc_a": 74.29,
+   "acc_b": 76.68,
+   "diff_b_minus_a": 2.39,
+   "p_raw": 0.1078,
+   "p_holm": 0.6468,
+   "q_bh": 0.2156
+  },
+  {
+   "test": "Qwen -> Llama, fa_mmlu/cot",
+   "n": 1089,
+   "acc_a": 59.14,
+   "acc_b": 47.93,
+   "diff_b_minus_a": -11.2,
+   "p_raw": 0.0,
+   "p_holm": 0.0,
+   "q_bh": 0.0
+  },
+  {
+   "test": "Qwen -> Llama, fa_mmlu/rrf2_k4",
+   "n": 1089,
+   "acc_a": 53.35,
+   "acc_b": 48.21,
+   "diff_b_minus_a": -5.14,
+   "p_raw": 0.0033,
+   "p_holm": 0.0264,
+   "q_bh": 0.0088
+  },
+  {
+   "test": "Qwen -> Llama, kopp/cot",
+   "n": 1878,
+   "acc_a": 51.65,
+   "acc_b": 47.39,
+   "diff_b_minus_a": -4.26,
+   "p_raw": 0.0035,
+   "p_holm": 0.0264,
+   "q_bh": 0.0088
+  },
+  {
+   "test": "Qwen -> Llama, kopp/rrf2_k4",
+   "n": 1878,
+   "acc_a": 47.55,
+   "acc_b": 46.86,
+   "diff_b_minus_a": -0.69,
+   "p_raw": 0.634,
+   "p_holm": 1.0,
+   "q_bh": 0.8581
+  }
+ ],
+ "rag_effect_on_strictly_parsed_both": {
+  "fa_mmlu": {
+   "n_both_strictly_parsed": 931,
+   "cot_%": 49.19,
+   "rrf2_k4_%": 49.73,
+   "p": 0.8045
+  },
+  "kopp": {
+   "n_both_strictly_parsed": 1436,
+   "cot_%": 49.65,
+   "rrf2_k4_%": 51.46,
+   "p": 0.2468
+  }
+ },
+ "note": "official MIRAGE parser (falls back to 'A'); strict parser counts unparsable answers as wrong"
+}

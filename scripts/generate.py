@@ -21,7 +21,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from medrag_repro.templates import build_messages, build_messages_gk, format_snippet  # noqa: E402
+from medrag_repro.templates import build_messages, build_messages_fa, build_messages_gk, format_snippet  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -74,8 +74,9 @@ def main():
     p.add_argument("--min_answer_tokens", type=int, default=256,
                    help="if prompt + this would exceed max_length, the retrieved context is cut further from its end "
                         "(documented deviation; MedRAG has no such guard and the prompt would not fit at all)")
-    p.add_argument("--prompt_style", default="medrag", choices=["medrag", "gaokerena"],
-                   help="'gaokerena': Gaokerena's own MCQ prompt (RQ2 check; answers parsed by scripts/persian/gk_parse.py)")
+    p.add_argument("--prompt_style", default="medrag", choices=["medrag", "gaokerena", "medrag_fa"],
+                   help="'gaokerena': Gaokerena's own MCQ prompt (RQ2 check; answers parsed by scripts/persian/gk_parse.py); "
+                        "'medrag_fa': MedRAG's prompts translated into Persian (review check)")
     p.add_argument("--out", default="results")
     a = p.parse_args()
     T_START = time.time()
@@ -148,6 +149,8 @@ def main():
                             context = tok.decode(ctx_ids)
                         if a.prompt_style == "gaokerena":
                             msgs = build_messages_gk(item["question"], item["options"], context)
+                        elif a.prompt_style == "medrag_fa":
+                            msgs = build_messages_fa(item["question"], item["options"], context)
                         else:
                             msgs = build_messages(item["question"], item["options"], context, a.system_suffix)
                         text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
